@@ -219,12 +219,17 @@
       const statusEl = document.getElementById('status-' + modId);
       if (!statusEl) return;
       
+      statusEl.classList.remove('status-complete', 'status-progress', 'status-ready', 'status-locked');
+
       if (mod.completed) {
-        statusEl.textContent = '✅ Completed';
+        statusEl.textContent = '✓ COMPLETE';
+        statusEl.classList.add('status-complete');
       } else if (mod.started) {
-        statusEl.textContent = '🟡 In Progress';
+        statusEl.textContent = '🟡 IN PROGRESS';
+        statusEl.classList.add('status-progress');
       } else {
-        statusEl.textContent = '⚪ Not Started';
+        statusEl.textContent = '▶ START';
+        statusEl.classList.add('status-ready');
       }
     });
   });
@@ -255,7 +260,7 @@
         <div class="hero-greet">WELCOME BACK</div>
         <h1>Hi <span id="user-name">there</span>! 👋</h1>
         <p>Overall progress: <span id="overall-progress">0%</span></p>
-        <button class="hero-cta" onclick="WorkshopAPI.openModule(5)">▶ Continue Module 5: Assessment →</button>
+        <button class="hero-cta" onclick="WorkshopAPI.openModule(1)">▶ Continue Module 1 →</button>
       </div>
       <div class="hero-stats">
         <div class="hero-stat-grid">
@@ -659,14 +664,26 @@
 
     // ---- Module navigation ----
     openModule: function (n) {
-      this.trackEvent('module_opened', n);
-      const route = WORKSHOP_CONFIG.moduleRoutes[n];
-      if (route) {
-        window.location.href = route;
-      } else {
-        alert('Module ' + n + ' is not yet available.');
-      }
-    },
+    this.trackEvent('module_opened', n);
+    const route = WORKSHOP_CONFIG.moduleRoutes[n];
+    if (!route) {
+      alert('Module ' + n + ' is not yet available.');
+      return;
+    }
+    // Check if the file actually exists before navigating
+    fetch(route, { method: 'HEAD' })
+      .then(function (r) {
+        if (r.ok) {
+          window.open(route, '_blank', 'noopener');  // open in NEW tab
+        } else {
+          alert('🚧 Module ' + n + ' is coming soon!\n\nOnly Modules 0, 1, and 2 are ready in this demo.');
+        }
+      })
+      .catch(function () {
+        // If fetch fails (e.g., file://), just try opening anyway
+        window.open(route, '_blank', 'noopener');
+      });
+  },
 
     // ---- Assessment ----
     startAssessment: function (n) {
