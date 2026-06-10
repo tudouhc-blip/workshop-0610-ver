@@ -291,12 +291,12 @@
  <script>
   // Mark this module as started when page loads
   document.addEventListener('DOMContentLoaded', () => {
-    ProgressTracker.markStarted('module_0');
+    ProgressTracker.markStarted('module_1');
   });
   
   // Function the "Complete" button will call
   function finishModule() {
-    ProgressTracker.markCompleted('module_0');
+    ProgressTracker.markCompleted('module_1');
     alert('Great work! You can close this tab now.');
   }
 </script>
@@ -881,7 +881,6 @@ function updateProgress() {
   document.getElementById('progressFill').style.width = pct + '%';
   document.getElementById('progressPct').textContent = pct + '%';
   
-  // 🆕 Tell the dashboard about progress
   if (pct === 100) {
     ProgressTracker.markCompleted('module_1');  // ← change ID per file
   } else if (pct > 0) {
