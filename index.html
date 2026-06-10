@@ -193,7 +193,49 @@
     .hero-stat-grid { grid-template-columns: 1fr 1fr; }
   }
 </style>
+<script src="progress.js"></script>
 </head>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    let data = ProgressTracker.load();
+    
+    // First visit? Ask for their name
+    if (!data.userName) {
+      const name = prompt("Welcome! What's your name?") || 'Learner';
+      ProgressTracker.setUserName(name);
+      data = ProgressTracker.load();
+    }
+    
+    // Show name and progress % (only if these elements exist)
+    const nameEl = document.getElementById('user-name');
+    if (nameEl) nameEl.textContent = data.userName;
+    
+    const progressEl = document.getElementById('overall-progress');
+    if (progressEl) progressEl.textContent = ProgressTracker.getCompletionPercent() + '%';
+    
+    // Update each module's status badge
+    Object.keys(data.modules).forEach(modId => {
+      const mod = data.modules[modId];
+      const statusEl = document.getElementById('status-' + modId);
+      if (!statusEl) return;
+      
+      if (mod.completed) {
+        statusEl.textContent = '✅ Completed';
+      } else if (mod.started) {
+        statusEl.textContent = '🟡 In Progress';
+      } else {
+        statusEl.textContent = '⚪ Not Started';
+      }
+    });
+  });
+  
+  // Auto-refresh dashboard when a module finishes in another tab
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'genai_workshop_progress') {
+      location.reload();
+    }
+  });
+</script>
 <body>
 <div class="wrap">
 
@@ -211,8 +253,8 @@
     <div class="hero-inner">
       <div>
         <div class="hero-greet">WELCOME BACK</div>
-        <h1>Hi <span id="userFirstName">Dr. Chen</span> <span class="wave">👋</span> — let's pick up where you left off.</h1>
-        <p class="hero-sub">You're <strong>67% through the workshop</strong>. Two modules to go before your final action map. Your last session was 3 days ago — a quick 15-minute push gets you into Module 5.</p>
+        <h1>Hi <span id="user-name">there</span>! 👋</h1>
+        <p>Overall progress: <span id="overall-progress">0%</span></p>
         <button class="hero-cta" onclick="WorkshopAPI.openModule(5)">▶ Continue Module 5: Assessment →</button>
       </div>
       <div class="hero-stats">
@@ -281,11 +323,11 @@
                 <div class="meta"><span>⏱ 25 min</span><span>3 sections</span><span>✓ Completed Mar 3</span></div>
                 <div class="module-bar-mini"><div class="module-bar-mini-fill" style="width:100%;"></div></div>
                 <div class="module-actions">
-                  <a class="mini-btn teal" href="module_1.html" onclick="event.stopPropagation();WorkshopAPI.trackEvent('module_wrapup',1)">📋 Wrap-up</a>
-                  <a class="mini-btn" href="module_1.html" onclick="event.stopPropagation();WorkshopAPI.trackEvent('module_revisit',1)">↻ Revisit</a>
+                  <a class="mini-btn teal" href="module_1.html" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();WorkshopAPI.trackEvent('module_wrapup',1)">📋 Wrap-up</a>
+                  <a class="mini-btn" href="module_1.html" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();WorkshopAPI.trackEvent('module_revisit',1)">↻ Revisit</a>
                 </div>
               </div>
-              <span class="module-status status-complete">✓ COMPLETE</span>
+              <span id="status-module_1" class="module-status status-complete">✓ COMPLETE</span>
               <div class="module-tooltip">
                 <h5>📋 WHAT YOU'LL GET</h5>
                 <h6>Sections covered:</h6>
@@ -306,11 +348,11 @@
                 <div class="meta"><span>⏱ 30–40 min</span><span>4 sections</span><span>✓ Completed Mar 5</span></div>
                 <div class="module-bar-mini"><div class="module-bar-mini-fill" style="width:100%;"></div></div>
                 <div class="module-actions">
-                  <a class="mini-btn teal" href="module_2_single_blue.html" onclick="event.stopPropagation();WorkshopAPI.trackEvent('module_wrapup',2)">📋 Wrap-up</a>
-                  <a class="mini-btn" href="module_2_single_blue.html" onclick="event.stopPropagation();WorkshopAPI.trackEvent('module_revisit',2)">↻ Revisit</a>
+                  <a class="mini-btn teal" href="module_1.html" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();WorkshopAPI.trackEvent('module_wrapup',1)">📋 Wrap-up</a>
+                  <a class="mini-btn" href="module_1.html" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();WorkshopAPI.trackEvent('module_revisit',1)">↻ Revisit</a>
                 </div>
               </div>
-              <span class="module-status status-complete">✓ COMPLETE</span>
+              <span id="status-module_2" class="module-status status-complete">✓ COMPLETE</span>
               <div class="module-tooltip">
                 <h5>📋 WHAT YOU'LL GET</h5>
                 <h6>Sections covered:</h6>
