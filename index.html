@@ -1,0 +1,675 @@
+<!DOCTYPE html><html lang="en"><head><meta name="x-poe-datastore-behavior" content="local_only"><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>My Workshop Dashboard — GenAI Competency</title>
+<style>
+  /* =============== RESET & BASE =============== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: clamp(14px, 1vw + 0.5rem, 17px); }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.6; min-height: 100vh; }
+  .wrap { width: 100%; max-width: min(1200px, 95vw); margin: 0 auto; padding: clamp(12px, 2vw, 24px) clamp(10px, 2vw, 20px) 80px; }
+
+  /* =============== BRAND HEADER (NO NAV) =============== */
+  .brandbar { display: flex; align-items: center; gap: 12px; padding: 12px 4px; margin-bottom: 18px; }
+  .brand-mark { width: 42px; height: 42px; border-radius: 11px; background: linear-gradient(135deg, #7c3aed, #0d9488); display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 19px; flex-shrink: 0; }
+  .brand-text strong { display: block; font-size: clamp(14px, 1.5vw, 16px); color: #0f172a; }
+  .brand-text span { font-size: clamp(10px, 1vw, 12px); color: #64748b; letter-spacing: 0.5px; }
+
+  /* =============== HERO BANNER =============== */
+  .hero { background: linear-gradient(135deg, #1e3a8a 0%, #5b21b6 60%, #0d9488 100%); color: white; border-radius: 18px; padding: clamp(22px, 3vw, 36px); margin-bottom: 24px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -60px; right: -60px; width: 220px; height: 220px; background: rgba(255,255,255,0.06); border-radius: 50%; }
+  .hero::after { content: ''; position: absolute; bottom: -80px; left: 30%; width: 180px; height: 180px; background: rgba(255,255,255,0.04); border-radius: 50%; }
+  .hero-inner { position: relative; z-index: 1; display: grid; grid-template-columns: 1.5fr 1fr; gap: clamp(18px, 3vw, 30px); align-items: center; }
+  @media (max-width: 800px) { .hero-inner { grid-template-columns: 1fr; } }
+  .hero-greet { font-size: clamp(10px, 1vw, 12px); letter-spacing: 1.5px; opacity: 0.85; font-weight: 600; margin-bottom: 6px; }
+  .hero h1 { font-size: clamp(20px, 2.6vw, 28px); line-height: 1.25; margin-bottom: 10px; }
+  .hero h1 .wave { display: inline-block; animation: wave 2s ease-in-out infinite; }
+  @keyframes wave { 0%,60%,100%{transform:rotate(0)} 10%{transform:rotate(14deg)} 20%{transform:rotate(-8deg)} 30%{transform:rotate(14deg)} 40%{transform:rotate(-4deg)} 50%{transform:rotate(10deg)} }
+  .hero-sub { font-size: clamp(13px, 1.2vw, 14px); opacity: 0.92; max-width: 540px; margin-bottom: 16px; }
+  .hero-cta { display: inline-flex; align-items: center; gap: 8px; background: white; color: #5b21b6; padding: 11px 20px; border-radius: 10px; font-size: clamp(12px, 1.1vw, 13px); font-weight: 700; text-decoration: none; transition: all 0.2s; border: none; cursor: pointer; }
+  .hero-cta:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.15); }
+  .hero-stats { background: rgba(255,255,255,0.12); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.18); border-radius: 14px; padding: clamp(14px, 1.5vw, 18px); }
+  .hero-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .hero-stat { text-align: center; padding: 10px 6px; background: rgba(255,255,255,0.08); border-radius: 10px; }
+  .hero-stat .num { font-size: clamp(18px, 2vw, 22px); font-weight: 800; }
+  .hero-stat .lbl { font-size: clamp(9px, 0.9vw, 10px); opacity: 0.85; letter-spacing: 0.8px; font-weight: 600; margin-top: 2px; }
+  .hero-streak { margin-top: 10px; padding: 8px 12px; background: rgba(255,255,255,0.1); border-radius: 8px; font-size: clamp(11px, 1vw, 12px); text-align: center; }
+
+  /* =============== LAYOUT =============== */
+  .grid-main { display: grid; grid-template-columns: 1fr 320px; gap: 22px; }
+  @media (max-width: 980px) { .grid-main { grid-template-columns: 1fr; } }
+
+  /* =============== CARDS =============== */
+  .card { background: white; border-radius: 14px; padding: clamp(18px, 2vw, 26px); box-shadow: 0 2px 12px rgba(0,0,0,0.04); margin-bottom: 22px; overflow: visible; }
+  .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+  .card-tag { font-size: 11px; font-weight: 800; color: #0d9488; letter-spacing: 1.5px; }
+  .card-tag.purple { color: #7c3aed; }
+  .card-tag.amber { color: #b45309; }
+  .card h2 { font-size: clamp(16px, 1.7vw, 19px); color: #0f172a; margin-top: 4px; }
+  .card-link { font-size: 12px; color: #7c3aed; text-decoration: none; font-weight: 700; cursor: pointer; }
+  .card-link:hover { text-decoration: underline; }
+
+  /* =============== READ THE PAPER =============== */
+  .paper { background: linear-gradient(135deg, #f5f3ff, #ecfdf5); border: 1px solid #c4b5fd; border-radius: 14px; padding: clamp(18px, 2vw, 24px); margin-bottom: 22px; }
+  .paper-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 700px) { .paper-grid { grid-template-columns: 1fr; } }
+  .paper-card { background: white; border-radius: 10px; padding: 16px 18px; border: 1px solid #ddd6fe; transition: all 0.2s; cursor: pointer; text-decoration: none; color: inherit; display: block; }
+  .paper-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(124,58,237,0.12); border-color: #a78bfa; }
+  .paper-card.module0 { border-color: #fcd34d; background: linear-gradient(135deg, #fffbeb, #ffffff); }
+  .paper-card.module0:hover { border-color: #f59e0b; box-shadow: 0 6px 16px rgba(245,158,11,0.18); }
+  .paper-card .icon { font-size: 24px; margin-bottom: 8px; }
+  .paper-card h4 { font-size: 14px; color: #5b21b6; margin-bottom: 4px; }
+  .paper-card.module0 h4 { color: #b45309; }
+  .paper-card p { font-size: 12px; color: #64748b; }
+  .paper-card .meta { display: inline-block; margin-top: 8px; font-size: 10.5px; font-weight: 700; color: #0d9488; letter-spacing: 0.5px; }
+  .paper-card.module0 .meta { color: #b45309; }
+
+  /* =============== MODULES LIST =============== */
+  .modules-wrap { position: relative; overflow: visible; }
+  .modules-list { display: grid; gap: 12px; position: relative; overflow: visible; }
+  .module-item { position: relative; background: white; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 16px 18px; display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s; cursor: pointer; }
+  .module-item:hover { border-color: #14b8a6; transform: translateX(3px); box-shadow: 0 4px 14px rgba(13,148,136,0.1); z-index: 50; }
+  .module-item:hover .module-tooltip { z-index: 999; }
+  .module-item.locked { opacity: 0.65; cursor: not-allowed; background: #f8fafc; }
+  .module-item.locked:hover { transform: none; border-color: #e2e8f0; box-shadow: none; }
+  .module-num { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; color: white; background: linear-gradient(135deg, #7c3aed, #0d9488); flex-shrink: 0; }
+  .module-item.locked .module-num { background: #cbd5e1; }
+  .module-item.complete .module-num { background: linear-gradient(135deg, #16a34a, #22c55e); }
+  .module-info { min-width: 0; }
+  .module-info h4 { font-size: clamp(13px, 1.3vw, 15px); color: #0f172a; margin-bottom: 2px; }
+  .module-info .meta { font-size: 11.5px; color: #64748b; display: flex; gap: 10px; flex-wrap: wrap; }
+  .module-info .meta span::before { content: '·'; margin-right: 8px; }
+  .module-info .meta span:first-child::before { content: ''; margin-right: 0; }
+  .module-bar-mini { width: 100%; height: 4px; background: #e2e8f0; border-radius: 2px; margin-top: 6px; overflow: hidden; }
+  .module-bar-mini-fill { height: 100%; background: linear-gradient(90deg, #0d9488, #14b8a6); border-radius: 2px; transition: width 0.4s; }
+  .module-status { font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 10px; letter-spacing: 0.5px; flex-shrink: 0; white-space: nowrap; }
+  .status-complete { background: #dcfce7; color: #166534; }
+  .status-progress { background: #fef3c7; color: #92400e; }
+  .status-locked { background: #f1f5f9; color: #64748b; }
+  .status-ready { background: #dbeafe; color: #1e40af; }
+
+  /* TOOLTIP - properly stacked */
+  .module-tooltip { position: absolute; left: 0; right: 0; top: calc(100% + 6px); background: white; border: 1px solid #ddd6fe; border-radius: 12px; padding: 16px 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.18); opacity: 0; visibility: hidden; transform: translateY(-6px); transition: opacity 0.2s, transform 0.2s, visibility 0s linear 0.2s; pointer-events: none; z-index: 999; }
+  .module-item:hover .module-tooltip,
+  .module-item:focus-within .module-tooltip { opacity: 1; visibility: visible; transform: translateY(0); transition: opacity 0.2s, transform 0.2s, visibility 0s; }
+  .module-tooltip h5 { font-size: 11px; font-weight: 800; color: #7c3aed; letter-spacing: 1.2px; margin-bottom: 8px; }
+  .module-tooltip h6 { font-size: 13px; color: #0f172a; margin: 8px 0 4px; }
+  .module-tooltip ul { list-style: none; padding: 0; }
+  .module-tooltip li { font-size: 12px; color: #475569; padding: 3px 0 3px 16px; position: relative; }
+  .module-tooltip li::before { content: '→'; position: absolute; left: 0; color: #14b8a6; font-weight: 700; }
+  .module-tooltip .gain { background: #ecfdf5; padding: 8px 10px; border-radius: 6px; margin-top: 8px; font-size: 11.5px; color: #065f46; font-style: italic; }
+  .module-tooltip .gain strong { font-style: normal; color: #047857; }
+  .module-item.locked .module-tooltip { display: none; }
+
+  .module-actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .mini-btn { font-size: 10.5px; font-weight: 700; padding: 4px 9px; border-radius: 6px; border: 1px solid #ddd6fe; background: white; color: #7c3aed; cursor: pointer; text-decoration: none; transition: all 0.2s; display: inline-block; }
+  .mini-btn:hover { background: #f5f3ff; }
+  .mini-btn.teal { border-color: #99f6e4; color: #0d9488; }
+  .mini-btn.teal:hover { background: #f0fdfa; }
+
+  /* =============== SELF-ASSESSMENT =============== */
+  .assess { background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 1px solid #fde68a; border-radius: 14px; padding: clamp(18px, 2vw, 24px); margin-bottom: 22px; }
+  .assess-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 14px; flex-wrap: wrap; }
+  .assess-tag { font-size: 11px; font-weight: 800; color: #b45309; letter-spacing: 1.5px; margin-bottom: 4px; }
+  .assess-head h2 { font-size: clamp(16px, 1.7vw, 19px); color: #78350f; margin-bottom: 4px; }
+  .assess-head p { font-size: clamp(12px, 1.1vw, 13px); color: #92400e; }
+  .assess-required { background: #fee2e2; border: 1px solid #fecaca; color: #991b1b; padding: 5px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; flex-shrink: 0; }
+  .assess-required.done { background: #dcfce7; border-color: #bbf7d0; color: #166534; }
+  .assess-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .assess-grid { grid-template-columns: 1fr; } }
+  .assess-recent, .assess-cta { background: white; border-radius: 10px; padding: 16px 18px; }
+  .assess-recent h4 { font-size: 13px; color: #0f172a; margin-bottom: 8px; }
+  .assess-recent .date { font-size: 11px; color: #64748b; margin-bottom: 12px; }
+  .score-circle-row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+  .score-circle { width: 70px; height: 70px; border-radius: 50%; background: conic-gradient(#0d9488 0% 72%, #e2e8f0 72% 100%); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .score-circle-inner { width: 56px; height: 56px; background: white; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .score-circle-inner .num { font-size: 18px; font-weight: 800; color: #0d9488; line-height: 1; }
+  .score-circle-inner .max { font-size: 9px; color: #64748b; }
+  .score-detail { font-size: 12px; color: #475569; flex: 1; min-width: 140px; }
+  .score-detail strong { color: #0f172a; }
+  .dim-bars { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+  .dim-bar-row { display: grid; grid-template-columns: minmax(80px, 100px) 1fr 30px; align-items: center; gap: 8px; font-size: 11px; }
+  .dim-bar-row .lbl { color: #475569; font-weight: 600; }
+  .dim-bar-row .bar { height: 6px; background: #f1f5f9; border-radius: 3px; overflow: hidden; }
+  .dim-bar-row .fill { height: 100%; border-radius: 3px; }
+  .dim-bar-row .pct { font-size: 10.5px; font-weight: 700; color: #0d9488; text-align: right; }
+  .assess-cta { display: flex; flex-direction: column; }
+  .assess-cta h4 { font-size: 13px; color: #0f172a; margin-bottom: 6px; }
+  .assess-cta p { font-size: 12px; color: #475569; margin-bottom: 12px; flex: 1; }
+  .assess-btn { background: linear-gradient(135deg, #f59e0b, #f97316); color: white; border: none; padding: 11px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; text-align: center; width: 100%; }
+  .assess-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(249,115,22,0.3); }
+  .assess-btn.report { background: linear-gradient(135deg, #0d9488, #14b8a6); margin-top: 8px; }
+  .assess-btn.report:hover { box-shadow: 0 4px 14px rgba(13,148,136,0.3); }
+
+  /* =============== SIDEBAR =============== */
+  .side { display: flex; flex-direction: column; gap: 22px; }
+  .profile-card { background: white; border-radius: 14px; padding: 22px 22px 18px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); text-align: center; position: relative; overflow: hidden; }
+  .profile-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 70px; background: linear-gradient(135deg, #7c3aed, #0d9488); }
+  .profile-avatar { position: relative; width: 76px; height: 76px; border-radius: 50%; background: linear-gradient(135deg, #fbbf24, #f97316); margin: 16px auto 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 30px; font-weight: 800; border: 4px solid white; box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
+  .profile-name { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 2px; }
+  .profile-role { font-size: 12px; color: #64748b; margin-bottom: 14px; }
+  .profile-badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-bottom: 14px; }
+  .profile-badge { background: #f5f3ff; color: #5b21b6; padding: 3px 9px; border-radius: 10px; font-size: 10.5px; font-weight: 700; border: 1px solid #ddd6fe; }
+  .profile-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-top: 12px; border-top: 1px solid #f1f5f9; }
+  .profile-meta-item { padding: 6px; }
+  .profile-meta-item .num { font-size: 16px; font-weight: 800; color: #0d9488; }
+  .profile-meta-item .lbl { font-size: 9.5px; color: #64748b; letter-spacing: 0.6px; font-weight: 700; }
+  .profile-edit { display: block; margin-top: 12px; font-size: 11px; color: #7c3aed; text-decoration: none; font-weight: 600; padding-top: 10px; border-top: 1px dashed #e2e8f0; cursor: pointer; }
+
+  .progress-card { background: white; border-radius: 14px; padding: 22px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+  .progress-card h3 { font-size: 15px; color: #0f172a; margin-bottom: 4px; }
+  .progress-card .sub { font-size: 12px; color: #64748b; margin-bottom: 14px; }
+  .progress-ring-wrap { display: flex; justify-content: center; margin-bottom: 14px; }
+  .progress-ring { width: 130px; height: 130px; border-radius: 50%; background: conic-gradient(#0d9488 0% 50%, #14b8a6 50% 67%, #f1f5f9 67% 100%); display: flex; align-items: center; justify-content: center; position: relative; }
+  .progress-ring-inner { width: 100px; height: 100px; background: white; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .progress-ring-inner .num { font-size: 26px; font-weight: 800; color: #0d9488; line-height: 1; }
+  .progress-ring-inner .lbl { font-size: 10px; color: #64748b; letter-spacing: 0.5px; font-weight: 700; margin-top: 2px; }
+  .progress-list { display: flex; flex-direction: column; gap: 8px; }
+  .progress-row { display: flex; justify-content: space-between; font-size: 12px; padding: 6px 0; border-bottom: 1px solid #f1f5f9; }
+  .progress-row:last-child { border: 0; }
+  .progress-row .lbl { color: #475569; }
+  .progress-row .val { font-weight: 700; color: #0f172a; }
+  .progress-row .val.green { color: #16a34a; }
+  .progress-row .val.amber { color: #b45309; }
+
+  .notice { background: linear-gradient(135deg, #fef3c7, #fce7f3); border: 1px solid #fde68a; border-radius: 14px; padding: 18px 20px; }
+  .notice h3 { font-size: 14px; color: #78350f; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .notice-item { background: white; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; font-size: 12px; color: #475569; border-left: 3px solid #f59e0b; }
+  .notice-item:last-child { margin-bottom: 0; }
+  .notice-item strong { color: #78350f; display: block; margin-bottom: 2px; font-size: 12.5px; }
+  .notice-item .when { font-size: 10.5px; color: #94a3b8; margin-top: 3px; display: block; }
+
+  .footer { text-align: center; margin-top: 30px; font-size: 11.5px; color: #94a3b8; padding: 0 12px; }
+  .footer a { color: #7c3aed; text-decoration: none; font-weight: 600; }
+
+  /* Sync indicator */
+  .sync-pill { position: fixed; bottom: 16px; right: 16px; background: white; border: 1px solid #e2e8f0; border-radius: 999px; padding: 8px 14px; font-size: 11.5px; color: #475569; box-shadow: 0 4px 14px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 8px; z-index: 100; }
+  .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #16a34a; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  @media (max-width: 600px) {
+    .module-item { grid-template-columns: auto 1fr; }
+    .module-status { grid-column: 1 / -1; justify-self: start; margin-top: 4px; }
+    .hero-stat-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ========== BRAND HEADER (no nav) ========== -->
+  <div class="brandbar">
+    <div class="brand-mark">G</div>
+    <div class="brand-text">
+      <strong>GenAI Competency Workshop</strong>
+      <span>Educator Edition · v1.1</span>
+    </div>
+  </div>
+
+  <!-- ========== HERO BANNER ========== -->
+  <div class="hero">
+    <div class="hero-inner">
+      <div>
+        <div class="hero-greet">WELCOME BACK</div>
+        <h1>Hi <span id="userFirstName">Dr. Chen</span> <span class="wave">👋</span> — let's pick up where you left off.</h1>
+        <p class="hero-sub">You're <strong>67% through the workshop</strong>. Two modules to go before your final action map. Your last session was 3 days ago — a quick 15-minute push gets you into Module 5.</p>
+        <button class="hero-cta" onclick="WorkshopAPI.openModule(5)">▶ Continue Module 5: Assessment →</button>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat-grid">
+          <div class="hero-stat"><div class="num" id="statModules">4 / 6</div><div class="lbl">MODULES DONE</div></div>
+          <div class="hero-stat"><div class="num" id="statTime">3h 42m</div><div class="lbl">TIME INVESTED</div></div>
+          <div class="hero-stat"><div class="num" id="statReflect">12</div><div class="lbl">REFLECTIONS</div></div>
+          <div class="hero-stat"><div class="num" id="statChecks">2</div><div class="lbl">SELF-CHECKS</div></div>
+        </div>
+        <div class="hero-streak">🔥 <strong id="statStreak">4-day learning streak</strong> — keep it going!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== READ THE PAPER + MODULE 0 ========== -->
+  <div class="paper" id="paper">
+    <div class="card-head">
+      <div>
+        <div class="card-tag purple">📄 FOUNDATIONAL READING &amp; ORIENTATION</div>
+        <h2 style="color:#5b21b6;">Read the Paper &amp; Get Oriented</h2>
+      </div>
+      <a class="card-link" onclick="WorkshopAPI.viewAllResources()">View all resources →</a>
+    </div>
+    <p style="font-size:13px;color:#64748b;margin-bottom:14px;">The peer-reviewed manuscript that grounds this workshop — and a 15-minute orientation that sets you up for everything that follows.</p>
+    <div class="paper-grid">
+      <!-- Linked to the actual PDF manuscript -->
+      <a class="paper-card" href="Sun_et_al_2026_GenAI_competency_framework.pdf" target="_blank" rel="noopener" onclick="WorkshopAPI.trackEvent('paper_opened','manuscript')">
+        <div class="icon">📑</div>
+        <h4>Full Manuscript (PDF)</h4>
+        <p>Sun, Ba, Cha, Yu, Chiang, Dai &amp; Lim (2026). <em>Empowering university teachers in higher education: A generative AI-responsive competency framework.</em> Computers and Education: Artificial Intelligence, 10, 100542.</p>
+        <span class="meta">📖 ~38 MIN READ · OPEN ACCESS · CC BY 4.0</span>
+      </a>
+      <!-- Module 0 replaces the Knowledge Shortcut -->
+      <a class="paper-card module0" href="module_0.html" onclick="WorkshopAPI.trackEvent('module_opened',0)">
+        <div class="icon">🧭</div>
+        <h4>Module 0 · Welcome &amp; Orientation</h4>
+        <p>Before the four dimensions, take 15 minutes to set up your profile, take the pre-test, and learn how to read your assessment report — the engine that drives the rest of your journey.</p>
+        <span class="meta">⏱ ~15 MIN · 3 SECTIONS · INCLUDES PRE-TEST</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- ========== MAIN GRID ========== -->
+  <div class="grid-main">
+    <div class="main-col">
+
+      <!-- =================== MODULES LIST =================== -->
+      <div class="card" id="modules">
+        <div class="card-head">
+          <div>
+            <div class="card-tag">🗂 ALL MODULES</div>
+            <h2>Your Learning Path</h2>
+          </div>
+          <a class="card-link" onclick="WorkshopAPI.filterModules()">Filter: All ▾</a>
+        </div>
+        <p style="font-size:12.5px;color:#64748b;margin-bottom:14px;">💡 <strong>Hover</strong> any module to preview its contents. <strong>Click</strong> a completed module to revisit its wrap-up.</p>
+
+        <div class="modules-wrap">
+          <div class="modules-list">
+
+            <!-- Module 1 → links to module_1.html -->
+            <div class="module-item complete" tabindex="0" onclick="WorkshopAPI.openModule(1)" data-module="1">
+              <div class="module-num">1</div>
+              <div class="module-info">
+                <h4>Introduction &amp; Framework Overview</h4>
+                <div class="meta"><span>⏱ 25 min</span><span>3 sections</span><span>✓ Completed Mar 3</span></div>
+                <div class="module-bar-mini"><div class="module-bar-mini-fill" style="width:100%;"></div></div>
+                <div class="module-actions">
+                  <a class="mini-btn teal" href="module_1.html" onclick="event.stopPropagation();WorkshopAPI.trackEvent('module_wrapup',1)">📋 Wrap-up</a>
+                  <a class="mini-btn" href="module_1.html" onclick="event.stopPropagation();WorkshopAPI.trackEvent('module_revisit',1)">↻ Revisit</a>
+                </div>
+              </div>
+              <span class="module-status status-complete">✓ COMPLETE</span>
+              <div class="module-tooltip">
+                <h5>📋 WHAT YOU'LL GET</h5>
+                <h6>Sections covered:</h6>
+                <ul>
+                  <li>1.1 The Big Picture — the 4×3×2 framework structure</li>
+                  <li>1.2 How the framework connects to your practice</li>
+                  <li>1.3 Recap of user instructions from Module 0</li>
+                </ul>
+                <div class="gain"><strong>You'll leave with:</strong> a personal learning plan, a clear sense of why the framework is structured this way, and three context layers (discipline, learner profile, culture) for reading every module ahead.</div>
+              </div>
+            </div>
+
+            <!-- Module 2 → links to module_2_single_blue.html -->
+            <div class="module-item complete" tabindex="0" onclick="WorkshopAPI.openModule(2)" data-module="2">
+              <div class="module-num">2</div>
+              <div class="module-info">
+                <h4>Dimension 1 · GenAI Literacy</h4>
+                <div class="meta"><span>⏱ 30–40 min</span><span>4 sections</span><span>✓ Completed Mar 5</span></div>
+                <div class="module-bar-mini"><div class="module-bar-mini-fill" style="width:100%;"></div></div>
+                <div class="module-actions">
+                  <a class="mini-btn teal" href="module_2_single_blue.html" onclick="event.stopPropagation();WorkshopAPI.trackEvent('module_wrapup',2)">📋 Wrap-up</a>
+                  <a class="mini-btn" href="module_2_single_blue.html" onclick="event.stopPropagation();WorkshopAPI.trackEvent('module_revisit',2)">↻ Revisit</a>
+                </div>
+              </div>
+              <span class="module-status status-complete">✓ COMPLETE</span>
+              <div class="module-tooltip">
+                <h5>📋 WHAT YOU'LL GET</h5>
+                <h6>Sections covered:</h6>
+                <ul>
+                  <li>2.1 What is GenAI Literacy in this framework?</li>
+                  <li>2.2 Teacher's own literacy across levels (with Dr. Chen)</li>
+                  <li>2.3 Empowering students' literacy across levels</li>
+                  <li>2.4 Module wrap-up &amp; knowledge recap</li>
+                </ul>
+                <div class="gain"><strong>You'll leave with:</strong> a sharper internal "BS detector" for AI outputs, six concrete takeaways, and five moves you can apply tomorrow.</div>
+              </div>
+            </div>
+
+            <!-- Module 3 -->
+            <div class="module-item complete" tabindex="0" onclick="WorkshopAPI.openModule(3)" data-module="3">
+              <div class="module-num">3</div>
+              <div class="module-info">
+                <h4>Dimension 2 · Curriculum &amp; Learning Design</h4>
+                <div class="meta"><span>⏱ 30 min</span><span>3 sections</span><span>✓ Completed Mar 9</span></div>
+                <div class="module-bar-mini"><div class="module-bar-mini-fill" style="width:100%;"></div></div>
+                <div class="module-actions">
+                  <a class="mini-btn teal" href="module_3.html" onclick="event.stopPropagation();WorkshopAPI.trackEvent('module_wrapup',3)">📋 Wrap-up</a>
+                  <a class="mini-btn" href="module_3.html" onclick="event.stopPropagation();WorkshopAPI.trackEvent('module_revisit',3)">↻ Revisit</a>
+                </div>
+              </div>
+              <span class="module-status status-complete">✓ COMPLETE</span>
+              <div class="module-tooltip">
+                <h5>📋 WHAT YOU'LL GET</h5>
+                <h6>Sections covered:</h6>
+                <ul><li>3.1 Learning objectives in the GenAI era</li><li>3.2 Redesigning syllabi &amp; units</li><li>3.3 Stress-testing your curriculum</li></ul>
+                <div class="gain"><strong>You'll leave with:</strong> a redesign checklist + a worked example of a unit before/after GenAI integration.</div>
+              </div>
+            </div>
+
+            <!-- Module 4 -->
+            <div class="module-item complete" tabindex="0" onclick="WorkshopAPI.openModule(4)" data-module="4">
+              <div class="module-num">4</div>
+              <div class="module-info">
+                <h4>Dimension 3 · Teaching &amp; Learning Practice</h4>
+                <div class="meta"><span>⏱ 28 min</span><span>3 sections</span><span>✓ Completed Mar 12</span></div>
+                <div class="module-bar-mini"><div class="module-bar-mini-fill" style="width:100%;"></div></div>
+                <div class="module-actions">
+                  <a class="mini-btn teal" href="module_4.html" onclick="event.stopPropagation();WorkshopAPI.trackEvent('module_wrapup',4)">📋 Wrap-up</a>
+                  <a class="mini-btn" href="module_4.html" onclick="event.stopPropagation();WorkshopAPI.trackEvent('module_revisit',4)">↻ Revisit</a>
+                </div>
+              </div>
+              <span class="module-status status-complete">✓ COMPLETE</span>
+              <div class="module-tooltip">
+                <h5>📋 WHAT YOU'LL GET</h5>
+                <h6>Sections covered:</h6>
+                <ul><li>4.1 GenAI as scaffold, simulation &amp; partner</li><li>4.2 Activity design patterns</li><li>4.3 Common pitfalls in classroom use</li></ul>
+                <div class="gain"><strong>You'll leave with:</strong> 3 concrete classroom activities you can run in your next teaching week.</div>
+              </div>
+            </div>
+
+            <!-- Module 5 - Ready -->
+            <div class="module-item" tabindex="0" onclick="WorkshopAPI.openModule(5)" data-module="5">
+              <div class="module-num">5</div>
+              <div class="module-info">
+                <h4>Dimension 4 · Assessment</h4>
+                <div class="meta"><span>⏱ 32 min</span><span>3 sections</span><span>📍 Up next</span></div>
+                <div class="module-bar-mini"><div class="module-bar-mini-fill" style="width:0%;"></div></div>
+              </div>
+              <span class="module-status status-ready">▶ START</span>
+              <div class="module-tooltip">
+                <h5>📋 WHAT YOU'LL GET</h5>
+                <h6>Sections covered:</h6>
+                <ul><li>5.1 Validity &amp; AI-aware assessment</li><li>5.2 Designing assessment tasks</li><li>5.3 Rubrics that grade reasoning, not artefacts</li></ul>
+                <div class="gain"><strong>You'll leave with:</strong> a redesigned rubric for one of your own assessments — done by the end of the module.</div>
+              </div>
+            </div>
+
+            <!-- Module 6 - Locked -->
+            <div class="module-item locked" data-module="6">
+              <div class="module-num">6</div>
+              <div class="module-info">
+                <h4>Synthesis &amp; Next Steps</h4>
+                <div class="meta"><span>⏱ 20 min</span><span>2 sections</span><span>🔒 Complete Module 5 to unlock</span></div>
+                <div class="module-bar-mini"><div class="module-bar-mini-fill" style="width:0%;"></div></div>
+              </div>
+              <span class="module-status status-locked">🔒 LOCKED</span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- =================== SELF-ASSESSMENT =================== -->
+      <div class="assess" id="assess">
+        <div class="assess-head">
+          <div>
+            <div class="assess-tag">📊 SELF-ASSESSMENT CHECKPOINT</div>
+            <h2>Your Most Recent Self-Check</h2>
+            <p>Required between Module 4 → Module 5. Take it again any time to see how your thinking has shifted.</p>
+          </div>
+          <span class="assess-required done">✓ COMPLETED · NEXT REQUIRED AFTER MOD 5</span>
+        </div>
+
+        <div class="assess-grid">
+          <div class="assess-recent">
+            <h4>Self-Assessment #2 — Mid-workshop</h4>
+            <div class="date">📅 Taken Mar 12, 2026 · 11 min</div>
+            <div class="score-circle-row">
+              <div class="score-circle">
+                <div class="score-circle-inner">
+                  <div class="num">72%</div>
+                  <div class="max">overall</div>
+                </div>
+              </div>
+              <div class="score-detail">
+                <strong>Strong growth</strong> since your baseline (51% → 72%). Biggest jumps in <strong>Curriculum Design</strong> and <strong>Teaching Practice</strong>.
+              </div>
+            </div>
+            <div class="dim-bars">
+              <div class="dim-bar-row"><span class="lbl">🧠 Literacy</span><div class="bar"><div class="fill" style="width:78%;background:linear-gradient(90deg,#3b82f6,#60a5fa);"></div></div><span class="pct">78%</span></div>
+              <div class="dim-bar-row"><span class="lbl">🎯 Curriculum</span><div class="bar"><div class="fill" style="width:75%;background:linear-gradient(90deg,#f59e0b,#fbbf24);"></div></div><span class="pct">75%</span></div>
+              <div class="dim-bar-row"><span class="lbl">💡 Teaching</span><div class="bar"><div class="fill" style="width:80%;background:linear-gradient(90deg,#10b981,#34d399);"></div></div><span class="pct">80%</span></div>
+              <div class="dim-bar-row"><span class="lbl">📊 Assessment</span><div class="bar"><div class="fill" style="width:54%;background:linear-gradient(90deg,#ec4899,#f472b6);"></div></div><span class="pct">54%</span></div>
+            </div>
+          </div>
+
+          <div class="assess-cta">
+            <h4>📌 Next checkpoint required</h4>
+            <p>You'll need to complete <strong>Self-Assessment #3</strong> after finishing Module 5 to unlock Module 6 (Synthesis). It takes ~10 minutes and is structured exactly like the first two — just with deeper questions on assessment design.</p>
+            <button class="assess-btn" onclick="WorkshopAPI.startAssessment(3)">▶ Take Self-Assessment #3</button>
+            <button class="assess-btn report" onclick="WorkshopAPI.viewReport()">📈 View detailed report</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- =================== SIDEBAR =================== -->
+    <aside class="side">
+
+      <div class="profile-card" id="profile">
+        <div class="profile-avatar" id="avatarInitials">DC</div>
+        <div class="profile-name" id="profileName">Dr. Mei Chen</div>
+        <div class="profile-role" id="profileRole">Senior Lecturer · Public Health</div>
+        <div class="profile-badges">
+          <span class="profile-badge">🏛 University of Auckland</span>
+          <span class="profile-badge">🧪 Researcher</span>
+        </div>
+        <div class="profile-meta">
+          <div class="profile-meta-item"><div class="num">4</div><div class="lbl">MODULES DONE</div></div>
+          <div class="profile-meta-item"><div class="num">3</div><div class="lbl">BADGES EARNED</div></div>
+        </div>
+        <a class="profile-edit" onclick="WorkshopAPI.editProfile()">⚙ Edit profile &amp; preferences</a>
+      </div>
+
+      <div class="progress-card">
+        <h3>📈 Progress Dashboard</h3>
+        <p class="sub">Your learning at a glance</p>
+        <div class="progress-ring-wrap">
+          <div class="progress-ring">
+            <div class="progress-ring-inner">
+              <div class="num">67%</div>
+              <div class="lbl">COMPLETE</div>
+            </div>
+          </div>
+        </div>
+        <div class="progress-list">
+          <div class="progress-row"><span class="lbl">Modules completed</span><span class="val green">4 / 6</span></div>
+          <div class="progress-row"><span class="lbl">Self-assessments</span><span class="val green">2 / 3</span></div>
+          <div class="progress-row"><span class="lbl">Reflections written</span><span class="val">12</span></div>
+          <div class="progress-row"><span class="lbl">Action items saved</span><span class="val">0</span></div>
+          <div class="progress-row"><span class="lbl">Current streak</span><span class="val amber">🔥 4 days</span></div>
+          <div class="progress-row"><span class="lbl">Est. time remaining</span><span class="val">~ 52 min</span></div>
+        </div>
+      </div>
+
+      <div class="notice">
+        <h3>📢 Notice Board</h3>
+        <div class="notice-item">
+          <strong>🎯 You're 1 module from your action map!</strong>
+          Finish Module 5 + the self-check to unlock the Synthesis module.
+          <span class="when">Personal nudge · today</span>
+        </div>
+        <div class="notice-item">
+          <strong>🆕 New community thread</strong>
+          "Anyone redesigned a STEM lab assessment with GenAI?" — 14 replies.
+          <span class="when">Posted yesterday</span>
+        </div>
+        <div class="notice-item">
+          <strong>📅 Live workshop</strong>
+          Optional Q&amp;A session with the framework authors — Mar 22, 4pm NZT.
+          <span class="when">In 8 days</span>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <div class="footer">
+    GenAI Competency Workshop · Built for educators, by educators · <a onclick="WorkshopAPI.openHelp()">Help</a> · <a onclick="WorkshopAPI.openPrivacy()">Privacy</a>
+  </div>
+</div>
+
+<!-- ========== SYNC STATUS PILL ========== -->
+<div class="sync-pill" id="syncPill" title="Synced with workshop platform">
+  <span class="sync-dot"></span>
+  <span id="syncStatus">Synced just now</span>
+</div>
+
+<!-- ========================================================
+     WORKSHOP API LAYER
+     Connects this dashboard to your external platform/database.
+     Configure WORKSHOP_CONFIG.apiBase to your backend endpoint.
+     All actions emit events that can be POSTed to your DB.
+     ======================================================== -->
+<script>
+(function () {
+  'use strict';
+
+  // ============== CONFIGURATION ==============
+  // Edit these values to point at your real backend.
+  const WORKSHOP_CONFIG = {
+    apiBase: 'https://api.your-platform.example.com/v1',  // ← replace with real API URL
+    apiKey:  '',                                          // ← inject server-side or via auth flow
+    userId:  null,                                        // ← will be filled after auth
+    syncInterval: 60000,                                  // background sync every 60s
+    moduleRoutes: {
+      0: 'module_0.html',
+      1: 'module_1.html',
+      2: 'module_2_single_blue.html',
+      3: 'module_3.html',
+      4: 'module_4.html',
+      5: 'module_5.html',
+      6: 'module_6.html'
+    }
+  };
+
+  // ============== INTERNAL HELPERS ==============
+  function authHeaders() {
+    const h = { 'Content-Type': 'application/json' };
+    if (WORKSHOP_CONFIG.apiKey) h['Authorization'] = 'Bearer ' + WORKSHOP_CONFIG.apiKey;
+    return h;
+  }
+
+  function apiCall(path, method, body) {
+    if (!WORKSHOP_CONFIG.apiBase || WORKSHOP_CONFIG.apiBase.includes('your-platform.example.com')) {
+      // Demo mode — log to console instead of making a real network call.
+      console.info('[WorkshopAPI · demo]', method, path, body || '');
+      return Promise.resolve({ ok: true, demo: true, body });
+    }
+    return fetch(WORKSHOP_CONFIG.apiBase + path, {
+      method: method || 'GET',
+      headers: authHeaders(),
+      credentials: 'include',
+      body: body ? JSON.stringify(body) : undefined
+    }).then(function (r) { return r.json(); });
+  }
+
+  function setSyncStatus(msg) {
+    const el = document.getElementById('syncStatus');
+    if (el) el.textContent = msg;
+  }
+
+  // ============== PUBLIC API ==============
+  const WorkshopAPI = {
+    config: WORKSHOP_CONFIG,
+
+    // ---- Auth & user data ----
+    init: function () {
+      // Pull user data from backend on load (or from sessionStorage cache).
+      const cached = sessionStorage.getItem('workshop_user');
+      if (cached) this.applyUser(JSON.parse(cached));
+      apiCall('/me', 'GET').then(function (user) {
+        if (user && !user.demo) {
+          sessionStorage.setItem('workshop_user', JSON.stringify(user));
+          WorkshopAPI.applyUser(user);
+        }
+      }).catch(function () { /* silent in demo */ });
+
+      // Pull progress
+      apiCall('/me/progress', 'GET').then(function (p) {
+        if (p && !p.demo) WorkshopAPI.applyProgress(p);
+      }).catch(function () {});
+
+      // Background sync
+      setInterval(function () {
+        apiCall('/me/sync', 'POST', { client: 'dashboard', ts: Date.now() })
+          .then(function () { setSyncStatus('Synced just now'); })
+          .catch(function () { setSyncStatus('Offline — changes saved locally'); });
+      }, WORKSHOP_CONFIG.syncInterval);
+    },
+
+    applyUser: function (user) {
+      if (!user) return;
+      WORKSHOP_CONFIG.userId = user.id || null;
+      if (user.firstName) document.getElementById('userFirstName').textContent = user.firstName;
+      if (user.fullName)  document.getElementById('profileName').textContent  = user.fullName;
+      if (user.role)      document.getElementById('profileRole').textContent  = user.role;
+      if (user.initials)  document.getElementById('avatarInitials').textContent = user.initials;
+    },
+
+    applyProgress: function (p) {
+      if (p.modulesDone)   document.getElementById('statModules').textContent  = p.modulesDone + ' / 6';
+      if (p.timeInvested)  document.getElementById('statTime').textContent     = p.timeInvested;
+      if (p.reflections)   document.getElementById('statReflect').textContent  = p.reflections;
+      if (p.selfChecks)    document.getElementById('statChecks').textContent   = p.selfChecks;
+      if (p.streakLabel)   document.getElementById('statStreak').textContent   = p.streakLabel;
+    },
+
+    // ---- Module navigation ----
+    openModule: function (n) {
+      this.trackEvent('module_opened', n);
+      const route = WORKSHOP_CONFIG.moduleRoutes[n];
+      if (route) {
+        window.location.href = route;
+      } else {
+        alert('Module ' + n + ' is not yet available.');
+      }
+    },
+
+    // ---- Assessment ----
+    startAssessment: function (n) {
+      this.trackEvent('assessment_started', n);
+      apiCall('/assessments/start', 'POST', { number: n });
+      window.location.href = 'self_assessment.html?n=' + encodeURIComponent(n);
+    },
+    viewReport: function () {
+      this.trackEvent('report_viewed', null);
+      window.location.href = 'assessment_report.html';
+    },
+
+    // ---- Profile / settings ----
+    editProfile: function () {
+      this.trackEvent('profile_edit_clicked', null);
+      window.location.href = 'profile.html';
+    },
+
+    // ---- Misc ----
+    viewAllResources: function () { window.location.href = 'resources.html'; },
+    filterModules:    function () { /* hook for filter UI */ },
+    openHelp:         function () { window.open('help.html', '_blank'); },
+    openPrivacy:      function () { window.open('privacy.html', '_blank'); },
+
+    // ---- Telemetry ----
+    trackEvent: function (event, value) {
+      const payload = { event: event, value: value, ts: new Date().toISOString(), userId: WORKSHOP_CONFIG.userId };
+      apiCall('/events', 'POST', payload);
+      // Also forward to any analytics layer if present (GA4, Plausible, etc.)
+      if (window.dataLayer && typeof window.dataLayer.push === 'function') {
+        window.dataLayer.push(payload);
+      }
+    }
+  };
+
+  // Expose globally so inline handlers work
+  window.WorkshopAPI = WorkshopAPI;
+
+  // ---- Boot ----
+  document.addEventListener('DOMContentLoaded', function () {
+    WorkshopAPI.init();
+  });
+})();
+</script>
+
+
+
+</body></html>
