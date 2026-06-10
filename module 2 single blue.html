@@ -303,7 +303,20 @@
     .match-row { grid-template-columns: 1fr; }
   }
 </style>
+ <script src="progress.js"></script>
 </head>
+ <script>
+  // Mark this module as started when page loads
+  document.addEventListener('DOMContentLoaded', () => {
+    ProgressTracker.markStarted('module_2');
+  });
+  
+  // Function the "Complete" button will call
+  function finishModule() {
+    ProgressTracker.markCompleted('module_2');
+    alert('Great work! You can close this tab now.');
+  }
+</script>
 <body>
 
 <nav class="top-nav">
