@@ -443,6 +443,141 @@ body { font-size: var(--fs-body); }
 /* 7️⃣ Quality-of-life everywhere */
 img, video, iframe { max-width: 100%; height: auto; }
 * { -webkit-text-size-adjust: 100%; }
+ /* ============================================================
+   📏 RESPONSIVE UX PATCH v2 — fixes label-tier & header-tier text
+   Adds fluid sizing for the small/medium text that v1 missed:
+   labels, tags, h4/h5, scenario titles, helper text, metadata.
+   ============================================================ */
+
+:root {
+  /* New tiers for previously-missed text sizes */
+  --fs-label:  clamp(0.82rem, 0.78rem + 0.2vw,  0.95rem);  /* tags, labels */
+  --fs-h4:     clamp(1.05rem, 1rem    + 0.35vw, 1.2rem);   /* card titles */
+  --fs-h5:     clamp(0.98rem, 0.94rem + 0.25vw, 1.1rem);   /* sub-titles */
+  --fs-meta:   clamp(0.85rem, 0.82rem + 0.15vw, 0.95rem);  /* meta, helpers */
+}
+
+/* ---------- Section number (e.g., "Section 2.1") ---------- */
+.section-num {
+  font-size: var(--fs-label);
+}
+
+/* ---------- Subsection tags (e.g., "2.1.1 · The Practical Challenge") ---------- */
+.subsection-tag {
+  font-size: var(--fs-label);
+  padding: 5px 12px;
+}
+
+/* ---------- All the small "LABEL" pills across cards ---------- */
+.companion-content .label,
+.maya-moment .label,
+.reflection-box label,
+.myth-block .label,
+.recall .label,
+.perspective-card .label,
+.level-defn .level-label,
+.maya-scenario .scenario-label,
+.inline-quiz .iq-prompt + .helper,  /* fallback safety */
+.practice-box .label,
+.strategies-card .label,
+.bridge-card .label,
+.takeaway-card .tk-tag,
+.hub-detail strong,
+.compare-card .card-label,
+.quiz-multi .qm-num {
+  font-size: var(--fs-label);
+  letter-spacing: 1px;
+}
+
+/* ---------- h4 elements (scenario titles, card titles) ---------- */
+.section h4,
+.maya-scenario h4,
+.practice-box h4,
+.strategies-card h4,
+.bridge-card h4,
+.takeaway-card h5,         /* takeaway uses h5 but reads as a card title */
+.resource-content h5 {
+  font-size: var(--fs-h4);
+  line-height: 1.4;
+}
+
+/* ---------- h5 (column headers etc.) ---------- */
+.dnd-col h5 {
+  font-size: var(--fs-h5);
+}
+
+/* ---------- Helper / meta text ---------- */
+.module-meta,
+.helper,
+.inline-quiz .helper,
+.myth-block .helper,
+.dnd-instructions,
+.match-row .stmt-tag,
+.takeaway-card .source,
+.resource-content .meta,
+.companion-stage,
+.bridge-card .meta,
+.maya-moment .attrib,
+.mark-complete-text,
+.compare-card li,
+.level-defn li,
+.strategies-list li,
+.section .pattern-note {
+  font-size: var(--fs-meta);
+  line-height: 1.55;
+}
+
+/* ---------- Statements / italic quote lines ---------- */
+.myth-row .stmt,
+.match-row .stmt,
+.maya-scenario .quote-line,
+.maya-scenario p,
+.level-defn .level-defn-text,
+.perspective-card p,
+.twoperspectives,
+.maya-moment p,
+.companion-content p {
+  font-size: var(--fs-p);
+  line-height: 1.65;
+}
+
+/* ---------- Quiz options — make them comfortably large ---------- */
+.iq-opt,
+.recall-opt,
+.qm-opt,
+.myth-btn {
+  font-size: var(--fs-p);
+  line-height: 1.5;
+  padding: 12px 14px;
+}
+
+/* ---------- Module header meta ("30–40 min · 4 sections...") ---------- */
+.module-meta { font-size: var(--fs-meta); gap: 20px; }
+.module-meta span { font-weight: 500; }
+
+/* ---------- Practice box labels ---------- */
+.practice-box label,
+.reflection-box label {
+  font-size: var(--fs-meta);
+}
+.practice-box label .sublabel {
+  font-size: 0.85em;
+}
+
+/* ---------- Bridge card body ---------- */
+.bridge-card p,
+.bridge-card .new-character-line {
+  font-size: var(--fs-p);
+}
+
+/* ---------- Recommended badge ---------- */
+.recommended-badge { font-size: 0.7rem; padding: 3px 10px; }
+
+/* ---------- Mobile micro-adjustments ---------- */
+@media (max-width: 640px) {
+  .subsection-tag { padding: 4px 10px; }
+  .iq-opt, .recall-opt, .qm-opt, .myth-btn { padding: 11px 12px; }
+}
 </style>
  <script src="progress.js"></script>
 </head>
