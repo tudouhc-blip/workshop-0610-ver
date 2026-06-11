@@ -1,0 +1,2205 @@
+<!DOCTYPE html><html lang="en"><head><meta name="x-poe-datastore-behavior" content="local_only"><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+<meta name="x-poe-datastore-behavior" content="local_only">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Module 2: GenAI Literacy</title>
+<style>
+  /* ============================================================
+     🎨 DESIGN SYSTEM — GenAI Competency Workshop
+     Module 2 palette: Blue
+     ============================================================ */
+
+  /* ---------- Reset & base ---------- */
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-text-size-adjust: 100%; }
+  img, video, iframe { max-width: 100%; height: auto; display: block; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #1e293b;
+    background: #f4f8fc;
+    line-height: 1.8;            /* ⬆ looser body */
+    font-size: var(--fs-body);
+  }
+
+  /* ---------- Fluid typography tokens ---------- */
+  :root {
+    --fs-body:   clamp(1rem,    0.95rem + 0.35vw, 1.15rem);
+    --fs-h1:     clamp(1.85rem, 1.5rem  + 1.4vw,  2.5rem);
+    --fs-h2:     clamp(1.35rem, 1.2rem  + 0.8vw,  1.75rem);
+    --fs-h3:     clamp(1.15rem, 1.08rem + 0.4vw,  1.35rem);
+    --fs-h4:     clamp(1.05rem, 1rem    + 0.35vw, 1.2rem);
+    --fs-h5:     clamp(0.98rem, 0.94rem + 0.25vw, 1.1rem);
+    --fs-p:      clamp(1rem,    0.95rem + 0.25vw, 1.1rem);
+    --fs-label:  clamp(0.82rem, 0.78rem + 0.2vw,  0.95rem);
+    --fs-meta:   clamp(0.85rem, 0.82rem + 0.15vw, 0.95rem);
+
+    /* Spacing scale (used throughout) */
+    --space-xs: 8px;
+    --space-sm: 14px;
+    --space-md: 22px;     /* paragraph rhythm */
+    --space-lg: 32px;     /* h3 → content */
+    --space-xl: 44px;     /* between major blocks */
+    --space-2xl: 56px;    /* between sections */
+  }
+
+  h1, h2, h3 { word-break: break-word; hyphens: auto; line-height: 1.35; }
+
+  /* ============================================================
+     🧭 TOP NAV
+     ============================================================ */
+  .top-nav {
+    position: sticky; top: 0; z-index: 100;
+    background: white;
+    border-bottom: 1px solid #e0e7ef;
+    padding: 14px 32px;
+    display: flex; justify-content: space-between; align-items: center;
+    box-shadow: 0 1px 3px rgba(30,64,175,0.05);
+  }
+  .nav-brand { font-weight: 600; color: #1d4ed8; font-size: 15px; }
+  .nav-brand span { color: #64748b; font-weight: 400; margin-left: 8px; }
+  .progress-wrap { display: flex; align-items: center; gap: 12px; font-size: 13px; color: #64748b; }
+  .progress-bar { width: 200px; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #60a5fa, #818cf8); width: 0%; transition: width 0.4s; }
+
+  /* ============================================================
+     📐 LAYOUT CONTAINER
+     ============================================================ */
+  .container {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 40px clamp(16px, 4vw, 48px) 140px;   /* ⬆ */
+  }
+
+  /* ============================================================
+     📛 MODULE HEADER (with hero image)
+     ============================================================ */
+  .module-header {
+    background: linear-gradient(135deg, #2563eb, #3b82f6 55%, #60a5fa);
+    color: white;
+    border-radius: 18px;
+    margin-bottom: var(--space-xl);
+    box-shadow: 0 6px 22px rgba(37,99,235,0.22);
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    align-items: stretch;
+  }
+  .module-header-text { padding: 52px 48px; }   /* ⬆ */
+  .module-header-image {
+    background-image: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=900&q=80');
+    background-size: cover;
+    background-position: center;
+    min-height: 280px;
+    position: relative;
+  }
+  .module-header-image::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, rgba(37,99,235,0.55), rgba(37,99,235,0.05));
+  }
+  .module-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.22);
+    padding: 6px 14px; border-radius: 20px;
+    font-size: 12px; font-weight: 500;
+    margin-bottom: 18px; letter-spacing: 0.6px;
+  }
+  .module-header h1 { font-size: var(--fs-h1); margin-bottom: 18px; line-height: 1.25; }
+  .module-header p  { font-size: var(--fs-p); opacity: 0.94; max-width: 660px; line-height: 1.75; }
+  .module-meta {
+    display: flex; gap: 24px;
+    margin-top: 28px;
+    font-size: var(--fs-meta);
+    opacity: 0.92; flex-wrap: wrap;
+  }
+  .module-meta span { font-weight: 500; }
+  .module-meta span::before { content: "● "; }
+
+  /* ============================================================
+     👤 COMPANION CARD (with portrait scene)
+     ============================================================ */
+  .companion {
+    background: white;
+    border: 1px solid #bfdbfe;
+    border-radius: 16px;
+    margin-bottom: var(--space-xl);
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    align-items: stretch;
+  }
+  .companion-image {
+    background-image: url('https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&q=80');
+    background-size: cover;
+    background-position: center;
+    min-height: 220px;
+  }
+  .companion-body {
+    padding: 32px 36px;          /* ⬆ */
+    display: flex; gap: 22px; align-items: flex-start;
+  }
+  .companion-avatar {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2563eb, #60a5fa);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 18px;
+    flex-shrink: 0;
+  }
+  .companion-content .label {
+    font-size: var(--fs-label);
+    font-weight: 700; color: #1d4ed8;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+  .companion-content h3 { font-size: var(--fs-h3); color: #1e293b; margin-bottom: 12px; }
+  .companion-content p  { font-size: var(--fs-p); color: #334155; margin-bottom: 14px; line-height: 1.8; }
+  .companion-stage {
+    font-size: var(--fs-meta); color: #1d4ed8;
+    background: #eff6ff;
+    padding: 8px 14px; border-radius: 6px;
+    display: inline-block;
+  }
+
+  /* ============================================================
+     📑 SECTION CARD
+     ============================================================ */
+  .section {
+    background: white;
+    border-radius: 14px;
+    padding: 52px 56px;             /* ⬆ much looser */
+    margin-bottom: var(--space-lg);
+    box-shadow: 0 1px 3px rgba(30,64,175,0.05);
+    border: 1px solid #e0e7ef;
+    transition: border-color 0.3s;
+  }
+  .section.completed { border-color: #93c5fd; }
+  .section-num {
+    color: #1d4ed8;
+    font-weight: 600;
+    font-size: var(--fs-label);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;            /* ⬆ */
+  }
+  .section h2 {
+    font-size: var(--fs-h2);
+    margin-bottom: 20px;            /* ⬆ */
+    color: #0f172a;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .section h2 .completed-badge {
+    display: none;
+    background: #3b82f6; color: white;
+    font-size: 11px; padding: 4px 12px; border-radius: 12px;
+    font-weight: 500; letter-spacing: 0.5px;
+  }
+  .section.completed h2 .completed-badge { display: inline-block; }
+  .section h3 {
+    font-size: var(--fs-h3);
+    margin: var(--space-lg) 0 16px;  /* ⬆ */
+    color: #1e293b;
+  }
+  .section h4 { font-size: var(--fs-h4); margin-bottom: 12px; color: #334155; line-height: 1.4; }
+  .section p  {
+    margin-bottom: var(--space-md);   /* ⬆ paragraph rhythm */
+    color: #334155;
+    font-size: var(--fs-p);
+    line-height: 1.85;                /* ⬆ */
+  }
+
+  .subsection-tag {
+    display: inline-block;
+    font-size: var(--fs-label);
+    font-weight: 700; color: #64748b;
+    letter-spacing: 1px;
+    background: #f1f5f9;
+    padding: 6px 14px; border-radius: 12px;
+    margin-bottom: 14px;
+  }
+
+  /* Section feature image (between paragraphs) */
+  .section-feature-img {
+    width: 100%;
+    border-radius: 12px;
+    margin: var(--space-lg) 0;
+    box-shadow: 0 4px 14px rgba(30,64,175,0.08);
+    aspect-ratio: 21 / 9;
+    object-fit: cover;
+  }
+
+  /* ============================================================
+     ✅ MARK-COMPLETE BUTTON
+     ============================================================ */
+  .mark-complete-wrap {
+    margin-top: var(--space-xl);
+    padding-top: 32px;
+    border-top: 2px dashed #e2e8f0;
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 16px; flex-wrap: wrap;
+  }
+  .mark-complete-text { font-size: var(--fs-meta); color: #64748b; flex: 1; min-width: 180px; line-height: 1.7; }
+  .mark-complete-btn {
+    background: white;
+    border: 2px solid #2563eb;
+    color: #2563eb;
+    padding: 12px 22px; border-radius: 8px;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .mark-complete-btn:hover { background: #eff6ff; }
+  .mark-complete-btn.completed { background: #3b82f6; border-color: #3b82f6; color: white; }
+  .mark-complete-btn .check {
+    display: inline-flex;
+    width: 18px; height: 18px;
+    border: 2px solid currentColor; border-radius: 50%;
+    align-items: center; justify-content: center;
+    font-size: 11px;
+  }
+  .mark-complete-btn.completed .check { background: white; color: #3b82f6; border-color: white; }
+
+  /* ============================================================
+     ⚠️ COMPANION MOMENT
+     ============================================================ */
+  .maya-moment {
+    background: linear-gradient(135deg, #fef9c3, #fef3c7);
+    border-left: 4px solid #f59e0b;
+    padding: 26px 30px;            /* ⬆ */
+    border-radius: 12px;
+    margin: var(--space-lg) 0;
+  }
+  .maya-moment .label {
+    font-size: var(--fs-label);
+    font-weight: 700; color: #92400e;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+  .maya-moment p {
+    font-size: var(--fs-p);
+    color: #78350f; font-style: italic;
+    margin-bottom: 12px;
+    line-height: 1.85;
+  }
+  .maya-moment .attrib { font-size: var(--fs-meta); color: #92400e; font-style: normal; }
+
+  /* ============================================================
+     💭 REFLECTION BOX
+     ============================================================ */
+  .reflection-box {
+    background: linear-gradient(135deg, #eff6ff, #e0e7ff);
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+    padding: 26px;              /* ⬆ */
+    margin: var(--space-lg) 0;
+  }
+  .reflection-box label {
+    display: block;
+    font-size: var(--fs-meta);
+    color: #1d4ed8;
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+  .reflection-box textarea, .reflection-box input {
+    width: 100%;
+    border: 1px solid #bfdbfe; border-radius: 8px;
+    padding: 12px;
+    font-family: inherit; font-size: 14px;
+    resize: vertical; background: white;
+    line-height: 1.6;
+  }
+  .reflection-box textarea { min-height: 90px; }
+
+  .submit-btn {
+    margin-top: 14px;
+    padding: 10px 22px;
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    color: white; border: none; border-radius: 8px;
+    font-size: 13px; cursor: pointer;
+  }
+  .submit-btn:hover { filter: brightness(1.05); }
+
+  .ai-response {
+    margin-top: 18px; padding: 18px;
+    background: white; border-radius: 8px;
+    font-size: 13px; color: #1d4ed8;
+    display: none;
+    border-left: 3px solid #3b82f6;
+    line-height: 1.7;
+  }
+  .ai-response.show { display: block; }
+  .ai-response strong { display: block; margin-bottom: 6px; }
+  .unpack-link {
+    display: inline-block; margin-top: 10px;
+    font-size: 12px; color: #1d4ed8;
+    text-decoration: none; cursor: pointer;
+  }
+  .unpack-link:hover { text-decoration: underline; }
+
+  /* ============================================================
+     🆚 COMPARISON CARDS
+     ============================================================ */
+  .compare-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 18px; margin: var(--space-lg) 0;
+  }
+  .compare-card { padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; }   /* ⬆ */
+  .compare-card.before { background: #fafbfc; }
+  .compare-card.after  { background: linear-gradient(135deg, #eff6ff, #dbeafe); border-color: #93c5fd; }
+  .compare-card .card-label {
+    font-size: var(--fs-label);
+    font-weight: 700; letter-spacing: 1px;
+    margin-bottom: 14px; color: #64748b;
+  }
+  .compare-card.after .card-label { color: #1d4ed8; }
+  .compare-card ul { list-style: none; padding: 0; }
+  .compare-card li {
+    font-size: var(--fs-meta);
+    color: #334155;
+    padding: 8px 0 8px 22px;        /* ⬆ */
+    position: relative;
+    line-height: 1.65;
+  }
+  .compare-card.before li::before { content: "·"; position: absolute; left: 6px; color: #94a3b8; font-weight: 700; }
+  .compare-card.after li::before  { content: "✓"; position: absolute; left: 0; color: #2563eb; font-weight: 700; }
+
+  .twoperspectives {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 3px solid #3b82f6;
+    padding: 22px 26px;            /* ⬆ */
+    border-radius: 10px;
+    margin: var(--space-lg) 0;
+    font-size: var(--fs-p); color: #1e3a8a; line-height: 1.8;
+  }
+  .twoperspectives strong { color: #1d4ed8; }
+
+  /* ============================================================
+     ⚡ MYTH-OR-MATCH
+     ============================================================ */
+  .myth-block {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+    padding: 26px;
+    margin: var(--space-lg) 0;
+  }
+  .myth-block .label {
+    font-size: var(--fs-label);
+    font-weight: 700; color: #1d4ed8;
+    letter-spacing: 1px; margin-bottom: 6px;
+  }
+  .myth-block .helper { font-size: var(--fs-meta); color: #64748b; margin-bottom: 18px; }
+  .myth-row {
+    background: white;
+    padding: 18px 20px;             /* ⬆ */
+    border-radius: 10px;
+    margin-bottom: 14px;
+    border: 1px solid #bfdbfe;
+  }
+  .myth-row .stmt {
+    font-size: var(--fs-p);
+    color: #334155;
+    margin-bottom: 14px; font-style: italic;
+    line-height: 1.7;
+  }
+  .myth-buttons { display: flex; gap: 10px; }
+  .myth-btn {
+    flex: 1;
+    padding: 14px 16px;
+    background: white;
+    border: 1px solid #bfdbfe; border-radius: 8px;
+    cursor: pointer;
+    font-size: var(--fs-p);
+    line-height: 1.4;
+    transition: all 0.2s;
+  }
+  .myth-btn:hover { background: #eff6ff; }
+  .myth-btn.selected.correct { background: #dbeafe; border-color: #3b82f6; color: #1e3a8a; font-weight: 600; }
+  .myth-btn.selected.wrong   { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+  .myth-fb {
+    font-size: var(--fs-meta);
+    margin-top: 10px; padding: 10px 14px;
+    border-radius: 6px; display: none;
+    line-height: 1.65;
+  }
+  .myth-fb.show { display: block; }
+  .myth-fb.correct { background: #eff6ff; color: #1e3a8a; border-left: 2px solid #3b82f6; }
+  .myth-fb.wrong   { background: #fef2f2; color: #991b1b; border-left: 2px solid #ef4444; }
+
+  /* ============================================================
+     🕸 DIMENSION HUB
+     ============================================================ */
+  .hub-section {
+    margin: var(--space-lg) 0;
+    padding: 32px;                  /* ⬆ */
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border: 1px solid #bfdbfe;
+    border-radius: 14px;
+  }
+  .hub-svg-wrap { display: flex; justify-content: center; margin: 18px 0; }
+  .hub-svg { max-width: 440px; width: 100%; height: auto; }
+  .hub-spoke { cursor: pointer; transition: opacity 0.2s; }
+  .hub-spoke:hover { opacity: 0.85; }
+  .hub-detail {
+    background: white;
+    padding: 20px 22px; border-radius: 10px;
+    margin-top: 14px;
+    border-left: 3px solid #3b82f6;
+    font-size: var(--fs-meta);
+    color: #1e3a8a; min-height: 60px;
+    line-height: 1.7;
+  }
+  .hub-detail strong {
+    color: #1d4ed8;
+    display: block;
+    margin-bottom: 6px;
+    font-size: var(--fs-label);
+    letter-spacing: 0.5px;
+  }
+
+  /* ============================================================
+     🧠 30-SECOND RECALL
+     ============================================================ */
+  .recall {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+    padding: 24px 26px;           /* ⬆ */
+    margin: var(--space-lg) 0;
+  }
+  .recall .label {
+    font-size: var(--fs-label);
+    font-weight: 700; color: #1d4ed8;
+    letter-spacing: 1px; margin-bottom: 8px;
+  }
+  .recall .prompt {
+    font-size: var(--fs-p);
+    color: #334155;
+    margin-bottom: 16px; line-height: 1.7;
+  }
+  .recall-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .recall-opt {
+    padding: 14px 16px;
+    background: white;
+    border: 1px solid #bfdbfe; border-radius: 8px;
+    cursor: pointer;
+    font-size: var(--fs-p);
+    line-height: 1.45;
+    transition: all 0.2s;
+    text-align: left;
+  }
+  .recall-opt:hover { background: #eff6ff; }
+  .recall-opt.selected.correct { background: #dbeafe; border-color: #3b82f6; color: #1e3a8a; font-weight: 600; }
+  .recall-opt.selected.wrong   { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+  .recall-fb {
+    margin-top: 12px;
+    font-size: var(--fs-meta);
+    padding: 12px 14px; border-radius: 6px;
+    display: none;
+    line-height: 1.65;
+  }
+  .recall-fb.show { display: block; }
+  .recall-fb.correct { background: white; color: #1e3a8a; border-left: 3px solid #3b82f6; }
+  .recall-fb.wrong   { background: white; color: #991b1b; border-left: 3px solid #ef4444; }
+
+  /* ============================================================
+     📍 PERSPECTIVE CARD
+     ============================================================ */
+  .perspective-card {
+    background: white;
+    border: 2px solid #bfdbfe;
+    border-radius: 12px;
+    padding: 24px 28px;           /* ⬆ */
+    margin: var(--space-lg) 0;
+  }
+  .perspective-card .label {
+    font-size: var(--fs-label);
+    font-weight: 700; color: #1d4ed8;
+    letter-spacing: 1px; margin-bottom: 10px;
+  }
+  .perspective-card p {
+    font-size: var(--fs-p);
+    color: #1e3a8a; margin-bottom: 0;
+    line-height: 1.8;
+  }
+
+  /* ============================================================
+     🗂 LEVEL TABS
+     ============================================================ */
+  .level-intro {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 3px solid #3b82f6;
+    padding: 16px 20px; border-radius: 8px;
+    margin: 16px 0 24px;
+    font-size: var(--fs-meta); color: #1e3a8a;
+    line-height: 1.7;
+  }
+
+  .level-tabs {
+    display: flex; gap: 8px;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 0; flex-wrap: wrap;
+  }
+  .level-tab {
+    padding: 14px 18px;
+    background: none; border: none;
+    cursor: pointer;
+    font-size: 13px; font-weight: 500;
+    color: #64748b;
+    position: relative; transition: color 0.2s;
+    flex: 1; min-width: 130px; text-align: left;
+  }
+  .level-tab.active { color: #1d4ed8; }
+  .level-tab.active::after {
+    content: "";
+    position: absolute; bottom: -2px; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #2563eb, #60a5fa);
+  }
+  .level-tab .level-num {
+    display: block;
+    font-size: 10px; color: #94a3b8;
+    margin-bottom: 6px; letter-spacing: 1px; font-weight: 700;
+  }
+  .level-tab.active .level-num { color: #3b82f6; }
+  .level-tab.completed .level-num::after { content: " ✓"; color: #3b82f6; font-weight: 700; }
+
+  .level-content { display: none; padding: 32px 0 0; }   /* ⬆ */
+  .level-content.active { display: block; }
+
+  .level-defn {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+    padding: 26px 30px;             /* ⬆ */
+    margin-bottom: 22px;
+  }
+  .level-defn .level-label {
+    font-size: var(--fs-label);
+    font-weight: 700; color: #1d4ed8;
+    letter-spacing: 1px; margin-bottom: 10px;
+  }
+  .level-defn .level-defn-text {
+    font-style: italic;
+    font-size: var(--fs-p);
+    color: #1e3a8a; margin-bottom: 18px;
+    line-height: 1.75;
+  }
+  .level-defn ul { list-style: none; padding: 0; }
+  .level-defn li {
+    font-size: var(--fs-meta);
+    color: #334155;
+    padding: 7px 0 7px 26px;        /* ⬆ */
+    position: relative;
+    line-height: 1.65;
+  }
+  .level-defn li::before {
+    content: "→";
+    position: absolute; left: 0; top: 7px;
+    color: #3b82f6; font-weight: 700;
+  }
+
+  /* ============================================================
+     🎬 COMPANION SCENARIO CARD (now with image)
+     ============================================================ */
+  .maya-scenario {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 18px;
+  }
+  .maya-scenario-image {
+    width: 100%;
+    aspect-ratio: 21 / 9;
+    object-fit: cover;
+    background: #eff6ff;
+  }
+  .maya-scenario-body { padding: 26px 30px; }   /* ⬆ */
+  .maya-scenario .scenario-header {
+    display: flex; align-items: center;
+    gap: 14px; margin-bottom: 14px;
+  }
+  .maya-avatar-sm {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2563eb, #60a5fa);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px;
+    flex-shrink: 0;
+  }
+  .maya-scenario .scenario-label {
+    font-size: var(--fs-label);
+    font-weight: 700; color: #1d4ed8;
+    letter-spacing: 1px;
+  }
+  .maya-scenario h4 { font-size: var(--fs-h4); color: #1e293b; margin-bottom: 0; }
+  .maya-scenario p {
+    font-size: var(--fs-p);
+    color: #334155;
+    line-height: 1.85;
+    margin-bottom: 14px;
+  }
+  .maya-scenario p:last-child { margin-bottom: 0; }
+  .maya-scenario .quote-line {
+    font-style: italic; color: #1d4ed8;
+    padding: 14px 18px;
+    background: #eff6ff;
+    border-left: 3px solid #3b82f6;
+    border-radius: 6px;
+    margin: 14px 0;
+    font-size: var(--fs-p);
+    line-height: 1.7;
+  }
+
+  /* ============================================================
+     ❓ INLINE QUIZ
+     ============================================================ */
+  .inline-quiz {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+    padding: 24px 26px;
+    margin: var(--space-md) 0;
+  }
+  .inline-quiz .iq-prompt {
+    font-size: var(--fs-p);
+    color: #1e293b;
+    margin-bottom: 6px; font-weight: 500;
+    line-height: 1.6;
+  }
+  .inline-quiz .helper { font-size: var(--fs-meta); color: #64748b; margin-bottom: 16px; }
+  .iq-options { margin: 8px 0; }
+  .iq-opt {
+    display: block; width: 100%; text-align: left;
+    padding: 14px 16px; margin-bottom: 8px;
+    background: white;
+    border: 1px solid #bfdbfe; border-radius: 8px;
+    cursor: pointer;
+    font-size: var(--fs-p);
+    line-height: 1.55;
+    transition: all 0.2s;
+  }
+  .iq-opt:hover { background: #eff6ff; }
+  .iq-opt.selected.correct { background: #dbeafe; border-color: #3b82f6; color: #1e3a8a; font-weight: 600; }
+  .iq-opt.selected.wrong   { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+  .iq-fb {
+    margin-top: 12px; padding: 12px 16px;
+    border-radius: 8px;
+    font-size: var(--fs-meta);
+    display: none;
+    line-height: 1.7;
+  }
+  .iq-fb.show { display: block; }
+  .iq-fb.correct { background: white; color: #1e3a8a; border-left: 3px solid #3b82f6; }
+  .iq-fb.wrong   { background: white; color: #991b1b; border-left: 3px solid #ef4444; }
+
+  /* ============================================================
+     🎯 PRACTICE BOX
+     ============================================================ */
+  .practice-box {
+    background: linear-gradient(135deg, #dbeafe, #e0e7ff);
+    border: 1px solid #bfdbfe;
+    border-radius: 14px;
+    padding: 30px;                    /* ⬆ */
+    margin: var(--space-lg) 0;
+  }
+  .practice-box .label {
+    font-size: var(--fs-label);
+    font-weight: 700; color: #1d4ed8;
+    letter-spacing: 1px; margin-bottom: 8px;
+  }
+  .practice-box h4 { color: #1e3a8a; margin-bottom: 12px; font-size: var(--fs-h4); }
+  .practice-box p  { font-size: var(--fs-p); color: #1e3a8a; line-height: 1.75; }
+  .practice-box .pq-field { margin: 16px 0; }
+  .practice-box label {
+    display: block;
+    font-size: var(--fs-meta);
+    color: #1d4ed8; font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .practice-box label .sublabel { color: #64748b; font-weight: 400; font-size: 0.85em; }
+  .practice-box input, .practice-box textarea {
+    width: 100%;
+    border: 1px solid #bfdbfe; border-radius: 8px;
+    padding: 11px 14px;
+    font-family: inherit; font-size: 13px;
+    background: white;
+    line-height: 1.6;
+  }
+  .practice-box textarea { min-height: 100px; resize: vertical; }
+  .practice-box .submit-btn { margin-top: 4px; }
+
+  /* ============================================================
+     🤏 DRAG-AND-DROP
+     ============================================================ */
+  .dnd-instructions {
+    font-size: var(--fs-meta);
+    color: #64748b;
+    margin: 6px 0 16px;
+    font-style: italic;
+    line-height: 1.65;
+  }
+  .dnd-zone {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 18px; margin: 16px 0;
+  }
+  .dnd-col {
+    background: white;
+    border: 2px dashed #bfdbfe; border-radius: 12px;
+    padding: 18px; min-height: 240px;
+  }
+  .dnd-col.drag-over { background: #eff6ff; border-color: #3b82f6; border-style: solid; }
+  .dnd-col h5 { font-size: var(--fs-h5); color: #1d4ed8; margin-bottom: 14px; font-weight: 600; }
+  .dnd-list { min-height: 180px; padding: 4px 0; }
+  .dnd-item {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe; border-radius: 8px;
+    padding: 14px 18px;            /* ⬆ */
+    margin-bottom: 10px;
+    font-size: var(--fs-meta);
+    color: #1e3a8a;
+    cursor: grab; user-select: none;
+    position: relative;
+    transition: background 0.15s, border-color 0.15s;
+    line-height: 1.6;
+  }
+  .dnd-item::before { content: "⋮⋮"; color: #94a3b8; margin-right: 8px; font-weight: 700; letter-spacing: -2px; }
+  .dnd-item:hover { background: #dbeafe; border-color: #93c5fd; }
+  .dnd-item.dragging { opacity: 0.4; cursor: grabbing; }
+  .dnd-placeholder { height: 6px; margin: 2px 0; background: #3b82f6; border-radius: 3px; }
+  .dnd-buttons { display: flex; gap: 10px; margin-top: 14px; }
+  .dnd-btn { padding: 11px 22px; border-radius: 8px; font-size: 13px; cursor: pointer; }
+  .dnd-btn.primary   { background: linear-gradient(135deg, #2563eb, #3b82f6); color: white; border: none; }
+  .dnd-btn.secondary { background: white; color: #2563eb; border: 1px solid #2563eb; }
+  .dnd-feedback {
+    margin-top: 14px; padding: 14px 16px;
+    border-radius: 8px;
+    font-size: var(--fs-meta);
+    display: none;
+    line-height: 1.7;
+  }
+  .dnd-feedback.show { display: block; }
+  .dnd-feedback.correct { background: #eff6ff; color: #1e3a8a; border-left: 3px solid #3b82f6; }
+  .dnd-feedback.wrong   { background: #fef2f2; color: #991b1b; border-left: 3px solid #ef4444; }
+
+  /* ============================================================
+     🃏 TAKEAWAY CARDS
+     ============================================================ */
+  .takeaway-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 16px; margin: var(--space-lg) 0;
+  }
+  .takeaway-card {
+    background: white;
+    border: 1px solid #e2e8f0; border-radius: 12px;
+    padding: 22px;                /* ⬆ */
+    border-left: 3px solid #3b82f6;
+    transition: transform 0.2s;
+  }
+  .takeaway-card:hover { transform: translateY(-2px); box-shadow: 0 2px 8px rgba(59,130,246,0.12); }
+  .takeaway-card .tk-tag {
+    display: inline-block;
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    color: #1d4ed8;
+    padding: 4px 10px; border-radius: 10px;
+    font-size: var(--fs-label);
+    font-weight: 700; letter-spacing: 0.8px;
+    margin-bottom: 12px;
+  }
+  .takeaway-card .tk-tag.empower    { background: linear-gradient(135deg, #e0e7ff, #c7d2fe); color: #3730a3; }
+  .takeaway-card .tk-tag.foundation { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
+  .takeaway-card h5 { font-size: var(--fs-h4); color: #1e293b; margin-bottom: 10px; line-height: 1.45; }
+  .takeaway-card p  { font-size: var(--fs-p); color: #334155; margin-bottom: 12px; line-height: 1.75; }
+  .takeaway-card .source {
+    font-size: var(--fs-meta);
+    color: #64748b; font-style: italic;
+    padding-top: 10px; border-top: 1px solid #f1f5f9;
+    line-height: 1.65;
+  }
+  .takeaway-card .source strong { color: #1d4ed8; font-style: normal; }
+
+  /* ============================================================
+     🛠 STRATEGIES CARD
+     ============================================================ */
+  .strategies-card {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+    padding: 28px 32px;             /* ⬆ */
+    margin: var(--space-lg) 0;
+  }
+  .strategies-card .label {
+    font-size: var(--fs-label);
+    font-weight: 700; color: #1d4ed8;
+    letter-spacing: 1px; margin-bottom: 10px;
+  }
+  .strategies-card h4 { color: #1e3a8a; margin-bottom: 14px; font-size: var(--fs-h4); }
+  .strategies-list { list-style: none; padding: 0; }
+  .strategies-list li {
+    padding: 14px 0 14px 32px;       /* ⬆ */
+    position: relative;
+    font-size: var(--fs-p);
+    color: #334155;
+    border-bottom: 1px solid rgba(191,219,254,0.5);
+    line-height: 1.75;
+  }
+  .strategies-list li:last-child { border-bottom: none; }
+  .strategies-list li::before {
+    content: "✓";
+    position: absolute; left: 4px; top: 15px;
+    color: #3b82f6; font-weight: 700;
+    background: white;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    border: 1px solid #bfdbfe;
+  }
+  .strategies-list li strong { color: #1d4ed8; }
+
+  /* ============================================================
+     🎲 MATCH-STATEMENTS
+     ============================================================ */
+  .match-row {
+    background: white;
+    padding: 16px 18px;             /* ⬆ */
+    border-radius: 10px;
+    margin-bottom: 12px;
+    border: 1px solid #bfdbfe;
+    display: grid; grid-template-columns: 1fr auto;
+    gap: 14px; align-items: center;
+  }
+  .match-row .stmt {
+    font-size: var(--fs-p);
+    color: #334155;
+    font-style: italic;
+    line-height: 1.65;
+  }
+  .match-row .stmt-tag {
+    display: block;
+    font-size: var(--fs-meta);
+    color: #1d4ed8;
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    margin-top: 6px;
+  }
+  .match-row select {
+    border: 1px solid #bfdbfe; border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    background: white;
+    cursor: pointer;
+  }
+  .match-row select.correct { background: #eff6ff; border-color: #3b82f6; color: #1e3a8a; font-weight: 600; }
+  .match-row select.wrong   { background: #fef2f2; border-color: #ef4444; color: #991b1b; }
+  .pattern-note {
+    background: white;
+    padding: 14px 18px; border-radius: 8px;
+    margin-top: 12px;
+    font-size: var(--fs-meta);
+    color: #1e3a8a;
+    border-left: 3px solid #3b82f6;
+    line-height: 1.7;
+  }
+  .pattern-note strong { color: #1d4ed8; }
+
+  /* ============================================================
+     📝 POP-QUIZ MULTI
+     ============================================================ */
+  .quiz-multi {
+    background: white;
+    border: 1px solid #bfdbfe; border-radius: 12px;
+    padding: 26px 28px;             /* ⬆ */
+    margin-bottom: 16px;
+  }
+  .quiz-multi .qm-num {
+    font-size: var(--fs-label);
+    font-weight: 700; color: #1d4ed8;
+    letter-spacing: 1px; margin-bottom: 8px;
+  }
+  .quiz-multi .qm-q {
+    font-size: var(--fs-p);
+    color: #1e293b;
+    margin-bottom: 14px; font-weight: 500;
+    line-height: 1.65;
+  }
+  .qm-opt {
+    display: block; width: 100%; text-align: left;
+    padding: 14px 16px; margin-bottom: 8px;
+    background: #fafbfc;
+    border: 1px solid #e2e8f0; border-radius: 8px;
+    cursor: pointer;
+    font-size: var(--fs-p);
+    line-height: 1.55;
+    transition: all 0.2s;
+  }
+  .qm-opt:hover { background: #eff6ff; border-color: #bfdbfe; }
+  .qm-opt.selected.correct { background: #dbeafe; border-color: #3b82f6; color: #1e3a8a; font-weight: 600; }
+  .qm-opt.selected.wrong   { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+  .qm-fb {
+    margin-top: 12px; padding: 12px 16px;
+    border-radius: 8px;
+    font-size: var(--fs-meta);
+    display: none;
+    line-height: 1.7;
+  }
+  .qm-fb.show { display: block; }
+  .qm-fb.correct { background: #eff6ff; color: #1e3a8a; border-left: 3px solid #3b82f6; }
+  .qm-fb.wrong   { background: #fef2f2; color: #991b1b; border-left: 3px solid #ef4444; }
+
+  /* ============================================================
+     📚 RESOURCES
+     ============================================================ */
+  .resource-list { display: flex; flex-direction: column; gap: 14px; margin-top: 18px; }
+  .resource-item {
+    background: white;
+    border: 1px solid #e2e8f0; border-radius: 12px;
+    padding: 18px 22px;            /* ⬆ */
+    display: flex; gap: 18px; align-items: center;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .resource-item:hover {
+    border-color: #bfdbfe;
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(59,130,246,0.08);
+  }
+  .resource-icon { font-size: 24px; flex-shrink: 0; }
+  .resource-content { flex: 1; }
+  .resource-content h5 {
+    font-size: var(--fs-h4);
+    color: #1e293b;
+    margin-bottom: 6px;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    line-height: 1.45;
+  }
+  .resource-content .meta { font-size: var(--fs-meta); color: #64748b; line-height: 1.6; }
+  .recommended-badge {
+    background: linear-gradient(135deg, #2563eb, #60a5fa);
+    color: white;
+    font-size: 0.7rem;
+    padding: 4px 11px; border-radius: 10px;
+    letter-spacing: 0.6px; font-weight: 600;
+  }
+
+  /* ============================================================
+     🌉 BRIDGE CARD
+     ============================================================ */
+  .bridge-card {
+    background: linear-gradient(135deg, #2563eb, #3b82f6 70%, #818cf8);
+    color: white;
+    padding: 36px;                  /* ⬆ */
+    border-radius: 16px;
+    margin: var(--space-lg) 0;
+  }
+  .bridge-card .label {
+    font-size: var(--fs-label);
+    font-weight: 700; letter-spacing: 1px;
+    opacity: 0.85; margin-bottom: 8px;
+  }
+  .bridge-card h4 { font-size: var(--fs-h2); color: white; margin-bottom: 8px; }
+  .bridge-card .meta { font-size: var(--fs-meta); opacity: 0.85; margin-bottom: 18px; }
+  .bridge-card p { font-size: var(--fs-p); opacity: 0.94; color: white; margin-bottom: 16px; line-height: 1.8; }
+  .bridge-card p em { color: #fde68a; font-style: normal; font-weight: 600; }
+  .bridge-card .new-character-line {
+    background: rgba(255,255,255,0.12);
+    padding: 16px 20px; border-radius: 10px;
+    font-size: var(--fs-p);
+    opacity: 0.96; margin-top: 16px;
+    line-height: 1.75;
+  }
+  .bridge-button {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 28px;
+    background: white; color: #1d4ed8;
+    border: none; border-radius: 10px;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer;
+    margin-top: 18px;
+  }
+  .bridge-button:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  .break-link {
+    display: inline-block; margin-left: 16px;
+    font-size: 13px; color: white;
+    opacity: 0.85; cursor: pointer;
+    text-decoration: underline;
+  }
+
+  /* ============================================================
+     💬 CHATBOT
+     ============================================================ */
+  .chat-fab {
+    position: fixed; bottom: 24px; right: 24px;
+    width: 58px; height: 58px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    color: white;
+    border: none; cursor: pointer;
+    box-shadow: 0 4px 16px rgba(37,99,235,0.3);
+    font-size: 22px; z-index: 90;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .chat-panel {
+    position: fixed; bottom: 95px; right: 24px;
+    width: 360px; max-height: 500px;
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    display: none; flex-direction: column;
+    z-index: 91; overflow: hidden;
+  }
+  .chat-panel.open { display: flex; }
+  .chat-header {
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    color: white;
+    padding: 14px 18px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .chat-header h4 { font-size: 14px; margin-bottom: 0; color: white; }
+  .chat-header small { font-size: 11px; opacity: 0.85; }
+  .chat-close { background: none; border: none; color: white; cursor: pointer; font-size: 18px; }
+  .chat-body {
+    flex: 1; overflow-y: auto;
+    padding: 16px;
+    background: #f9fafb;
+    max-height: 300px;
+  }
+  .chat-msg {
+    margin-bottom: 12px;
+    max-width: 85%;
+    padding: 11px 15px;
+    border-radius: 14px;
+    font-size: 13px; line-height: 1.6;
+  }
+  .chat-msg.bot  { background: white; border: 1px solid #e2e8f0; border-bottom-left-radius: 4px; }
+  .chat-msg.user { background: #1d4ed8; color: white; margin-left: auto; border-bottom-right-radius: 4px; }
+  .chat-quick { display: flex; gap: 8px; padding: 10px 14px; flex-wrap: wrap; border-top: 1px solid #f1f5f9; }
+  .chat-quick button {
+    background: #eff6ff; color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+    padding: 6px 12px; border-radius: 14px;
+    font-size: 11px; cursor: pointer;
+  }
+  .chat-input-row { display: flex; padding: 12px; border-top: 1px solid #e2e8f0; gap: 8px; }
+  .chat-input-row input {
+    flex: 1;
+    border: 1px solid #cbd5e1; border-radius: 20px;
+    padding: 8px 14px;
+    font-size: 13px; outline: none;
+  }
+  .chat-send {
+    background: #1d4ed8; color: white;
+    border: none; border-radius: 50%;
+    width: 34px; height: 34px;
+    cursor: pointer;
+  }
+
+  /* ============================================================
+     📱 RESPONSIVE
+     ============================================================ */
+  @media (min-width: 641px) and (max-width: 1023px) {
+    .container { max-width: 760px; }
+    .section   { padding: 40px 36px; }
+    .module-header { grid-template-columns: 1fr; }
+    .module-header-image { min-height: 200px; }
+    .companion { grid-template-columns: 1fr; }
+    .companion-image { min-height: 180px; }
+  }
+
+  @media (max-width: 640px) {
+    .container { padding: 20px 14px 100px; }
+    .progress-wrap { display: none; }
+
+    .module-header { grid-template-columns: 1fr; border-radius: 14px; }
+    .module-header-text { padding: 32px 26px; }
+    .module-header-image { min-height: 160px; order: -1; }
+    .module-meta { gap: 16px; font-size: 12px; }
+
+    .companion { grid-template-columns: 1fr; }
+    .companion-image { min-height: 160px; order: -1; }
+    .companion-body { padding: 24px 22px; gap: 16px; flex-direction: column; }
+    .companion-avatar { width: 48px; height: 48px; font-size: 16px; }
+
+    .section { padding: 32px 24px; border-radius: 12px; }
+    .section h2 { gap: 8px; }
+
+    .compare-grid, .takeaway-grid, .recall-options, .dnd-zone { grid-template-columns: 1fr; }
+    .match-row { grid-template-columns: 1fr; }
+
+    .maya-moment, .level-defn, .myth-block,
+    .recall, .inline-quiz, .practice-box, .strategies-card,
+    .hub-section, .reflection-box, .perspective-card {
+      padding: 22px 22px; border-radius: 12px;
+    }
+    .maya-scenario-body { padding: 22px 22px; }
+    .compare-card { padding: 20px 22px; }
+    .quiz-multi { padding: 22px 22px; }
+
+    .myth-btn, .iq-opt, .recall-opt, .qm-opt,
+    .submit-btn, .mark-complete-btn, .dnd-btn { min-height: 44px; }
+
+    .level-tabs { gap: 0; border-bottom: 1px solid #e2e8f0; }
+    .level-tab  { min-width: 0; padding: 12px 8px; font-size: 12px; }
+    .level-tab .level-num { font-size: 9px; margin-bottom: 2px; }
+
+    .mark-complete-wrap { flex-direction: column; align-items: stretch; }
+    .mark-complete-btn  { justify-content: center; width: 100%; }
+
+    .bridge-card { padding: 28px 22px; }
+    .break-link { display: block; margin: 14px 0 0 0; }
+
+    .chat-fab { width: 52px; height: 52px; bottom: 18px; right: 18px; }
+    .chat-panel { width: calc(100vw - 24px); right: 12px; bottom: 80px; }
+
+    .resource-item { padding: 16px 18px; gap: 12px; }
+    .dnd-col { min-height: 180px; padding: 14px; }
+    .subsection-tag { padding: 5px 12px; }
+  }
+</style>
+
+<script src="progress.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof ProgressTracker !== 'undefined') ProgressTracker.markStarted('module_2');
+  });
+  function finishModule() {
+    if (typeof ProgressTracker !== 'undefined') ProgressTracker.markCompleted('module_2');
+    alert('Great work! You can close this tab now.');
+  }
+</script>
+</head>
+<body>
+
+<!-- ============================================================
+     🧭 TOP NAV
+     ============================================================ -->
+<nav class="top-nav">
+  <div class="nav-brand">GenAI Competency Workshop<span>· Module 2 of 6</span></div>
+  <div class="progress-wrap">
+    <span>Progress</span>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <span id="progressPct">0%</span>
+  </div>
+</nav>
+
+<div class="container">
+
+<!-- ============================================================
+     📛 MODULE HEADER (with hero image)
+     ============================================================ -->
+<header class="module-header">
+  <div class="module-header-text">
+    <span class="module-tag">DIMENSION 1 OF 4</span>
+    <h1>GenAI Literacy</h1>
+    <p>The foundation of every other dimension. By the end of this module, you'll understand what GenAI Literacy means here, identify your level on both perspectives, and leave with strategies you can apply tomorrow.</p>
+    <div class="module-meta">
+      <span>30–40 min</span>
+      <span>4 sections</span>
+      <span>Knowledge recap included</span>
+    </div>
+  </div>
+  <div class="module-header-image" role="img" aria-label="Educators collaborating around a laptop"></div>
+</header>
+
+<!-- ============================================================
+     👤 COMPANION CARD (with portrait scene)
+     ============================================================ -->
+<div class="companion">
+  <div class="companion-image" role="img" aria-label="Educator working at laptop"></div>
+  <div class="companion-body">
+    <div class="companion-avatar">MC</div>
+    <div class="companion-content">
+      <div class="label">👋 MEET YOUR COMPANION FOR THIS MODULE</div>
+      <h3>Dr. Maya Chen — Associate Professor of Public Health</h3>
+      <p>Maya teaches a Year 3 undergraduate course, <em>Health Inequalities and Society</em>, with about 80 students. She's mid-career, curious about GenAI, but not yet confident. You'll walk alongside Maya through this module — watching how she develops her own literacy and grows her students' literacy along the way.</p>
+      <div class="companion-stage">📍 Module 2 stage: Just starting out · uncertain but motivated</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     📑 SECTION 2.1
+     ============================================================ -->
+<section class="section" id="section-2-1">
+  <div class="section-num">Section 2.1</div>
+  <h2>What Is GenAI Literacy in This Framework? <span class="completed-badge">✓ COMPLETED</span></h2>
+
+  <span class="subsection-tag">2.1.1 · The Practical Challenge</span>
+  <h3 style="margin-top:8px;">Why GenAI Literacy Has Become Urgent</h3>
+  <p>Traditional digital literacy prepared us to evaluate a webpage or judge a source. GenAI introduces a different challenge: outputs <em>look</em> fluent and authoritative — even when they're wrong. Teachers face this twice over: in their own work, and in guiding students who are already using these tools.</p>
+
+  <img class="section-feature-img" src="https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=1200&amp;q=80" alt="A student writing in a notebook beside an open laptop">
+
+  <div class="maya-moment">
+    <div class="label">⚠️ DR. CHEN'S MOMENT</div>
+    <p>"Last semester, two of my students submitted essays with citations to studies that <strong>don't exist</strong>. I didn't catch it — a TA did. Honestly, I'm not sure I could teach my students to spot AI errors when I'm not always confident I could spot them myself."</p>
+    <div class="attrib">— Dr. Maya Chen, before starting this workshop</div>
+  </div>
+
+  <div class="reflection-box">
+    <label>💭 Have you had a moment like Maya's? Share one example (2–3 sentences):</label>
+    <textarea id="reflectMoment" placeholder="A small example, not an essay. What happened, what surprised you?"></textarea>
+    <button class="submit-btn" onclick="submitReflection('reflectMoment','aiRespMoment')">Share</button>
+    <div class="ai-response" id="aiRespMoment">
+      <strong>💡 AI Companion</strong>
+      Thanks for sharing. You're in good company — Maya, and many teachers, recognise this exact moment. Hold onto your example; we'll come back to it when you build your own action plan.
+      <a class="unpack-link" onclick="toggleChat()">💬 Unpack this further</a>
+    </div>
+  </div>
+
+  <span class="subsection-tag" style="margin-top:36px;">2.1.2 · Definitions</span>
+  <h3 style="margin-top:8px;">What This Framework Means by "GenAI Literacy"</h3>
+  <p>You've probably encountered "AI literacy" before — usually framed in technical terms. In this framework, we mean something broader and more pedagogically grounded.</p>
+
+  <div class="compare-grid">
+    <div class="compare-card before">
+      <div class="card-label">CONVENTIONAL AI LITERACY</div>
+      <ul>
+        <li>Technical know-how</li>
+        <li>Tool operation</li>
+        <li>Individual skill</li>
+        <li>An end in itself</li>
+      </ul>
+    </div>
+    <div class="compare-card after">
+      <div class="card-label">GENAI LITERACY (THIS FRAMEWORK)</div>
+      <ul>
+        <li>Critical, ethical, applied use</li>
+        <li>Pedagogical judgement</li>
+        <li>Foundation for all dimensions</li>
+        <li>A starting point, not a destination</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="twoperspectives">
+    Two perspectives are always at play: <strong>your own literacy</strong> as a teacher, and your capacity to <strong>empower students' literacy</strong>. These are related but distinct — strength in one does not guarantee strength in the other.
+  </div>
+
+  <div class="myth-block">
+    <div class="label">⚡ QUICK CHECK · MYTH OR MATCH</div>
+    <div class="helper">Decide whether each statement matches our framework's definition. You can change your answer anytime.</div>
+
+    <div class="myth-row">
+      <div class="stmt">"GenAI literacy means knowing how to write good prompts."</div>
+      <div class="myth-buttons">
+        <button class="myth-btn" data-correct="false" onclick="checkMyth(this, 1, 'Prompt-writing is one tiny piece, not the whole picture. Our framework includes critical evaluation, ethical reasoning, and pedagogical judgement.')">Matches framework</button>
+        <button class="myth-btn" data-correct="true" onclick="checkMyth(this, 1, 'Right. Prompt-writing matters — but it\'s only one slice. Real literacy includes critical evaluation, ethics, and pedagogical judgement.')">Myth</button>
+      </div>
+      <div class="myth-fb" id="mythFb1"></div>
+    </div>
+
+    <div class="myth-row">
+      <div class="stmt">"GenAI literacy includes knowing when NOT to use GenAI."</div>
+      <div class="myth-buttons">
+        <button class="myth-btn" data-correct="true" onclick="checkMyth(this, 2, 'Exactly. Knowing when to refuse the tool is a literacy move, not a refusal of literacy.')">Matches framework</button>
+        <button class="myth-btn" data-correct="false" onclick="checkMyth(this, 2, 'Reconsider. Pedagogical judgement includes knowing when GenAI undermines a learning goal — that\'s literacy.')">Myth</button>
+      </div>
+      <div class="myth-fb" id="mythFb2"></div>
+    </div>
+
+    <div class="myth-row">
+      <div class="stmt">"Being personally fluent with GenAI means you can also teach it well."</div>
+      <div class="myth-buttons">
+        <button class="myth-btn" data-correct="false" onclick="checkMyth(this, 3, 'A common assumption — but the two-perspective view rejects this. Being personally literate and being able to empower students are different competencies.')">Matches framework</button>
+        <button class="myth-btn" data-correct="true" onclick="checkMyth(this, 3, 'Correct. Personal fluency and pedagogical capacity are related but distinct. Many teachers are strong in one and growing in the other.')">Myth</button>
+      </div>
+      <div class="myth-fb" id="mythFb3"></div>
+    </div>
+  </div>
+
+  <span class="subsection-tag" style="margin-top:36px;">2.1.3 · Connections With Other Dimensions</span>
+  <h3 style="margin-top:8px;">GenAI Literacy as the Foundation</h3>
+  <p>GenAI Literacy underpins the other three dimensions. Click each spoke to see how.</p>
+
+  <div class="hub-section">
+    <div class="hub-svg-wrap">
+      <svg class="hub-svg" viewBox="0 0 400 280">
+        <line x1="200" y1="140" x2="80" y2="60" stroke="#60a5fa" stroke-width="2" stroke-dasharray="4,3"></line>
+        <line x1="200" y1="140" x2="320" y2="60" stroke="#60a5fa" stroke-width="2" stroke-dasharray="4,3"></line>
+        <line x1="200" y1="140" x2="200" y2="240" stroke="#60a5fa" stroke-width="2" stroke-dasharray="4,3"></line>
+        <circle class="hub-spoke" cx="200" cy="140" r="50" fill="url(#hubGrad)" onclick="showHubDetail(0)"></circle>
+        <text x="200" y="135" text-anchor="middle" font-size="11" fill="white" font-weight="700">DIMENSION 1</text>
+        <text x="200" y="150" text-anchor="middle" font-size="11" fill="white" font-weight="600">GenAI Literacy</text>
+        <circle class="hub-spoke" cx="80" cy="60" r="38" fill="#3b82f6" onclick="showHubDetail(2)"></circle>
+        <text x="80" y="55" text-anchor="middle" font-size="9" fill="white" font-weight="700">DIM 2</text>
+        <text x="80" y="68" text-anchor="middle" font-size="8" fill="white">Curriculum</text>
+        <circle class="hub-spoke" cx="320" cy="60" r="38" fill="#60a5fa" onclick="showHubDetail(3)"></circle>
+        <text x="320" y="55" text-anchor="middle" font-size="9" fill="white" font-weight="700">DIM 3</text>
+        <text x="320" y="68" text-anchor="middle" font-size="8" fill="white">Teaching</text>
+        <circle class="hub-spoke" cx="200" cy="240" r="38" fill="#93c5fd" onclick="showHubDetail(4)"></circle>
+        <text x="200" y="235" text-anchor="middle" font-size="9" fill="white" font-weight="700">DIM 4</text>
+        <text x="200" y="248" text-anchor="middle" font-size="8" fill="white">Assessment</text>
+        <defs>
+          <linearGradient id="hubGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#1d4ed8"></stop>
+            <stop offset="100%" stop-color="#60a5fa"></stop>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+    <div class="hub-detail" id="hubDetail">
+      <strong>CLICK A SPOKE</strong>
+      Each connecting line shows how GenAI Literacy enables the other dimensions. Try clicking Curriculum, Teaching, or Assessment above.
+    </div>
+  </div>
+
+  <div class="mark-complete-wrap">
+    <div class="mark-complete-text">✅ Finished this section? Mark it complete to track your progress.</div>
+    <button class="mark-complete-btn" onclick="markSectionComplete('section-2-1', this)">
+      <span class="check"></span><span class="btn-text">Mark Section 2.1 as Complete</span>
+    </button>
+  </div>
+</section>
+
+<!-- ============================================================
+     📑 SECTION 2.2 — Teacher's Own Literacy
+     ============================================================ -->
+<section class="section" id="section-2-2">
+  <div class="section-num">Section 2.2</div>
+  <h2>Teacher's Own Literacy Across Levels <span class="completed-badge">✓ COMPLETED</span></h2>
+
+  <div class="recall">
+    <div class="label">🧠 30-SECOND RECALL · Before we go further</div>
+    <div class="prompt">From Section 2.1, which of the following is NOT part of GenAI Literacy as defined in this framework?</div>
+    <div class="recall-options">
+      <button class="recall-opt" data-correct="false" onclick="checkRecall(this, 'r1', 'That IS part of the framework. Try again.')">Critical engagement with outputs</button>
+      <button class="recall-opt" data-correct="true" onclick="checkRecall(this, 'r1', 'Right — pure technical mastery is conventional AI literacy, not what we mean here.')">Mastery of technical AI architecture</button>
+      <button class="recall-opt" data-correct="false" onclick="checkRecall(this, 'r1', 'That IS part of the framework. Try again.')">Pedagogical judgement</button>
+      <button class="recall-opt" data-correct="false" onclick="checkRecall(this, 'r1', 'That IS part of the framework. Try again.')">Ethical reasoning</button>
+    </div>
+    <div class="recall-fb" id="recallFb-r1"></div>
+  </div>
+
+  <div class="perspective-card">
+    <div class="label">📍 PERSPECTIVE 1 OF 2 · TEACHER'S OWN LITERACY</div>
+    <p>Your <strong>personal</strong> capacity to understand, use, and critically engage with GenAI in safe, ethical, and effective ways.</p>
+  </div>
+
+  <span class="subsection-tag" style="margin-top:28px;">2.2.1 · Walk Through Maya's Journey at Each Level</span>
+  <div class="level-intro">👇 Click each tab below — every level shows the definition, Maya's scenario, and a question to check your understanding.</div>
+
+  <div class="level-tabs">
+    <button class="level-tab active" data-level="1" onclick="switchLevel('own', 1)"><span class="level-num">LEVEL 1</span>Basic</button>
+    <button class="level-tab" data-level="2" onclick="switchLevel('own', 2)"><span class="level-num">LEVEL 2</span>Intermediate</button>
+    <button class="level-tab" data-level="3" onclick="switchLevel('own', 3)"><span class="level-num">LEVEL 3</span>Advanced</button>
+  </div>
+
+  <!-- BASIC -->
+  <div class="level-content active" id="own-level-1">
+    <div class="level-defn">
+      <div class="level-label">BASIC — Teacher's Own GenAI Literacy</div>
+      <div class="level-defn-text">"You are able to demonstrate foundational understanding of safe, ethical, and effective interaction with GenAI systems."</div>
+      <ul>
+        <li>Navigates GenAI platforms confidently</li>
+        <li>Writes clear prompts to get useful responses</li>
+        <li>Recognises when outputs may be inaccurate or biased</li>
+        <li>Follows privacy and data-security rules</li>
+      </ul>
+    </div>
+    <div class="maya-scenario">
+      <img class="maya-scenario-image" src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=1200&amp;q=80" alt="A laptop on a desk with an open notebook — preparing a lecture quickly">
+      <div class="maya-scenario-body">
+        <div class="scenario-header">
+          <div class="maya-avatar-sm">MC</div>
+          <div>
+            <div class="scenario-label">MAYA AT BASIC LEVEL</div>
+            <h4>Preparing a Lecture, Quickly</h4>
+          </div>
+        </div>
+        <p>Maya needs to prep next week's lecture on global health inequalities. She opens ChatGPT, asks for a lecture outline with examples, and copies the response into her slides. She presents it confidently. A week later, a student notices that one of the cited studies doesn't exist.</p>
+      </div>
+    </div>
+    <div class="inline-quiz">
+      <div class="iq-prompt">What's the main risk of staying at Basic level?</div>
+      <div class="helper">You can change your answer anytime.</div>
+      <div class="iq-options">
+        <button class="iq-opt" data-correct="false" onclick="checkInlineQuiz(this, 'iq1', 'Tools have actually become easier — that\'s not the main risk.')">A) GenAI tools may become too complex to use without training</button>
+        <button class="iq-opt" data-correct="true" onclick="checkInlineQuiz(this, 'iq1', 'Exactly. Without critical evaluation, fabrications and biases get baked into teaching.')">B) Inaccurate, biased, or fabricated content can go unnoticed and reach students</button>
+        <button class="iq-opt" data-correct="false" onclick="checkInlineQuiz(this, 'iq1', 'Not really — student engagement isn\'t the core risk here. Think about content quality.')">C) Students will lose interest in human-led teaching</button>
+      </div>
+      <div class="iq-fb" id="iqFb-iq1"></div>
+    </div>
+  </div>
+
+  <!-- INTERMEDIATE -->
+  <div class="level-content" id="own-level-2">
+    <div class="level-defn">
+      <div class="level-label">INTERMEDIATE — Teacher's Own GenAI Literacy</div>
+      <div class="level-defn-text">"You are able to critically engage with GenAI outputs, identifying potential issues, biases, and opportunities for improvement."</div>
+      <ul>
+        <li>Reviews GenAI content critically for inaccuracies and bias</li>
+        <li>Evaluates relevance for specific teaching contexts</li>
+        <li>Iteratively refines prompts to improve outputs</li>
+        <li>Discusses ethical implications with colleagues</li>
+      </ul>
+    </div>
+    <div class="maya-scenario">
+      <img class="maya-scenario-image" src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=1200&amp;q=80" alt="A person reviewing documents critically with a pen in hand">
+      <div class="maya-scenario-body">
+        <div class="scenario-header">
+          <div class="maya-avatar-sm">MC</div>
+          <div>
+            <div class="scenario-label">MAYA AT INTERMEDIATE LEVEL</div>
+            <h4>Same Task, Different Approach</h4>
+          </div>
+        </div>
+        <p>This semester, Maya asks ChatGPT for a draft outline — but doesn't stop there. She critically reads it for Western-centric framing, then refines her prompt:</p>
+        <div class="quote-line">"Include case examples from three different regions and flag any contested data points."</div>
+        <p>She verifies each citation against her library database. At the next staff meeting, she raises one ethical concern she noticed about how the AI framed inequality.</p>
+      </div>
+    </div>
+    <div class="inline-quiz">
+      <div class="iq-prompt">What single move shifts Maya from Basic to Intermediate?</div>
+      <div class="helper">You can change your answer anytime.</div>
+      <div class="iq-options">
+        <button class="iq-opt" data-correct="false" onclick="checkInlineQuiz(this, 'iq2', 'A different model wouldn\'t change Maya\'s approach. Look at her behaviour, not the tool.')">A) Switching to a more advanced GenAI model</button>
+        <button class="iq-opt" data-correct="true" onclick="checkInlineQuiz(this, 'iq2', 'Yes — that combination is the hallmark of Intermediate. Critical engagement + iteration.')">B) Iteratively refining prompts AND verifying outputs against trusted sources</button>
+        <button class="iq-opt" data-correct="false" onclick="checkInlineQuiz(this, 'iq2', 'Avoidance is not the framework\'s answer. Critical engagement is.')">C) Avoiding GenAI for any academic content</button>
+      </div>
+      <div class="iq-fb" id="iqFb-iq2"></div>
+    </div>
+  </div>
+
+  <!-- ADVANCED -->
+  <div class="level-content" id="own-level-3">
+    <div class="level-defn">
+      <div class="level-label">ADVANCED — Teacher's Own GenAI Literacy</div>
+      <div class="level-defn-text">"You are able to explore innovative ways of collaborating with GenAI, reflecting on its evolving role as a cognitive partner."</div>
+      <ul>
+        <li>Designs new workflows treating GenAI as a "co-thinker"</li>
+        <li>Shares insights in professional learning communities</li>
+        <li>Innovates by co-creating teaching materials with GenAI</li>
+      </ul>
+    </div>
+    <div class="maya-scenario">
+      <img class="maya-scenario-image" src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&amp;q=80" alt="A small team collaborating around a workshop table">
+      <div class="maya-scenario-body">
+        <div class="scenario-header">
+          <div class="maya-avatar-sm">MC</div>
+          <div>
+            <div class="scenario-label">MAYA AT ADVANCED LEVEL</div>
+            <h4>GenAI as Cognitive Partner</h4>
+          </div>
+        </div>
+        <p>A year on, Maya designs a recurring workflow: she drafts a lecture, then prompts GenAI to generate the strongest possible counterarguments to her own framing. She then structures a "devil's advocate" segment in her lectures using these counterpoints. She presents this approach at a faculty workshop on co-thinking with GenAI, and three colleagues adopt it.</p>
+      </div>
+    </div>
+    <div class="inline-quiz">
+      <div class="iq-prompt">What most distinguishes Maya's Advanced practice from her Intermediate one?</div>
+      <div class="helper">You can change your answer anytime.</div>
+      <div class="iq-options">
+        <button class="iq-opt" data-correct="false" onclick="checkInlineQuiz(this, 'iq3', 'Frequency is not the marker. Think about kind of practice and her contribution.')">A) She uses GenAI more frequently in her work</button>
+        <button class="iq-opt" data-correct="false" onclick="checkInlineQuiz(this, 'iq3', 'On the contrary — Advanced means engaging GenAI more critically, not trusting it more.')">B) She trusts GenAI outputs more than before</button>
+        <button class="iq-opt" data-correct="true" onclick="checkInlineQuiz(this, 'iq3', 'Right. Novel co-thinking workflows + community contribution are the Advanced markers.')">C) She designs novel workflows with GenAI as co-thinker AND shares them with the community</button>
+      </div>
+      <div class="iq-fb" id="iqFb-iq3"></div>
+    </div>
+  </div>
+
+  <div class="practice-box">
+    <div class="label">🎯 PRACTICE · DESCRIBE YOUR CURRENT PRACTICE</div>
+    <h4>2.2.2 · Apply to Your Own Context</h4>
+    <p style="margin-bottom:14px;">Describe — in your own words — how you currently use GenAI for one teaching task. Your AI companion will detect signals in your language to suggest where you sit on the levels framework, and what the next step might look like.</p>
+    <div class="pq-field">
+      <label>1. Your discipline / subject area <span class="sublabel">(short)</span></label>
+      <input type="text" id="ownDiscipline" placeholder="e.g., Public Health, Engineering, Sociology…">
+    </div>
+    <div class="pq-field">
+      <label>2. Describe how you currently use GenAI for one task <span class="sublabel">(2–4 sentences, in your own words)</span></label>
+      <textarea id="ownPractice" placeholder="What do you do? Do you check it? Do you iterate? Be honest — Basic is fine."></textarea>
+    </div>
+    <button class="submit-btn" onclick="analyzeOwn()">Analyse my description</button>
+    <div class="ai-response" id="aiOwnResp"></div>
+  </div>
+
+  <div class="mark-complete-wrap">
+    <div class="mark-complete-text">✅ Worked through all three levels and applied to your context? Mark this section complete.</div>
+    <button class="mark-complete-btn" onclick="markSectionComplete('section-2-2', this)">
+      <span class="check"></span><span class="btn-text">Mark Section 2.2 as Complete</span>
+    </button>
+  </div>
+</section>
+
+<!-- ============================================================
+     📑 SECTION 2.3 — Empowering Students
+     ============================================================ -->
+<section class="section" id="section-2-3">
+  <div class="section-num">Section 2.3</div>
+  <h2>Empowering Students' Literacy Across Levels <span class="completed-badge">✓ COMPLETED</span></h2>
+
+  <div class="recall">
+    <div class="label">🧠 30-SECOND RECALL · From Section 2.2</div>
+    <div class="prompt">At what level does a teacher start <em>iteratively refining prompts</em> based on output quality?</div>
+    <div class="recall-options" style="grid-template-columns: repeat(3, 1fr);">
+      <button class="recall-opt" data-correct="false" onclick="checkRecall(this, 'r2', 'Basic is foundational use — refining prompts iteratively starts at Intermediate.')">Basic</button>
+      <button class="recall-opt" data-correct="true" onclick="checkRecall(this, 'r2', 'Right. Iterative refinement is one of the defining moves at Intermediate.')">Intermediate</button>
+      <button class="recall-opt" data-correct="false" onclick="checkRecall(this, 'r2', 'Advanced extends further — but iterative refinement first appears at Intermediate.')">Advanced</button>
+    </div>
+    <div class="recall-fb" id="recallFb-r2"></div>
+  </div>
+
+  <div class="perspective-card">
+    <div class="label">📍 PERSPECTIVE 2 OF 2 · EMPOWERING STUDENTS' LITERACY</div>
+    <p>Your capacity to <strong>guide</strong> students' responsible, critical, and creative engagement with GenAI. Being personally literate doesn't automatically make you good at teaching this — they're related but distinct skills.</p>
+  </div>
+
+  <span class="subsection-tag" style="margin-top:28px;">2.3.1 · Walk Through Maya's Journey at Each Level</span>
+  <div class="level-intro">Now we follow Maya through one semester with her 80 students.</div>
+
+  <div class="level-tabs">
+    <button class="level-tab active" data-level="1" onclick="switchLevel('emp', 1)"><span class="level-num">LEVEL 1</span>Basic</button>
+    <button class="level-tab" data-level="2" onclick="switchLevel('emp', 2)"><span class="level-num">LEVEL 2</span>Intermediate</button>
+    <button class="level-tab" data-level="3" onclick="switchLevel('emp', 3)"><span class="level-num">LEVEL 3</span>Advanced</button>
+  </div>
+
+  <!-- BASIC -->
+  <div class="level-content active" id="emp-level-1">
+    <div class="level-defn">
+      <div class="level-label">BASIC — Empowering Students' Literacy</div>
+      <div class="level-defn-text">"You are able to introduce students to responsible, ethical, and basic methods for interacting with GenAI systems."</div>
+      <ul>
+        <li>Demonstrates basic functionalities of GenAI tools</li>
+        <li>Shows students how to ask clear, specific questions</li>
+        <li>Explains privacy and ethical guidelines</li>
+        <li>Encourages students to question reliability of outputs</li>
+      </ul>
+    </div>
+    <div class="maya-scenario">
+      <img class="maya-scenario-image" src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&amp;q=80" alt="A teacher engaging with a class of students">
+      <div class="maya-scenario-body">
+        <div class="scenario-header">
+          <div class="maya-avatar-sm">MC</div>
+          <div>
+            <div class="scenario-label">MAYA WITH STUDENTS · WEEKS 1–4</div>
+            <h4>Laying the Foundation</h4>
+          </div>
+        </div>
+        <p>In the first month, Maya demonstrates ChatGPT live in class. She walks her 80 students through the privacy policy, runs a 15-minute exercise on writing clearer prompts, and gives them a one-page handout on academic integrity. Her closing line becomes a class mantra:</p>
+        <div class="quote-line">"Outputs are drafts, not facts."</div>
+      </div>
+    </div>
+    <div class="inline-quiz">
+      <div class="iq-prompt">What's the foundation Maya is building at this Basic level?</div>
+      <div class="helper">You can change your answer anytime.</div>
+      <div class="iq-options">
+        <button class="iq-opt" data-correct="false" onclick="checkInlineQuiz(this, 'iq4', 'No — this isn\'t freedom without scaffolds; it\'s scaffolds before freedom.')">A) Letting students use GenAI freely without guardrails</button>
+        <button class="iq-opt" data-correct="true" onclick="checkInlineQuiz(this, 'iq4', 'Yes. Basic-level student work is about safety scaffolds, not restrictions.')">B) Establishing safe, ethical, and basic interaction practices students can rely on</button>
+        <button class="iq-opt" data-correct="false" onclick="checkInlineQuiz(this, 'iq4', 'Not the goal — and not what Maya does. Re-read the scenario.')">C) Replacing assigned readings with AI summaries</button>
+      </div>
+      <div class="iq-fb" id="iqFb-iq4"></div>
+    </div>
+  </div>
+
+  <!-- INTERMEDIATE -->
+  <div class="level-content" id="emp-level-2">
+    <div class="level-defn">
+      <div class="level-label">INTERMEDIATE — Empowering Students' Literacy</div>
+      <div class="level-defn-text">"You are able to guide students to critically engage in iterative dialogues with GenAI tools."</div>
+      <ul>
+        <li>Designs activities that require students to fact-check AI outputs</li>
+        <li>Co-designs evaluation rubrics with students</li>
+        <li>Models reflective questioning of AI-generated content</li>
+        <li>Discusses bias and limitations openly in class</li>
+      </ul>
+    </div>
+    <div class="maya-scenario">
+      <img class="maya-scenario-image" src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1200&amp;q=80" alt="Students working together at a classroom table">
+      <div class="maya-scenario-body">
+        <div class="scenario-header">
+          <div class="maya-avatar-sm">MC</div>
+          <div>
+            <div class="scenario-label">MAYA WITH STUDENTS · WEEKS 5–9</div>
+            <h4>Critical, Iterative Dialogue</h4>
+          </div>
+        </div>
+        <p>Maya now assigns a "fact-check the chatbot" task in pairs. Students take a public health policy brief, ask GenAI to summarise it, and then identify where the AI got it wrong. In class, she co-designs a rubric with them — bias, accuracy, contextual relevance — that they'll use for the rest of the semester. Discussion of AI limitations becomes a regular feature of class.</p>
+      </div>
+    </div>
+    <div class="inline-quiz">
+      <div class="iq-prompt">What pedagogical shift defines this Intermediate level?</div>
+      <div class="helper">You can change your answer anytime.</div>
+      <div class="iq-options">
+        <button class="iq-opt" data-correct="false" onclick="checkInlineQuiz(this, 'iq5', 'Frequency isn\'t the marker. Look at what students are doing intellectually.')">A) Using more GenAI tools in every class session</button>
+        <button class="iq-opt" data-correct="true" onclick="checkInlineQuiz(this, 'iq5', 'Yes — co-designing rubrics with students is the Intermediate hinge.')">B) Engaging students in critical, iterative dialogue with GenAI — including co-designing evaluation criteria</button>
+        <button class="iq-opt" data-correct="false" onclick="checkInlineQuiz(this, 'iq5', 'The framework is not pro-banning — it\'s pro-critical-engagement.')">C) Banning GenAI for all student assessments</button>
+      </div>
+      <div class="iq-fb" id="iqFb-iq5"></div>
+    </div>
+  </div>
+
+  <!-- ADVANCED -->
+  <div class="level-content" id="emp-level-3">
+    <div class="level-defn">
+      <div class="level-label">ADVANCED — Empowering Students' Literacy</div>
+      <div class="level-defn-text">"You are able to support students in co-creating knowledge and artefacts through advanced human-AI collaboration."</div>
+      <ul>
+        <li>Facilitates collaborative knowledge co-creation with GenAI</li>
+        <li>Empowers students to design their own GenAI workflows</li>
+        <li>Mentors students to contribute to community discussions on responsible AI use</li>
+      </ul>
+    </div>
+    <div class="maya-scenario">
+      <img class="maya-scenario-image" src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=1200&amp;q=80" alt="A student presenting a project to a small group">
+      <div class="maya-scenario-body">
+        <div class="scenario-header">
+          <div class="maya-avatar-sm">MC</div>
+          <div>
+            <div class="scenario-label">MAYA WITH STUDENTS · WEEKS 10–13</div>
+            <h4>Students as Co-Creators</h4>
+          </div>
+        </div>
+        <p>For their final project on health misinformation, student teams design <em>their own</em> GenAI-integrated workflows — some use it for stakeholder analysis, others for argument-mapping. Two groups present their workflows at a campus open day. One team writes a short blog post for a public health student network, contributing to wider discourse about responsible AI use in their discipline.</p>
+      </div>
+    </div>
+    <div class="inline-quiz">
+      <div class="iq-prompt">What's most distinctive of this Advanced level?</div>
+      <div class="helper">You can change your answer anytime.</div>
+      <div class="iq-options">
+        <button class="iq-opt" data-correct="false" onclick="checkInlineQuiz(this, 'iq6', 'Daily use isn\'t the hallmark — student agency and contribution to wider discourse are.')">A) Maya uses GenAI in every single class</button>
+        <button class="iq-opt" data-correct="false" onclick="checkInlineQuiz(this, 'iq6', 'That\'s Intermediate. Advanced goes further — students design AND contribute outward.')">B) Students fact-check the chatbot together</button>
+        <button class="iq-opt" data-correct="true" onclick="checkInlineQuiz(this, 'iq6', 'Right. Student-designed workflows + outward contribution = Advanced.')">C) Students design their own workflows AND contribute to community discourse on responsible AI</button>
+      </div>
+      <div class="iq-fb" id="iqFb-iq6"></div>
+    </div>
+  </div>
+
+  <span class="subsection-tag" style="margin-top:36px;">2.3.2 · Apply to Your Own Context</span>
+  <h3 style="margin-top:8px;">Build a Student Briefing for Your Class</h3>
+  <p>Drag the statements that fit a <strong>Basic-level student briefing</strong> into the briefing card on the right.</p>
+  <p class="dnd-instructions">💡 You can drop items <strong>anywhere</strong> — between, above, or below other items. Reorder freely on either side.</p>
+
+  <div class="dnd-zone">
+    <div class="dnd-col" id="dndPool" data-col="pool">
+      <h5>📚 Statements pool</h5>
+      <div class="dnd-list" id="poolList">
+        <div class="dnd-item" draggable="true" data-correct="true">Show students how to ask clear, specific questions</div>
+        <div class="dnd-item" draggable="true" data-correct="false">Have students co-design an evaluation rubric for AI outputs</div>
+        <div class="dnd-item" draggable="true" data-correct="true">Explain privacy and ethical guidelines for GenAI use</div>
+        <div class="dnd-item" draggable="true" data-correct="true">Encourage them to question the reliability of outputs</div>
+        <div class="dnd-item" draggable="true" data-correct="false">Facilitate collaborative knowledge co-creation with GenAI</div>
+        <div class="dnd-item" draggable="true" data-correct="true">Demonstrate basic functionalities of GenAI tools</div>
+      </div>
+    </div>
+    <div class="dnd-col" id="dndBasic" data-col="basic">
+      <h5>📋 Basic Student Briefing</h5>
+      <div class="dnd-list" id="basicList"></div>
+    </div>
+  </div>
+  <div class="dnd-buttons">
+    <button class="dnd-btn primary" onclick="checkDnd()">Check my briefing</button>
+    <button class="dnd-btn secondary" onclick="resetDnd()">Reset</button>
+  </div>
+  <div class="dnd-feedback" id="dndFb"></div>
+
+  <div class="practice-box" style="margin-top:36px;">
+    <div class="label">🎯 PRACTICE · DESCRIBE A PLANNED STUDENT ACTIVITY</div>
+    <h4>Plan a Concrete Move for Your Students</h4>
+    <p style="margin-bottom:14px;">Describe in your own words what you'd like to do with your students next term. Your AI companion will analyse your language and tell you where this activity sits in the framework.</p>
+    <div class="pq-field">
+      <label>1. Course or class you're planning</label>
+      <input type="text" id="planCourse" placeholder="e.g., Year 2 Introduction to Statistics">
+    </div>
+    <div class="pq-field">
+      <label>2. Describe the activity you'd like to do with students <span class="sublabel">(2–4 sentences)</span></label>
+      <textarea id="planDescr" placeholder="Be concrete: what task, what tool, what students will produce."></textarea>
+    </div>
+    <button class="submit-btn" onclick="analyzePlan()">Analyse my plan</button>
+    <div class="ai-response" id="aiPlanResp"></div>
+  </div>
+
+  <div class="mark-complete-wrap">
+    <div class="mark-complete-text">✅ Walked through all three levels and planned for your students? Mark this section complete.</div>
+    <button class="mark-complete-btn" onclick="markSectionComplete('section-2-3', this)">
+      <span class="check"></span><span class="btn-text">Mark Section 2.3 as Complete</span>
+    </button>
+  </div>
+</section>
+
+<!-- ============================================================
+     📑 SECTION 2.4 — Wrap-up
+     ============================================================ -->
+<section class="section" id="section-2-4">
+  <div class="section-num">Section 2.4</div>
+  <h2>Module Wrap-Up <span class="completed-badge">✓ COMPLETED</span></h2>
+  <p>You've worked through the foundation. Let's consolidate what you've learned, do a quick knowledge recap, point you to resources for deeper exploration, and then bridge into Module 3.</p>
+
+  <span class="subsection-tag" style="margin-top:28px;">2.4.1 · Key Takeaways, Best Practices &amp; Strategies</span>
+  <h3 style="margin-top:8px;">Six Insights Specific to GenAI Literacy</h3>
+  <p>These takeaways aren't general study tips — they're the core ideas <strong>specific to GenAI Literacy as a dimension</strong>. Each is anchored to where it appeared in the module, so you can return to the source if you want to go deeper.</p>
+
+  <div class="takeaway-grid">
+    <div class="takeaway-card">
+      <span class="tk-tag foundation">FRAMEWORK CORE</span>
+      <h5>GenAI Literacy is two perspectives, not one</h5>
+      <p>Your <em>own</em> literacy and your capacity to <em>empower students'</em> literacy are related but distinct. Strength in one does not guarantee strength in the other.</p>
+      <div class="source"><strong>From §2.1.2:</strong> "Two perspectives are always at play."</div>
+    </div>
+    <div class="takeaway-card">
+      <span class="tk-tag">OWN LITERACY</span>
+      <h5>Critical engagement is what separates Basic from Intermediate</h5>
+      <p>The shift up isn't about using more tools — it's about iteratively refining prompts AND verifying outputs against trusted sources, while watching for bias and framing issues.</p>
+      <div class="source"><strong>From §2.2.1:</strong> Maya's Intermediate scenario.</div>
+    </div>
+    <div class="takeaway-card">
+      <span class="tk-tag">OWN LITERACY</span>
+      <h5>Advanced means GenAI as cognitive partner — and sharing it</h5>
+      <p>At Advanced, you're not just using GenAI well; you're designing novel workflows (e.g., "devil's advocate" co-thinking) and contributing those insights to a professional learning community.</p>
+      <div class="source"><strong>From §2.2.1:</strong> Maya's Advanced scenario.</div>
+    </div>
+    <div class="takeaway-card">
+      <span class="tk-tag empower">EMPOWERING STUDENTS</span>
+      <h5>Basic-level student work is about safety scaffolds, not restrictions</h5>
+      <p>"Outputs are drafts, not facts." A Basic-level student briefing introduces GenAI through clear prompts, privacy guidelines, and the habit of questioning reliability — not through prohibitions.</p>
+      <div class="source"><strong>From §2.3.1:</strong> Maya's Weeks 1–4 with students.</div>
+    </div>
+    <div class="takeaway-card">
+      <span class="tk-tag empower">EMPOWERING STUDENTS</span>
+      <h5>Co-designing rubrics is the Intermediate hinge</h5>
+      <p>When students help build the criteria for evaluating AI outputs, they move from passive consumers to critical interlocutors. This single move signals the Intermediate shift in the empowerment track.</p>
+      <div class="source"><strong>From §2.3.1:</strong> Maya's Weeks 5–9 with students.</div>
+    </div>
+    <div class="takeaway-card">
+      <span class="tk-tag foundation">FOUNDATION</span>
+      <h5>This dimension underpins the next three</h5>
+      <p>Without GenAI Literacy, you cannot make informed choices in Curriculum &amp; Learning Design, Teaching &amp; Learning, or Assessment. It is the precondition — not just the first step.</p>
+      <div class="source"><strong>From §2.1.3:</strong> The dimension diagram.</div>
+    </div>
+  </div>
+
+  <div class="strategies-card">
+    <div class="label">🛠 BEST PRACTICES &amp; STRATEGIES YOU CAN APPLY TOMORROW</div>
+    <h4>Five Concrete Moves Drawn From This Module</h4>
+    <ol class="strategies-list">
+      <li><strong>Verify before you use:</strong> Run every GenAI-generated citation through your library database before it touches a slide or a syllabus.</li>
+      <li><strong>Iterate, don't accept:</strong> Treat the first output as a draft. Refine your prompt at least once — explicitly asking for diverse regions, contested data, or alternative framings.</li>
+      <li><strong>Co-design rubrics with students:</strong> Spend one class building the evaluation criteria together. This single move activates critical engagement across the rest of the semester.</li>
+      <li><strong>Adopt a class mantra:</strong> "Outputs are drafts, not facts." Repeat it until students self-monitor without prompting.</li>
+      <li><strong>Build a co-thinking workflow:</strong> Use GenAI to generate counterarguments to your own framing — then bring those into class as a "devil's advocate" segment.</li>
+    </ol>
+  </div>
+
+  <span class="subsection-tag" style="margin-top:36px;">2.4.2 · Knowledge Recap (Pop Quizzes)</span>
+  <h3 style="margin-top:8px;">Quick Checks Before You Move On</h3>
+  <p>Three short pop quizzes — designed to surface anything still hazy. You can change answers at any time; nothing is graded.</p>
+
+  <div class="quiz-multi">
+    <div class="qm-num">POP QUIZ 1 OF 3 · CONCEPTUAL</div>
+    <div class="qm-q">What is the single biggest reason GenAI Literacy is treated as the <em>foundation</em> dimension in this framework?</div>
+    <button class="qm-opt" data-correct="false" onclick="checkPopQuiz(this, 'pq1', 'Time spent isn\'t the criterion — conceptual dependence is.')">A) It takes the most time to develop</button>
+    <button class="qm-opt" data-correct="true" onclick="checkPopQuiz(this, 'pq1', 'Right. Without literacy, the choices you make in curriculum, teaching, and assessment lose their grounding.')">B) Without it, the other three dimensions can't be enacted with judgement</button>
+    <button class="qm-opt" data-correct="false" onclick="checkPopQuiz(this, 'pq1', 'It\'s not about ease — it\'s about being a precondition for the others.')">C) It's the easiest dimension to assess</button>
+    <div class="qm-fb" id="pqFb-pq1"></div>
+  </div>
+
+  <div class="quiz-multi">
+    <div class="qm-num">POP QUIZ 2 OF 3 · APPLICATION</div>
+    <div class="qm-q">A colleague says: "I'm pretty good with ChatGPT — I can write strong prompts. So I'm probably already at Advanced." How would you respond?</div>
+    <button class="qm-opt" data-correct="false" onclick="checkPopQuiz(this, 'pq2', 'Strong prompting alone isn\'t Advanced. Re-read the Advanced criteria.')">A) Sounds right — strong prompts mean Advanced literacy</button>
+    <button class="qm-opt" data-correct="true" onclick="checkPopQuiz(this, 'pq2', 'Exactly. Strong prompting is closer to Basic/Intermediate. Advanced requires novel co-thinking workflows AND community contribution.')">B) Strong prompts are valuable, but Advanced specifically requires designing novel co-thinking workflows and sharing them with a community — and the two perspectives can sit at different levels</button>
+    <button class="qm-opt" data-correct="false" onclick="checkPopQuiz(this, 'pq2', 'Categorical claims about students aren\'t the point — the framework asks you to look at distinct competencies, not generalisations.')">C) That depends on whether their students are Advanced too</button>
+    <div class="qm-fb" id="pqFb-pq2"></div>
+  </div>
+
+  <div class="quiz-multi">
+    <div class="qm-num">POP QUIZ 3 OF 3 · CONSOLIDATION (MATCH THE LEVEL)</div>
+    <div class="qm-q">Match each competency statement to the correct level. Change your selection any time.</div>
+    <div class="match-row">
+      <div>
+        <div class="stmt">"Explore innovative ways of collaborating with GenAI, reflecting on its evolving role as a cognitive partner."</div>
+        <span class="stmt-tag">OWN LITERACY</span>
+      </div>
+      <select onchange="checkMatch(this, 'Advanced')">
+        <option value="">Choose…</option><option>Basic</option><option>Intermediate</option><option>Advanced</option>
+      </select>
+    </div>
+    <div class="match-row">
+      <div>
+        <div class="stmt">"Introduce students to responsible, ethical, and basic methods for interacting with GenAI systems."</div>
+        <span class="stmt-tag">EMPOWERING STUDENTS</span>
+      </div>
+      <select onchange="checkMatch(this, 'Basic')">
+        <option value="">Choose…</option><option>Basic</option><option>Intermediate</option><option>Advanced</option>
+      </select>
+    </div>
+    <div class="match-row">
+      <div>
+        <div class="stmt">"Critically engage with GenAI outputs, identifying potential issues, biases, and opportunities for improvement."</div>
+        <span class="stmt-tag">OWN LITERACY</span>
+      </div>
+      <select onchange="checkMatch(this, 'Intermediate')">
+        <option value="">Choose…</option><option>Basic</option><option>Intermediate</option><option>Advanced</option>
+      </select>
+    </div>
+    <div class="match-row">
+      <div>
+        <div class="stmt">"Support students in co-creating knowledge and artefacts through advanced human-AI collaboration."</div>
+        <span class="stmt-tag">EMPOWERING STUDENTS</span>
+      </div>
+      <select onchange="checkMatch(this, 'Advanced')">
+        <option value="">Choose…</option><option>Basic</option><option>Intermediate</option><option>Advanced</option>
+      </select>
+    </div>
+    <div class="match-row">
+      <div>
+        <div class="stmt">"Guide students to critically engage in iterative dialogues with GenAI tools."</div>
+        <span class="stmt-tag">EMPOWERING STUDENTS</span>
+      </div>
+      <select onchange="checkMatch(this, 'Intermediate')">
+        <option value="">Choose…</option><option>Basic</option><option>Intermediate</option><option>Advanced</option>
+      </select>
+    </div>
+    <div class="pattern-note">💡 <strong>Pattern:</strong> "introduce" signals Basic; "critically engage" signals Intermediate; "co-create" / "innovative collaboration" signals Advanced.</div>
+  </div>
+
+  <span class="subsection-tag" style="margin-top:36px;">2.4.3 · Additional Resources Recommended in the PD Pool</span>
+  <h3 style="margin-top:8px;">Go Deeper</h3>
+  <p>A small selection from the wider PD pool — items marked <strong>Recommended</strong> are most closely aligned with this dimension and Maya's growth points.</p>
+
+  <div class="resource-list">
+    <div class="resource-item">
+      <div class="resource-icon">📄</div>
+      <div class="resource-content">
+        <h5>Critical Evaluation of GenAI Outputs in Higher Education <span class="recommended-badge">Recommended</span></h5>
+        <div class="meta">Practitioner guide · 12 min read</div>
+      </div>
+    </div>
+    <div class="resource-item">
+      <div class="resource-icon">🎥</div>
+      <div class="resource-content">
+        <h5>Designing Student-Friendly GenAI Briefings</h5>
+        <div class="meta">Video · 18 min · Includes downloadable slide template</div>
+      </div>
+    </div>
+    <div class="resource-item">
+      <div class="resource-icon">📚</div>
+      <div class="resource-content">
+        <h5>Prompt Engineering for Educators</h5>
+        <div class="meta">Self-paced micro-course · 45 min</div>
+      </div>
+    </div>
+    <div class="resource-item">
+      <div class="resource-icon">🛠️</div>
+      <div class="resource-content">
+        <h5>Co-Designing AI Evaluation Rubrics with Students <span class="recommended-badge">Recommended</span></h5>
+        <div class="meta">Toolkit · Includes 4 sample rubrics across disciplines</div>
+      </div>
+    </div>
+    <div class="resource-item">
+      <div class="resource-icon">📰</div>
+      <div class="resource-content">
+        <h5>UNESCO Guidance on Generative AI in Education</h5>
+        <div class="meta">External · Policy reference</div>
+      </div>
+    </div>
+  </div>
+
+  <span class="subsection-tag" style="margin-top:36px;">2.4.4 · Bridging to the Next Module</span>
+  <h3 style="margin-top:8px;">Coming Up Next</h3>
+
+  <div class="bridge-card">
+    <div class="label">→ NEXT</div>
+    <h4>Module 3 · Curriculum &amp; Learning Design</h4>
+    <div class="meta">DIMENSION 2 · ~40 min · 5 sections</div>
+    <p>If Module 2 asked <em>"can I engage critically with GenAI?"</em>, Module 3 asks <em>"how should it change what and how I teach?"</em> You'll explore how some learning objectives are <em>strengthened</em> by GenAI, while others are quietly undermined — and how to redesign a syllabus accordingly.</p>
+    <div class="new-character-line">🌏 <strong>A new educator joins us in Module 3</strong> — different discipline, different teaching context. The framework should hold up across very different realities; that's the point.</div>
+    <button class="bridge-button" onclick="alert('In production: navigation guarded by Module 2 → Module 3 self-assessment checkpoint.')">Continue to Module 3 →</button>
+    <a class="break-link">Take a break · remind me in 2 days</a>
+  </div>
+
+  <div class="mark-complete-wrap">
+    <div class="mark-complete-text">🎉 Worked through wrap-up, knowledge recap, resources, and bridge? Mark Section 2.4 complete.</div>
+    <button class="mark-complete-btn" onclick="markSectionComplete('section-2-4', this)">
+      <span class="check"></span><span class="btn-text">Mark Section 2.4 as Complete</span>
+    </button>
+  </div>
+</section>
+
+</div>
+
+<!-- ============================================================
+     💬 CHATBOT
+     ============================================================ -->
+<button class="chat-fab" onclick="toggleChat()">💬</button>
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-header">
+    <div><h4>AI Learning Companion</h4><small>Here to help you reflect — not to give answers</small></div>
+    <button class="chat-close" onclick="toggleChat()">×</button>
+  </div>
+  <div class="chat-body" id="chatBody">
+    <div class="chat-msg bot">👋 Hi! I'm your reflection companion. I won't grade you or hand you "the right answer" — I'll ask questions to help you think more clearly.</div>
+  </div>
+  <div class="chat-quick">
+    <button onclick="quickChat('Discipline example')">Discipline example</button>
+    <button onclick="quickChat('Help me reflect')">Help me reflect</button>
+    <button onclick="quickChat('Explain differently')">Explain differently</button>
+  </div>
+  <div class="chat-input-row">
+    <input type="text" id="chatInput" placeholder="Ask anything..." onkeypress="if(event.key==='Enter') sendChat()">
+    <button class="chat-send" onclick="sendChat()">→</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     🧠 INTERACTIVE LOGIC (unchanged)
+     ============================================================ -->
+<script>
+function submitReflection(inputId, respId) {
+  const text = document.getElementById(inputId).value.trim();
+  if (text.length < 5) { alert('Please share a brief thought.'); return; }
+  document.getElementById(respId).classList.add('show');
+}
+function checkMyth(btn, n, msg) {
+  const isCorrect = btn.dataset.correct === 'true';
+  const row = btn.closest('.myth-row');
+  row.querySelectorAll('.myth-btn').forEach(b => b.classList.remove('selected', 'correct', 'wrong'));
+  btn.classList.add('selected', isCorrect ? 'correct' : 'wrong');
+  const fb = document.getElementById('mythFb' + n);
+  fb.classList.add('show');
+  fb.classList.remove('correct', 'wrong');
+  fb.classList.add(isCorrect ? 'correct' : 'wrong');
+  fb.textContent = (isCorrect ? '✓ ' : '✗ ') + msg;
+}
+const hubDetails = {
+  0: { t: 'DIMENSION 1: GENAI LITERACY',                  b: 'You\'re here. The foundation that enables informed judgement in every other dimension.' },
+  2: { t: 'DIMENSION 2 — CURRICULUM & LEARNING DESIGN',    b: 'Without literacy, you can\'t make informed choices about when GenAI fits a learning objective — or undermines one.' },
+  3: { t: 'DIMENSION 3 — TEACHING & LEARNING',             b: 'Critical evaluation skills shape how GenAI shows up in your daily teaching — as scaffolding, simulation, or cognitive partner.' },
+  4: { t: 'DIMENSION 4 — ASSESSMENT',                      b: 'Designing valid AI-aware assessments depends on understanding what GenAI can produce — and what it can\'t.' }
+};
+function showHubDetail(idx) {
+  const d = hubDetails[idx];
+  document.getElementById('hubDetail').innerHTML = `<strong>${d.t}</strong>${d.b}`;
+}
+function checkRecall(btn, id, msg) {
+  const isCorrect = btn.dataset.correct === 'true';
+  btn.parentElement.querySelectorAll('.recall-opt').forEach(o => o.classList.remove('selected', 'correct', 'wrong'));
+  btn.classList.add('selected', isCorrect ? 'correct' : 'wrong');
+  const fb = document.getElementById('recallFb-' + id);
+  fb.classList.add('show');
+  fb.classList.remove('correct', 'wrong');
+  fb.classList.add(isCorrect ? 'correct' : 'wrong');
+  fb.textContent = (isCorrect ? '✓ ' : '✗ ') + msg;
+}
+function checkInlineQuiz(btn, id, msg) {
+  const isCorrect = btn.dataset.correct === 'true';
+  btn.parentElement.querySelectorAll('.iq-opt').forEach(o => o.classList.remove('selected', 'correct', 'wrong'));
+  btn.classList.add('selected', isCorrect ? 'correct' : 'wrong');
+  const fb = document.getElementById('iqFb-' + id);
+  fb.classList.add('show');
+  fb.classList.remove('correct', 'wrong');
+  fb.classList.add(isCorrect ? 'correct' : 'wrong');
+  fb.textContent = (isCorrect ? '✓ ' : '✗ ') + msg;
+}
+const levelVisited = { own: new Set([1]), emp: new Set([1]) };
+function switchLevel(group, n) {
+  const prefix = group === 'own' ? 'own-level-' : 'emp-level-';
+  const tabSelector = group === 'own' ? '#section-2-2 .level-tab' : '#section-2-3 .level-tab';
+  document.querySelectorAll(tabSelector).forEach(t => t.classList.remove('active'));
+  const parent = group === 'own' ? document.getElementById('section-2-2') : document.getElementById('section-2-3');
+  parent.querySelectorAll('.level-content').forEach(c => c.classList.remove('active'));
+  document.querySelector(`${tabSelector}[data-level="${n}"]`).classList.add('active');
+  document.getElementById(prefix + n).classList.add('active');
+  levelVisited[group].add(n);
+  document.querySelectorAll(tabSelector).forEach(t => {
+    if (levelVisited[group].has(parseInt(t.dataset.level))) t.classList.add('completed');
+  });
+}
+function detectLevel(text) {
+  const lc = text.toLowerCase();
+  let s = { basic: 0, inter: 0, adv: 0 };
+  if (/(navigate|prompt|use|ask)/.test(lc)) s.basic++;
+  if (/(privacy|ethics|guidelines)/.test(lc)) s.basic++;
+  if (/(verify|check|fact[- ]?check|critical|bias|refine|iterate)/.test(lc)) s.inter++;
+  if (/(rubric|co-?design|fact-?check|critique)/.test(lc)) s.inter++;
+  if (/(workflow|co-?think|cognitive partner|community|share|innovat|co-?creat|peer|present)/.test(lc)) s.adv++;
+  if (s.adv >= 1) return 'Advanced';
+  if (s.inter >= 1) return 'Intermediate';
+  return 'Basic';
+}
+function analyzeOwn() {
+  const disc = document.getElementById('ownDiscipline').value.trim();
+  const txt  = document.getElementById('ownPractice').value.trim();
+  if (txt.length < 15) { alert('Please write 2–4 sentences.'); return; }
+  const lvl = detectLevel(txt);
+  const next = lvl === 'Basic'
+    ? 'Try iteratively refining one prompt this week — and verifying its citations against a trusted source.'
+    : lvl === 'Intermediate'
+      ? 'Try designing a small co-thinking workflow — e.g., ask GenAI to generate counterarguments to your draft.'
+      : 'Beautiful. Consider sharing your workflow with a colleague or in a learning community.';
+  const resp = document.getElementById('aiOwnResp');
+  resp.innerHTML = `<strong>💡 AI Companion · Signal: ${lvl}</strong>From your description${disc ? ' (in ' + disc + ')' : ''}, you sound closest to <strong>${lvl}</strong>. ${next}`;
+  resp.classList.add('show');
+}
+function analyzePlan() {
+  const course = document.getElementById('planCourse').value.trim();
+  const txt    = document.getElementById('planDescr').value.trim();
+  if (txt.length < 15) { alert('Please write 2–4 sentences.'); return; }
+  const lvl = detectLevel(txt);
+  const note = lvl === 'Basic'
+    ? 'A solid Basic-level activity. To stretch toward Intermediate, add a step where students fact-check the AI output, or co-design the evaluation rubric with you.'
+    : lvl === 'Intermediate'
+      ? 'Strong Intermediate move. To push toward Advanced, let students design their own GenAI workflow for the project, and invite at least one team to share their thinking outside class.'
+      : 'Excellent — your plan reaches Advanced empowerment. Consider how you\'ll mentor outward contribution (a blog, a poster, or a presentation).';
+  const resp = document.getElementById('aiPlanResp');
+  resp.innerHTML = `<strong>💡 AI Companion · Signal: ${lvl}</strong>For your${course ? ' "' + course + '"' : ''} activity, this reads as <strong>${lvl}</strong> on the empowering-students track. ${note}`;
+  resp.classList.add('show');
+}
+let dragged = null;
+function initDnd() {
+  document.querySelectorAll('.dnd-item').forEach(item => {
+    item.addEventListener('dragstart', e => {
+      dragged = item;
+      item.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    item.addEventListener('dragend', () => {
+      item.classList.remove('dragging');
+      removePlaceholders();
+      dragged = null;
+    });
+  });
+  ['poolList', 'basicList'].forEach(id => {
+    const list = document.getElementById(id);
+    const col  = list.closest('.dnd-col');
+    list.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      col.classList.add('drag-over');
+      if (!dragged) return;
+      const after = getDragAfterElement(list, e.clientY);
+      removePlaceholders();
+      const ph = document.createElement('div');
+      ph.className = 'dnd-placeholder';
+      if (after == null) list.appendChild(ph);
+      else list.insertBefore(ph, after);
+    });
+    list.addEventListener('dragleave', e => {
+      if (!col.contains(e.relatedTarget)) {
+        col.classList.remove('drag-over');
+        removePlaceholders();
+      }
+    });
+    list.addEventListener('drop', e => {
+      e.preventDefault();
+      col.classList.remove('drag-over');
+      if (!dragged) return;
+      const ph = list.querySelector('.dnd-placeholder');
+      if (ph) { list.insertBefore(dragged, ph); ph.remove(); }
+      else {
+        const after = getDragAfterElement(list, e.clientY);
+        if (after == null) list.appendChild(dragged);
+        else list.insertBefore(dragged, after);
+      }
+    });
+  });
+}
+function getDragAfterElement(container, y) {
+  const items = [...container.querySelectorAll('.dnd-item:not(.dragging)')];
+  return items.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) return { offset, element: child };
+    return closest;
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+function removePlaceholders() {
+  document.querySelectorAll('.dnd-placeholder').forEach(p => p.remove());
+}
+document.addEventListener('DOMContentLoaded', initDnd);
+function checkDnd() {
+  const basicList = document.getElementById('basicList');
+  const items = basicList.querySelectorAll('.dnd-item');
+  let correctCount = 0, wrongCount = 0, missedCount = 0;
+  items.forEach(i => { if (i.dataset.correct === 'true') correctCount++; else wrongCount++; });
+  document.getElementById('poolList').querySelectorAll('.dnd-item').forEach(i => {
+    if (i.dataset.correct === 'true') missedCount++;
+  });
+  const fb = document.getElementById('dndFb');
+  fb.classList.remove('correct', 'wrong');
+  fb.classList.add('show');
+  if (correctCount === 4 && wrongCount === 0) {
+    fb.classList.add('correct');
+    fb.innerHTML = '✓ Perfect. You\'ve identified all four Basic-level briefing points — safety scaffolds first, deeper engagement comes later.';
+  } else {
+    fb.classList.add('wrong');
+    fb.innerHTML = `Not quite. You picked ${correctCount} correct${wrongCount > 0 ? `, but also ${wrongCount} that belong to higher levels` : ''}${missedCount > 0 ? ` and missed ${missedCount}` : ''}. <strong>Hint:</strong> "co-design rubrics" is Intermediate; "co-creating knowledge" is Advanced.`;
+  }
+}
+function resetDnd() {
+  const pool = document.getElementById('poolList');
+  document.querySelectorAll('#basicList .dnd-item').forEach(item => pool.appendChild(item));
+  document.getElementById('dndFb').classList.remove('show');
+}
+function checkMatch(sel, correct) {
+  sel.classList.remove('correct', 'wrong');
+  if (sel.value === '') return;
+  sel.classList.add(sel.value === correct ? 'correct' : 'wrong');
+}
+function checkPopQuiz(btn, id, msg) {
+  const isCorrect = btn.dataset.correct === 'true';
+  btn.parentElement.querySelectorAll('.qm-opt').forEach(o => o.classList.remove('selected', 'correct', 'wrong'));
+  btn.classList.add('selected', isCorrect ? 'correct' : 'wrong');
+  const fb = document.getElementById('pqFb-' + id);
+  fb.classList.add('show');
+  fb.classList.remove('correct', 'wrong');
+  fb.classList.add(isCorrect ? 'correct' : 'wrong');
+  fb.textContent = (isCorrect ? '✓ ' : '✗ ') + msg;
+}
+const completedSections = new Set();
+const totalSections = 4;
+function markSectionComplete(sectionId, btn) {
+  const section = document.getElementById(sectionId);
+  const txt = btn.querySelector('.btn-text');
+  if (completedSections.has(sectionId)) {
+    completedSections.delete(sectionId);
+    btn.classList.remove('completed');
+    if (section) section.classList.remove('completed');
+    const num = sectionId.replace('section-', '').replace('-', '.');
+    txt.textContent = 'Mark Section ' + num + ' as Complete';
+  } else {
+    completedSections.add(sectionId);
+    btn.classList.add('completed');
+    if (section) section.classList.add('completed');
+    txt.textContent = '✓ Section Marked as Complete';
+  }
+  const pct = Math.round((completedSections.size / totalSections) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+}
+function toggleChat() { document.getElementById('chatPanel').classList.toggle('open'); }
+function quickChat(text) {
+  document.getElementById('chatInput').value = text;
+  sendChat();
+}
+function sendChat() {
+  const input = document.getElementById('chatInput');
+  const text  = input.value.trim();
+  if (!text) return;
+  const body = document.getElementById('chatBody');
+  body.innerHTML += `<div class="chat-msg user">${text}</div>`;
+  input.value = '';
+  setTimeout(() => {
+    const responses = [
+      "Good question. Try this: think of one specific GenAI moment from your last week of teaching. What did you do, and what did you NOT check?",
+      "If you're between two levels, you probably are between two levels — that's normal. Pick the one that better describes your <em>average</em> practice, not your best day.",
+      "The two perspectives can sit at different levels. Maya started this module at Basic on her own use, but she had real strengths in talking ethics with students — closer to Intermediate on empowerment.",
+      "Notice your language. Words like 'verify', 'iterate', 'rubric' often signal Intermediate. Words like 'co-create', 'workflow', 'community' signal Advanced."
+    ];
+    body.innerHTML += `<div class="chat-msg bot">${responses[Math.floor(Math.random() * responses.length)]}</div>`;
+    body.scrollTop = body.scrollHeight;
+  }, 700);
+  body.scrollTop = body.scrollHeight;
+}
+</script>
+
+
+
+</body></html>
