@@ -1,5 +1,6 @@
 <!DOCTYPE html><html lang="en"><head><meta name="x-poe-datastore-behavior" content="local_only"><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Module 2: GenAI Literacy — v6.1 (assessment-free, blue palette)</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -303,6 +304,146 @@
     .match-row { grid-template-columns: 1fr; }
   }
 </style>
+ /* ============================================================
+   📱💻 RESPONSIVE UX PATCH v1
+   - Wider desktop column (880 → 1140px)
+   - Fluid typography that scales mobile ↔ desktop
+   - Tighter, more breathable mobile spacing
+   - Append at end of <style>; safe to remove
+   ============================================================ */
+
+:root {
+  --fs-body:      clamp(0.92rem, 0.86rem + 0.3vw, 1rem);
+  --fs-h1:        clamp(1.5rem,  1.2rem  + 1.2vw, 2rem);
+  --fs-h2:        clamp(1.15rem, 1rem    + 0.7vw, 1.45rem);
+  --fs-h3:        clamp(1rem,    0.94rem + 0.35vw, 1.15rem);
+  --fs-p:         clamp(0.88rem, 0.84rem + 0.2vw,  0.97rem);
+  --fs-small:     clamp(0.78rem, 0.75rem + 0.15vw, 0.85rem);
+}
+
+/* 1️⃣ Widen desktop reading column for less "thin slide" feel */
+.container {
+  max-width: 1140px;
+  padding: 32px clamp(16px, 4vw, 48px) 120px;
+}
+
+/* 2️⃣ Fluid base typography — scales smoothly across breakpoints */
+body { font-size: var(--fs-body); }
+
+.module-header h1 { font-size: var(--fs-h1); }
+.module-header p  { font-size: var(--fs-p); }
+
+.section h2 { font-size: var(--fs-h2); }
+.section h3 { font-size: var(--fs-h3); }
+.section p  { font-size: var(--fs-p); line-height: 1.7; }
+
+/* 3️⃣ Companion + scenario + reflection cards — fluid text */
+.companion-content h3 { font-size: var(--fs-h3); }
+.companion-content p  { font-size: var(--fs-p); }
+.maya-moment p        { font-size: var(--fs-p); }
+.maya-scenario h4     { font-size: var(--fs-h3); }
+.maya-scenario p      { font-size: var(--fs-p); }
+.maya-scenario .quote-line { font-size: var(--fs-p); }
+.twoperspectives      { font-size: var(--fs-p); }
+.level-defn .level-defn-text { font-size: var(--fs-p); }
+.level-defn li, .compare-card li { font-size: var(--fs-p); }
+.takeaway-card p      { font-size: var(--fs-p); }
+.strategies-list li   { font-size: var(--fs-p); }
+
+/* Quiz / interactive elements */
+.iq-prompt, .recall .prompt, .qm-q { font-size: var(--fs-p); }
+.iq-opt, .recall-opt, .qm-opt, .myth-btn { font-size: var(--fs-small); }
+
+/* 4️⃣ Desktop-only refinements (≥ 1024px) */
+@media (min-width: 1024px) {
+  /* Two-column layout for the companion card on wide screens */
+  .companion { padding: 26px 30px; }
+
+  /* Slightly more generous card padding */
+  .section { padding: 36px 40px; }
+
+  /* Maya scenarios sit side-by-side with their quizzes? Keep stacked
+     for reading flow, but breathe more */
+  .level-content { padding-top: 26px; }
+}
+
+/* 5️⃣ Tablet sweet spot (641px – 1023px) */
+@media (min-width: 641px) and (max-width: 1023px) {
+  .container { max-width: 760px; }
+  .section   { padding: 28px 26px; }
+}
+
+/* 6️⃣ Mobile improvements (≤ 640px) — less overwhelming density */
+@media (max-width: 640px) {
+  .container { padding: 16px 14px 100px; }
+
+  .module-header { padding: 28px 22px; border-radius: 14px; }
+  .module-header p { font-size: var(--fs-p); }
+  .module-meta { gap: 14px; font-size: 12px; }
+
+  .companion { padding: 18px 16px; gap: 14px; flex-direction: column; }
+  .companion-avatar { width: 48px; height: 48px; font-size: 16px; }
+
+  .section { padding: 22px 18px; border-radius: 10px; }
+  .section h2 { gap: 6px; }
+
+  /* Tighter cards everywhere */
+  .maya-moment,
+  .maya-scenario,
+  .level-defn,
+  .myth-block,
+  .recall,
+  .inline-quiz,
+  .practice-box,
+  .strategies-card,
+  .hub-section,
+  .reflection-box {
+    padding: 14px 16px;
+    border-radius: 10px;
+  }
+
+  /* Compare cards stack with comfortable padding */
+  .compare-card { padding: 14px 16px; }
+
+  /* Tap targets meet 44px guideline */
+  .myth-btn, .iq-opt, .recall-opt, .qm-opt,
+  .submit-btn, .mark-complete-btn, .dnd-btn {
+    min-height: 42px;
+  }
+
+  /* Level tabs stack cleanly on small screens */
+  .level-tabs { gap: 0; border-bottom: 1px solid #e2e8f0; }
+  .level-tab  { min-width: 0; padding: 10px 8px; font-size: 12px; }
+  .level-tab .level-num { font-size: 9px; margin-bottom: 2px; }
+
+  /* Mark-complete row stacks nicely */
+  .mark-complete-wrap { flex-direction: column; align-items: stretch; }
+  .mark-complete-btn  { justify-content: center; width: 100%; }
+
+  /* Bridge card */
+  .bridge-card { padding: 22px 18px; }
+  .bridge-card h4 { font-size: 18px; }
+  .break-link { display: block; margin: 10px 0 0 0; }
+
+  /* Chatbot — slightly less intrusive on small screens */
+  .chat-fab { width: 52px; height: 52px; bottom: 18px; right: 18px; }
+  .chat-panel { width: calc(100vw - 24px); right: 12px; bottom: 80px; }
+
+  /* Headings don't overflow long words */
+  h1, h2, h3 { word-break: break-word; hyphens: auto; }
+
+  /* Resource items breathe a bit */
+  .resource-item { padding: 12px 14px; gap: 10px; }
+  .resource-content h5 { font-size: 13px; }
+
+  /* DnD usable on small screens */
+  .dnd-col { min-height: 160px; padding: 12px; }
+  .dnd-item { font-size: 12px; padding: 10px 12px; }
+}
+
+/* 7️⃣ Quality-of-life everywhere */
+img, video, iframe { max-width: 100%; height: auto; }
+* { -webkit-text-size-adjust: 100%; }
  <script src="progress.js"></script>
 </head>
  <script>
