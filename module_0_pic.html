@@ -1636,38 +1636,65 @@
   </div>
 
   <!-- TRIADIC MODEL -->
-  <div class="triadic-block">
-    <div class="label">🔄 THE BIG-PICTURE IMPLICATION</div>
-    <h4>From a Dyadic to a Triadic Instructional Model</h4>
-    <div class="subline">These three shifts together call for a fundamental reframing: instruction is no longer just between teacher and student. GenAI joins as a <strong>third agent</strong> in the room — one that learns, generates, and responds.</div>
+<div class="implication-card">
+  <div class="impl-eyebrow">🔄 THE BIG-PICTURE IMPLICATION</div>
+  <h3 class="impl-title">From a Dyadic to a Triadic Instructional Model</h3>
+  <p class="impl-lede">
+    These three shifts together call for a fundamental reframing: instruction is no
+    longer just between teacher and student. GenAI joins as a <strong>third agent</strong>
+    in the room — one that learns, generates, and responds. The journal article visualises this as:
+  </p>
 
-    <div class="triadic-grid">
-      <div class="triadic-card dyadic">
-        <div class="tcard-label">DYADIC · TRADITIONAL</div>
-        <h5>Instructional Model</h5>
-        <div class="nodes">
-          <div class="node">Teacher</div>
-          <div class="arrow">↕</div>
-          <div class="node">Student</div>
-        </div>
-        <div class="meta">Two-way relationship</div>
-      </div>
-      <div class="triadic-arrow">
-        →
-        <span class="ar-label">CO-DESIGN<br>WITH GENAI</span>
-      </div>
-      <div class="triadic-card triadic">
-        <div class="tcard-label">TRIADIC · WITH GENAI</div>
-        <h5>Instructional Model</h5>
-        <div class="nodes">
-          <div class="node">GenAI</div>
-          <div class="node">Teacher</div>
-          <div class="node">Student</div>
-        </div>
-        <div class="meta">Three-way collaboration</div>
-      </div>
+  <div class="model-compare">
+
+    <!-- ============ DYADIC ============ -->
+    <div class="model-box model-dyadic">
+      <div class="model-label">DYADIC<br><span>Instructional Model</span></div>
+      <svg viewBox="0 0 220 260" class="model-svg" role="img" aria-label="Dyadic model: teacher and student">
+        <!-- Teacher circle -->
+        <circle cx="110" cy="70" r="42" fill="#4f46e5"/>
+        <text x="110" y="76" text-anchor="middle" fill="#fff" font-size="15" font-weight="700">Teacher</text>
+        <!-- two-way arrow -->
+        <text x="110" y="145" text-anchor="middle" fill="#94a3b8" font-size="22">↕</text>
+        <!-- Student circle -->
+        <circle cx="110" cy="200" r="42" fill="#7dd3fc"/>
+        <text x="110" y="206" text-anchor="middle" fill="#0c4a6e" font-size="15" font-weight="700">Student</text>
+      </svg>
+      <div class="model-caption">Two-way relationship</div>
     </div>
+
+    <!-- ============ ARROW + LABEL ============ -->
+    <div class="model-bridge">
+      <div class="bridge-label">Co-Design<br>&amp; Co-Creation<br>with GenAI</div>
+      <div class="bridge-arrow">→</div>
+    </div>
+
+    <!-- ============ TRIADIC ============ -->
+    <div class="model-box model-triadic">
+      <div class="model-label">TRIADIC<br><span>Instruction Model</span></div>
+      <svg viewBox="0 0 260 260" class="model-svg" role="img" aria-label="Triadic model: teacher, student, and GenAI">
+        <!-- dashed triangle connectors -->
+        <line x1="130" y1="80"  x2="65"  y2="195" stroke="#a78bfa" stroke-width="2" stroke-dasharray="6,5"/>
+        <line x1="130" y1="80"  x2="195" y2="195" stroke="#a78bfa" stroke-width="2" stroke-dasharray="6,5"/>
+        <line x1="65"  y1="195" x2="195" y2="195" stroke="#a78bfa" stroke-width="2" stroke-dasharray="6,5"/>
+
+        <!-- GenAI (top) -->
+        <circle cx="130" cy="80" r="38" fill="#a78bfa"/>
+        <text x="130" y="86" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">GenAI</text>
+
+        <!-- Teacher (bottom-left) -->
+        <circle cx="65" cy="195" r="38" fill="#4f46e5"/>
+        <text x="65" y="201" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Teacher</text>
+
+        <!-- Student (bottom-right) -->
+        <circle cx="195" cy="195" r="38" fill="#7dd3fc"/>
+        <text x="195" y="201" text-anchor="middle" fill="#0c4a6e" font-size="13" font-weight="700">Student</text>
+      </svg>
+      <div class="model-caption">Three-way collaboration</div>
+    </div>
+
   </div>
+</div>
 
   <div class="reflection-box">
     <label>💭 Before we go further — what brought you to this workshop?</label>
