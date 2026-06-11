@@ -1,0 +1,2483 @@
+<!DOCTYPE html><html lang="en"><head><meta name="x-poe-datastore-behavior" content="local_only"><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+<meta name="x-poe-datastore-behavior" content="local_only">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Module 0: Welcome &amp; Orientation</title>
+<style>
+  /* ============================================================
+     🎨 DESIGN SYSTEM — GenAI Competency Workshop
+     Module 0 palette: Blue + Purple (gradient)
+     Aligned with Module 2 spacing & typography tokens.
+     ============================================================ */
+
+  /* ---------- Reset & base ---------- */
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-text-size-adjust: 100%; }
+  img, video, iframe { max-width: 100%; height: auto; display: block; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #1e293b;
+    background: #f6f5fc;
+    line-height: 1.8;
+    font-size: var(--fs-body);
+  }
+
+  /* ---------- Tokens (same scale as Module 2) ---------- */
+  :root {
+    --fs-body:   clamp(1rem,    0.95rem + 0.35vw, 1.15rem);
+    --fs-h1:     clamp(1.85rem, 1.5rem  + 1.4vw,  2.5rem);
+    --fs-h2:     clamp(1.35rem, 1.2rem  + 0.8vw,  1.75rem);
+    --fs-h3:     clamp(1.15rem, 1.08rem + 0.4vw,  1.35rem);
+    --fs-h4:     clamp(1.05rem, 1rem    + 0.35vw, 1.2rem);
+    --fs-h5:     clamp(0.98rem, 0.94rem + 0.25vw, 1.1rem);
+    --fs-p:      clamp(1rem,    0.95rem + 0.25vw, 1.1rem);
+    --fs-label:  clamp(0.82rem, 0.78rem + 0.2vw,  0.95rem);
+    --fs-meta:   clamp(0.85rem, 0.82rem + 0.15vw, 0.95rem);
+
+    --space-xs: 8px;
+    --space-sm: 14px;
+    --space-md: 22px;
+    --space-lg: 32px;
+    --space-xl: 44px;
+    --space-2xl: 56px;
+
+    /* Module 0 brand tones */
+    --blue-700:   #1d4ed8;
+    --blue-600:   #2563eb;
+    --blue-500:   #3b82f6;
+    --blue-100:   #dbeafe;
+    --blue-50:    #eff6ff;
+
+    --purple-700: #6d28d9;
+    --purple-600: #7c3aed;
+    --purple-500: #8b5cf6;
+    --purple-300: #c4b5fd;
+    --purple-100: #ede9fe;
+    --purple-50:  #f5f3ff;
+
+    --grad-primary:    linear-gradient(135deg, var(--blue-600), var(--purple-600));
+    --grad-soft:       linear-gradient(135deg, var(--blue-50), var(--purple-50));
+    --grad-soft-card:  linear-gradient(135deg, #eff6ff, #ede9fe);
+  }
+
+  h1, h2, h3 { word-break: break-word; hyphens: auto; line-height: 1.35; }
+
+  /* ============================================================
+     🧭 TOP NAV
+     ============================================================ */
+  .top-nav {
+    position: sticky; top: 0; z-index: 100;
+    background: white;
+    border-bottom: 1px solid #e6e2f1;
+    padding: 14px 32px;
+    display: flex; justify-content: space-between; align-items: center;
+    box-shadow: 0 1px 3px rgba(91, 56, 215, 0.05);
+  }
+  .nav-brand {
+    font-weight: 600;
+    background: var(--grad-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 15px;
+  }
+  .nav-brand span { color: #64748b; font-weight: 400; margin-left: 8px; -webkit-text-fill-color: #64748b; }
+  .progress-wrap { display: flex; align-items: center; gap: 12px; font-size: 13px; color: #64748b; }
+  .progress-bar { width: 200px; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--grad-primary); width: 0%; transition: width 0.4s; }
+
+  /* ============================================================
+     📐 LAYOUT
+     ============================================================ */
+  .container {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 40px clamp(16px, 4vw, 48px) 140px;
+  }
+
+  /* ============================================================
+     📛 MODULE HEADER (text only — no image)
+     ============================================================ */
+  .module-header {
+    background: var(--grad-primary);
+    color: white;
+    border-radius: 18px;
+    margin-bottom: var(--space-xl);
+    box-shadow: 0 6px 22px rgba(99, 56, 207, 0.22);
+    overflow: hidden;
+    padding: 56px 52px;
+    position: relative;
+  }
+  .module-header::after {
+    content: "";
+    position: absolute;
+    right: -80px; top: -80px;
+    width: 280px; height: 280px;
+    background: radial-gradient(circle, rgba(255,255,255,0.18), transparent 70%);
+    pointer-events: none;
+  }
+  .module-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.22);
+    padding: 6px 14px; border-radius: 20px;
+    font-size: 12px; font-weight: 500;
+    margin-bottom: 18px; letter-spacing: 0.6px;
+    backdrop-filter: blur(4px);
+  }
+  .module-header h1 { font-size: var(--fs-h1); margin-bottom: 18px; line-height: 1.25; }
+  .module-header p {
+    font-size: var(--fs-p);
+    opacity: 0.94;
+    max-width: 760px;
+    line-height: 1.75;
+  }
+  .module-meta {
+    display: flex; gap: 24px;
+    margin-top: 28px;
+    font-size: var(--fs-meta);
+    opacity: 0.92;
+    flex-wrap: wrap;
+  }
+  .module-meta span { font-weight: 500; }
+  .module-meta span::before { content: "● "; }
+
+  /* ============================================================
+     📑 SECTION CARD
+     ============================================================ */
+  .section {
+    background: white;
+    border-radius: 14px;
+    padding: 52px 56px;
+    margin-bottom: var(--space-lg);
+    box-shadow: 0 1px 3px rgba(91, 56, 215, 0.05);
+    border: 1px solid #e6e2f1;
+    transition: border-color 0.3s;
+  }
+  .section.completed { border-color: var(--purple-300); }
+  .section-num {
+    background: var(--grad-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+    font-size: var(--fs-label);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .section h2 {
+    font-size: var(--fs-h2);
+    margin-bottom: 20px;
+    color: #0f172a;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .section h2 .completed-badge {
+    display: none;
+    background: var(--grad-primary);
+    color: white;
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+  .section.completed h2 .completed-badge { display: inline-block; }
+  .section h3 {
+    font-size: var(--fs-h3);
+    margin: var(--space-lg) 0 16px;
+    color: #1e293b;
+  }
+  .section h4 { font-size: var(--fs-h4); margin-bottom: 12px; color: #334155; line-height: 1.4; }
+  .section p {
+    margin-bottom: var(--space-md);
+    color: #334155;
+    font-size: var(--fs-p);
+    line-height: 1.85;
+  }
+
+  .subsection-tag {
+    display: inline-block;
+    font-size: var(--fs-label);
+    font-weight: 700;
+    color: #64748b;
+    letter-spacing: 1px;
+    background: #f1f5f9;
+    padding: 6px 14px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+  }
+
+  /* ============================================================
+     ✅ MARK-COMPLETE BUTTON
+     ============================================================ */
+  .mark-complete-wrap {
+    margin-top: var(--space-xl);
+    padding-top: 32px;
+    border-top: 2px dashed #e2e8f0;
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 16px; flex-wrap: wrap;
+  }
+  .mark-complete-text {
+    font-size: var(--fs-meta);
+    color: #64748b;
+    flex: 1; min-width: 180px; line-height: 1.7;
+  }
+  .mark-complete-btn {
+    background: white;
+    border: 2px solid var(--blue-600);
+    color: var(--blue-600);
+    padding: 12px 22px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .mark-complete-btn:hover {
+    background: var(--blue-50);
+    border-color: var(--purple-600);
+    color: var(--purple-600);
+  }
+  .mark-complete-btn.completed {
+    background: var(--grad-primary);
+    border-color: transparent;
+    color: white;
+  }
+  .mark-complete-btn .check {
+    display: inline-flex;
+    width: 18px; height: 18px;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    align-items: center; justify-content: center;
+    font-size: 11px;
+  }
+  .mark-complete-btn.completed .check {
+    background: white;
+    color: var(--purple-600);
+    border-color: white;
+  }
+
+  /* ============================================================
+     🗂 PARADIGM-SHIFT TABS (style from level-tabs)
+     ============================================================ */
+  .shift-intro {
+    background: var(--grad-soft-card);
+    border-left: 3px solid var(--purple-500);
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin: 16px 0 24px;
+    font-size: var(--fs-meta);
+    color: #4c1d95;
+    line-height: 1.7;
+  }
+  .shift-tabs {
+    display: flex; gap: 8px;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 0;
+    flex-wrap: wrap;
+  }
+  .shift-tab {
+    padding: 14px 18px;
+    background: none; border: none;
+    cursor: pointer;
+    font-size: 13px; font-weight: 500;
+    color: #64748b;
+    position: relative; transition: color 0.2s;
+    flex: 1; min-width: 150px; text-align: left;
+  }
+  .shift-tab.active { color: var(--purple-700); }
+  .shift-tab.active::after {
+    content: "";
+    position: absolute; bottom: -2px; left: 0; right: 0;
+    height: 2px;
+    background: var(--grad-primary);
+  }
+  .shift-tab .shift-num {
+    display: block;
+    font-size: 10px; color: #94a3b8;
+    margin-bottom: 6px; letter-spacing: 1px; font-weight: 700;
+  }
+  .shift-tab.active .shift-num { color: var(--purple-600); }
+  .shift-tab.completed .shift-num::after { content: " ✓"; color: var(--purple-600); font-weight: 700; }
+
+  .shift-content { display: none; padding: 32px 0 0; }
+  .shift-content.active { display: block; }
+
+  /* ---------- Two-column comparison ---------- */
+  .shift-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: var(--space-lg);
+    align-items: stretch;
+  }
+  .shift-card {
+    padding: 28px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+  }
+  .shift-card.before { background: #fafbfc; }
+  .shift-card.after  {
+    background: var(--grad-soft-card);
+    border-color: var(--purple-300);
+  }
+  .shift-card .card-label {
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+    color: #64748b;
+  }
+  .shift-card.after .card-label {
+    background: var(--grad-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .shift-card h4 { font-size: var(--fs-h4); margin-bottom: 14px; color: #1e293b; }
+  .shift-card p {
+    font-size: var(--fs-p);
+    color: #334155;
+    line-height: 1.8;
+    margin-bottom: 0;
+  }
+  .shift-card p strong { color: var(--purple-700); }
+
+  .shift-implication {
+    background: var(--grad-soft-card);
+    border-left: 3px solid var(--purple-500);
+    padding: 22px 26px;
+    border-radius: 10px;
+    margin-top: var(--space-md);
+    font-size: var(--fs-p);
+    color: #4c1d95;
+    line-height: 1.8;
+  }
+  .shift-implication .label {
+    font-size: var(--fs-label);
+    font-weight: 700;
+    color: var(--purple-700);
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  /* ============================================================
+     🔄 TRIADIC MODEL VISUAL
+     ============================================================ */
+  .triadic-block {
+    background: var(--grad-soft);
+    border: 1px solid var(--purple-300);
+    border-radius: 14px;
+    padding: 36px 32px;
+    margin: var(--space-lg) 0;
+    text-align: center;
+  }
+  .triadic-block .label {
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    background: var(--grad-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .triadic-block h4 { font-size: var(--fs-h3); color: #1e293b; margin-bottom: 8px; }
+  .triadic-block .subline {
+    font-size: var(--fs-p);
+    color: #4c1d95;
+    margin-bottom: 28px;
+    line-height: 1.75;
+    max-width: 720px;
+    margin-left: auto; margin-right: auto;
+  }
+  .triadic-grid {
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    gap: 18px;
+    align-items: center;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  .triadic-card {
+    background: white;
+    border-radius: 12px;
+    padding: 26px 22px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .triadic-card .tcard-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    color: #94a3b8;
+    margin-bottom: 12px;
+  }
+  .triadic-card h5 {
+    font-size: var(--fs-h4);
+    color: #1e293b;
+    margin-bottom: 16px;
+  }
+  .triadic-card.dyadic { background: #fafbfc; }
+  .triadic-card.triadic {
+    background: linear-gradient(135deg, var(--blue-600), var(--purple-600));
+    color: white;
+    border-color: transparent;
+  }
+  .triadic-card.triadic h5 { color: white; }
+  .triadic-card.triadic .tcard-label { color: rgba(255,255,255,0.7); }
+  .triadic-card .nodes {
+    display: flex; flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .triadic-card .node {
+    background: rgba(255,255,255,0.16);
+    padding: 8px 18px;
+    border-radius: 18px;
+    font-weight: 500;
+    min-width: 90px;
+  }
+  .triadic-card.dyadic .node {
+    background: #f1f5f9;
+    color: #334155;
+  }
+  .triadic-card .arrow { font-size: 16px; opacity: 0.6; }
+  .triadic-card .meta {
+    margin-top: 14px;
+    font-size: var(--fs-meta);
+    opacity: 0.85;
+  }
+  .triadic-card.dyadic .meta { color: #64748b; }
+  .triadic-arrow {
+    font-size: 28px;
+    color: var(--purple-600);
+    text-align: center;
+  }
+  .triadic-arrow .ar-label {
+    display: block;
+    font-size: 11px;
+    color: #6d28d9;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+
+  /* ============================================================
+     💭 REFLECTION BOX
+     ============================================================ */
+  .reflection-box {
+    background: var(--grad-soft-card);
+    border: 1px solid var(--purple-300);
+    border-radius: 12px;
+    padding: 26px;
+    margin: var(--space-lg) 0;
+  }
+  .reflection-box label {
+    display: block;
+    font-size: var(--fs-meta);
+    color: var(--purple-700);
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+  .reflection-box textarea, .reflection-box input {
+    width: 100%;
+    border: 1px solid var(--purple-300);
+    border-radius: 8px;
+    padding: 12px;
+    font-family: inherit; font-size: 14px;
+    background: white;
+    line-height: 1.6;
+    resize: vertical;
+  }
+  .reflection-box textarea { min-height: 90px; }
+
+  .submit-btn {
+    margin-top: 14px;
+    padding: 10px 22px;
+    background: var(--grad-primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: filter 0.2s;
+  }
+  .submit-btn:hover { filter: brightness(1.05); }
+
+  .ai-response {
+    margin-top: 18px;
+    padding: 18px;
+    background: white;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--purple-700);
+    display: none;
+    border-left: 3px solid var(--purple-600);
+    line-height: 1.7;
+  }
+  .ai-response.show { display: block; }
+  .ai-response strong { display: block; margin-bottom: 6px; }
+
+  /* ============================================================
+     🎯 LEARNING OBJECTIVES (clickable cards)
+     ============================================================ */
+  .objectives-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin: var(--space-lg) 0;
+  }
+  .objective-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 26px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .objective-card:hover {
+    border-color: var(--purple-300);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.1);
+  }
+  .objective-card .obj-num {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--grad-primary);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 14px;
+  }
+  .objective-card h5 {
+    font-size: var(--fs-h4);
+    color: #1e293b;
+    margin-bottom: 10px;
+  }
+  .objective-card .obj-detail {
+    font-size: var(--fs-meta);
+    color: #475569;
+    line-height: 1.7;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s;
+  }
+  .objective-card.expanded .obj-detail {
+    max-height: 200px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #f1f5f9;
+  }
+  .objective-card .obj-toggle {
+    position: absolute;
+    top: 22px; right: 22px;
+    color: var(--purple-500);
+    font-size: 18px;
+    transition: transform 0.3s;
+  }
+  .objective-card.expanded .obj-toggle { transform: rotate(45deg); }
+
+  /* ============================================================
+     🛣 ROADMAP
+     ============================================================ */
+  .roadmap-helper {
+    font-size: var(--fs-meta);
+    color: #64748b;
+    margin: 8px 0 18px;
+    font-style: italic;
+  }
+  .roadmap {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 6px 2px 18px;
+    margin: var(--space-md) -8px var(--space-md);
+    padding-left: 8px; padding-right: 8px;
+    scroll-snap-type: x mandatory;
+  }
+  .road-mod {
+    flex: 0 0 auto;
+    width: 150px;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    scroll-snap-align: start;
+    text-align: left;
+    position: relative;
+  }
+  .road-mod:hover {
+    border-color: var(--purple-300);
+    transform: translateY(-2px);
+  }
+  .road-mod.current {
+    background: var(--grad-primary);
+    border-color: transparent;
+    color: white;
+  }
+  .road-mod .rm-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #94a3b8;
+    margin-bottom: 8px;
+  }
+  .road-mod.current .rm-tag { color: rgba(255,255,255,0.85); }
+  .road-mod .rm-dim {
+    display: inline-block;
+    background: var(--purple-100);
+    color: var(--purple-700);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    padding: 3px 8px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+  .road-mod.current .rm-dim {
+    background: rgba(255,255,255,0.22);
+    color: white;
+  }
+  .road-mod h5 {
+    font-size: 13px;
+    margin-bottom: 8px;
+    line-height: 1.4;
+    color: inherit;
+  }
+  .road-mod .rm-time {
+    font-size: 11px;
+    color: #94a3b8;
+  }
+  .road-mod.current .rm-time { color: rgba(255,255,255,0.8); }
+  .road-mod.active-pulse::after {
+    content: "📍";
+    position: absolute;
+    top: -10px; right: -8px;
+    font-size: 18px;
+  }
+  .road-detail {
+    background: var(--grad-soft-card);
+    border-left: 3px solid var(--purple-500);
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin-top: 12px;
+    font-size: var(--fs-meta);
+    color: #4c1d95;
+    line-height: 1.7;
+    min-height: 60px;
+  }
+  .road-detail strong {
+    display: block;
+    color: var(--purple-700);
+    margin-bottom: 6px;
+    font-size: var(--fs-label);
+    letter-spacing: 0.5px;
+  }
+
+  /* ============================================================
+     🌿 HABIT CARDS
+     ============================================================ */
+  .habits-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin: var(--space-lg) 0;
+  }
+  .habit-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px 26px;
+    border-left: 3px solid var(--purple-500);
+    transition: transform 0.2s;
+  }
+  .habit-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.1);
+  }
+  .habit-card .habit-icon {
+    font-size: 24px;
+    margin-bottom: 12px;
+    display: block;
+  }
+  .habit-card h5 {
+    font-size: var(--fs-h4);
+    color: #1e293b;
+    margin-bottom: 10px;
+    line-height: 1.45;
+  }
+  .habit-card p {
+    font-size: var(--fs-p);
+    color: #475569;
+    margin: 0;
+    line-height: 1.75;
+  }
+
+  /* ============================================================
+     🌱 MINDSET CALLOUT
+     ============================================================ */
+  .mindset-card {
+    background: var(--grad-primary);
+    color: white;
+    padding: 36px;
+    border-radius: 16px;
+    margin: var(--space-lg) 0;
+    box-shadow: 0 4px 16px rgba(99, 56, 207, 0.18);
+  }
+  .mindset-card .label {
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 1px;
+    opacity: 0.85;
+    margin-bottom: 12px;
+  }
+  .mindset-card h4 { font-size: var(--fs-h2); color: white; margin-bottom: 16px; }
+  .mindset-card p {
+    font-size: var(--fs-p);
+    color: white;
+    opacity: 0.96;
+    line-height: 1.85;
+    margin-bottom: 16px;
+  }
+  .mindset-quote {
+    background: rgba(255,255,255,0.14);
+    padding: 18px 22px;
+    border-radius: 10px;
+    font-style: italic;
+    line-height: 1.75;
+    margin-top: 18px;
+    border-left: 3px solid rgba(255,255,255,0.5);
+  }
+
+  /* ============================================================
+     ⚡ QUICK CHECK
+     ============================================================ */
+  .quick-check {
+    background: var(--grad-soft-card);
+    border: 1px solid var(--purple-300);
+    border-radius: 12px;
+    padding: 26px 28px;
+    margin: var(--space-lg) 0;
+  }
+  .quick-check .label {
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 1px;
+    background: var(--grad-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+  }
+  .quick-check .qc-prompt {
+    font-size: var(--fs-p);
+    color: #1e293b;
+    margin-bottom: 14px;
+    font-weight: 500;
+    line-height: 1.65;
+  }
+  .qc-opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    background: white;
+    border: 1px solid var(--purple-300);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: var(--fs-p);
+    line-height: 1.55;
+    transition: all 0.2s;
+  }
+  .qc-opt:hover { background: var(--blue-50); }
+  .qc-opt.selected.correct {
+    background: var(--purple-100);
+    border-color: var(--purple-600);
+    color: var(--purple-700);
+    font-weight: 600;
+  }
+  .qc-opt.selected.wrong {
+    background: #fee2e2;
+    border-color: #ef4444;
+    color: #991b1b;
+  }
+  .qc-fb {
+    margin-top: 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: var(--fs-meta);
+    display: none;
+    line-height: 1.7;
+  }
+  .qc-fb.show { display: block; }
+  .qc-fb.correct {
+    background: white;
+    color: var(--purple-700);
+    border-left: 3px solid var(--purple-600);
+  }
+  .qc-fb.wrong {
+    background: white;
+    color: #991b1b;
+    border-left: 3px solid #ef4444;
+  }
+
+  /* ============================================================
+     👤 PROFILE FORM (0.3.1)
+     ============================================================ */
+  .profile-card {
+    background: var(--grad-soft);
+    border: 1px solid var(--purple-300);
+    border-radius: 14px;
+    padding: 32px 36px;
+    margin: var(--space-lg) 0;
+  }
+  .profile-card .label {
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 1px;
+    background: var(--grad-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+  .profile-card h4 { font-size: var(--fs-h4); color: #1e293b; margin-bottom: 8px; }
+  .profile-card .helper {
+    font-size: var(--fs-meta);
+    color: #64748b;
+    line-height: 1.7;
+    margin-bottom: 22px;
+  }
+  .profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+  .profile-field { display: flex; flex-direction: column; }
+  .profile-field label {
+    font-size: var(--fs-meta);
+    color: var(--purple-700);
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .profile-field input,
+  .profile-field select {
+    width: 100%;
+    border: 1px solid var(--purple-300);
+    border-radius: 8px;
+    padding: 11px 14px;
+    font-family: inherit;
+    font-size: 14px;
+    background: white;
+    line-height: 1.6;
+    color: #1e293b;
+  }
+  .profile-field input:focus,
+  .profile-field select:focus {
+    outline: none;
+    border-color: var(--purple-600);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  }
+  .profile-saved-msg {
+    display: none;
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: white;
+    border-left: 3px solid var(--purple-600);
+    border-radius: 8px;
+    font-size: var(--fs-meta);
+    color: var(--purple-700);
+    line-height: 1.6;
+  }
+  .profile-saved-msg.show { display: block; }
+
+  /* ============================================================
+     🔒 PRE-TEST CTA (0.3.2)
+     ============================================================ */
+  .pretest-cta {
+    background: var(--grad-primary);
+    color: white;
+    border-radius: 16px;
+    padding: 36px 40px;
+    margin: var(--space-lg) 0;
+    box-shadow: 0 4px 16px rgba(99, 56, 207, 0.18);
+  }
+  .pretest-cta .label {
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 1px;
+    opacity: 0.85;
+    margin-bottom: 10px;
+  }
+  .pretest-cta h4 { font-size: var(--fs-h2); color: white; margin-bottom: 14px; }
+  .pretest-cta p {
+    font-size: var(--fs-p);
+    color: white;
+    opacity: 0.94;
+    margin-bottom: 22px;
+    line-height: 1.8;
+  }
+  .pretest-button {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 28px;
+    background: white;
+    color: var(--purple-700);
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .pretest-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .pretest-meta {
+    margin-top: 16px;
+    font-size: var(--fs-meta);
+    opacity: 0.85;
+  }
+  .pretest-status {
+    margin-top: 18px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: var(--fs-meta);
+    display: none;
+  }
+  .pretest-status.show { display: block; }
+
+  /* ============================================================
+     📖 REPORT TOUR (0.3.3)
+     ============================================================ */
+  .tour-intro {
+    background: var(--grad-soft-card);
+    border-left: 3px solid var(--purple-500);
+    padding: 18px 22px;
+    border-radius: 10px;
+    margin: 16px 0 24px;
+    font-size: var(--fs-meta);
+    color: #4c1d95;
+    line-height: 1.75;
+  }
+  .tour-tabs {
+    display: flex; gap: 4px;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 0;
+    flex-wrap: wrap;
+  }
+  .tour-tab {
+    padding: 14px 16px;
+    background: none; border: none;
+    cursor: pointer;
+    font-size: 12.5px; font-weight: 500;
+    color: #64748b;
+    position: relative; transition: color 0.2s;
+    flex: 1; min-width: 120px; text-align: left;
+  }
+  .tour-tab.active { color: var(--purple-700); }
+  .tour-tab.active::after {
+    content: "";
+    position: absolute; bottom: -2px; left: 0; right: 0;
+    height: 2px;
+    background: var(--grad-primary);
+  }
+  .tour-tab .tour-num {
+    display: block;
+    font-size: 10px; color: #94a3b8;
+    margin-bottom: 6px; letter-spacing: 1px; font-weight: 700;
+  }
+  .tour-tab.active .tour-num { color: var(--purple-600); }
+  .tour-tab.completed .tour-num::after { content: " ✓"; color: var(--purple-600); }
+
+  .tour-content { display: none; padding: 32px 0 0; }
+  .tour-content.active { display: block; }
+
+  /* report sample mock */
+  .report-mock {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 26px 30px;
+    margin-bottom: 22px;
+    position: relative;
+  }
+  .report-mock .mock-tag {
+    position: absolute;
+    top: -10px; left: 22px;
+    background: var(--grad-primary);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 4px 12px;
+    border-radius: 10px;
+  }
+  .report-mock .mock-header {
+    display: flex; justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 14px;
+    margin-bottom: 20px;
+    font-size: var(--fs-meta);
+    color: #64748b;
+  }
+  .report-mock .mock-header strong { color: #1e293b; }
+
+  /* Step 1 — score */
+  .score-block { text-align: center; margin: 20px 0; }
+  .score-num {
+    font-size: 56px;
+    font-weight: 700;
+    background: var(--grad-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+  }
+  .score-num span { font-size: 22px; opacity: 0.6; }
+  .score-level {
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--purple-700);
+    font-weight: 600;
+  }
+  .score-bands {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .band {
+    padding: 14px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 12px;
+  }
+  .band-1 { background: #f1f5f9; color: #475569; }
+  .band-2 { background: var(--blue-50); color: var(--blue-700); border: 1px solid var(--blue-100); }
+  .band-3 { background: var(--purple-50); color: var(--purple-700); }
+  .band strong { display: block; font-size: 13px; margin-bottom: 4px; }
+  .band .range { font-size: 11px; opacity: 0.85; margin-bottom: 4px; }
+
+  /* Step 2 — radar */
+  .radar-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .radar-mock {
+    background: #fafbfc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 18px;
+    text-align: center;
+  }
+  .radar-mock .rm-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--purple-700);
+    margin-bottom: 10px;
+  }
+  .radar-mock svg { max-width: 100%; height: auto; }
+  .radar-mock .rm-axis-label {
+    font-size: 9px;
+    fill: #64748b;
+  }
+  .radar-legend {
+    display: flex; justify-content: center; gap: 16px;
+    margin-top: 14px;
+    font-size: 11px;
+    color: #475569;
+  }
+  .radar-legend .swatch {
+    display: inline-block;
+    width: 14px; height: 6px;
+    margin-right: 6px;
+    vertical-align: middle;
+    border-radius: 2px;
+  }
+
+  /* Step 3 — two stances */
+  .stance-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 14px;
+  }
+  .stance-card {
+    background: var(--grad-soft-card);
+    border: 1px solid var(--purple-300);
+    border-radius: 12px;
+    padding: 22px;
+  }
+  .stance-card .stance-tag {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--purple-700);
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .stance-card h5 {
+    font-size: var(--fs-h4);
+    color: #1e293b;
+    margin-bottom: 10px;
+  }
+  .stance-card p {
+    font-size: var(--fs-meta);
+    color: #4c1d95;
+    margin: 0;
+    line-height: 1.7;
+  }
+
+  /* Step 4 — strength + improvement */
+  .sg-block {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 20px 22px;
+    margin-bottom: 14px;
+  }
+  .sg-block .dim-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--purple-700);
+    margin-bottom: 4px;
+  }
+  .sg-block .stance {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-bottom: 14px;
+    letter-spacing: 0.8px;
+  }
+  .sg-row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 12px;
+    align-items: start;
+    padding: 10px 0;
+    border-top: 1px solid #f1f5f9;
+  }
+  .sg-row:first-of-type { border-top: none; }
+  .sg-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    text-align: center;
+  }
+  .sg-tag.strength {
+    background: var(--purple-100);
+    color: var(--purple-700);
+  }
+  .sg-tag.improve {
+    background: var(--blue-100);
+    color: var(--blue-700);
+  }
+  .sg-text {
+    font-size: var(--fs-meta);
+    color: #475569;
+    line-height: 1.7;
+  }
+
+  /* Step 5 — recs */
+  .rec-row {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 10px;
+    display: flex; justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+  }
+  .rec-row .rec-num {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--grad-primary);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .rec-row .rec-content { flex: 1; }
+  .rec-row h6 {
+    font-size: 13px;
+    color: #1e293b;
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  .rec-row .rec-meta {
+    font-size: 11px;
+    color: #64748b;
+  }
+  .match-pill {
+    background: var(--purple-100);
+    color: var(--purple-700);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 12px;
+    flex-shrink: 0;
+  }
+
+  .tour-explainer {
+    background: var(--grad-soft-card);
+    border-left: 3px solid var(--purple-500);
+    padding: 22px 26px;
+    border-radius: 10px;
+    margin-top: 18px;
+  }
+  .tour-explainer h5 {
+    font-size: var(--fs-h4);
+    color: var(--purple-700);
+    margin-bottom: 12px;
+  }
+  .tour-explainer p {
+    font-size: var(--fs-p);
+    color: #4c1d95;
+    line-height: 1.8;
+    margin-bottom: 12px;
+  }
+  .tour-explainer ul { margin: 8px 0 12px 0; padding-left: 22px; }
+  .tour-explainer li {
+    font-size: var(--fs-meta);
+    color: #4c1d95;
+    margin-bottom: 8px;
+    line-height: 1.7;
+  }
+  .tour-explainer .insight {
+    background: white;
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin-top: 12px;
+    border-left: 3px solid var(--purple-600);
+    font-size: var(--fs-meta);
+    color: var(--purple-700);
+    line-height: 1.7;
+  }
+  .tour-explainer .insight strong { color: var(--purple-700); }
+
+  .tour-nav {
+    display: flex; justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
+    gap: 12px;
+  }
+  .tour-nav-btn {
+    background: white;
+    border: 1px solid var(--purple-300);
+    color: var(--purple-700);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tour-nav-btn:hover:not(:disabled) {
+    background: var(--purple-50);
+  }
+  .tour-nav-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .tour-nav-btn.primary {
+    background: var(--grad-primary);
+    color: white;
+    border: none;
+  }
+
+  /* Reading practice quizzes */
+  .practice-quizzes {
+    background: var(--grad-soft);
+    border: 1px solid var(--purple-300);
+    border-radius: 14px;
+    padding: 30px 32px;
+    margin: var(--space-lg) 0;
+  }
+  .practice-quizzes .label {
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 1px;
+    background: var(--grad-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+  }
+  .practice-quizzes h4 {
+    color: #1e293b;
+    margin-bottom: 18px;
+    font-size: var(--fs-h4);
+  }
+  .practice-quizzes .pq-prompt {
+    font-size: var(--fs-p);
+    color: #1e293b;
+    margin: 18px 0 12px;
+    font-weight: 500;
+    line-height: 1.7;
+  }
+  .practice-quizzes .pq-prompt:first-of-type { margin-top: 0; }
+
+  /* ============================================================
+     🌉 BRIDGE CARD
+     ============================================================ */
+  .bridge-card {
+    background: var(--grad-primary);
+    color: white;
+    padding: 36px;
+    border-radius: 16px;
+    margin: var(--space-lg) 0;
+  }
+  .bridge-card .label {
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 1px;
+    opacity: 0.85;
+    margin-bottom: 8px;
+  }
+  .bridge-card h4 { font-size: var(--fs-h2); color: white; margin-bottom: 8px; }
+  .bridge-card .meta {
+    font-size: var(--fs-meta);
+    opacity: 0.85;
+    margin-bottom: 18px;
+  }
+  .bridge-card p {
+    font-size: var(--fs-p);
+    opacity: 0.94;
+    color: white;
+    margin-bottom: 16px;
+    line-height: 1.8;
+  }
+  .bridge-button {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 28px;
+    background: white;
+    color: var(--purple-700);
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 18px;
+  }
+  .bridge-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  /* ============================================================
+     💬 CHATBOT
+     ============================================================ */
+  .chat-fab {
+    position: fixed; bottom: 24px; right: 24px;
+    width: 58px; height: 58px;
+    border-radius: 50%;
+    background: var(--grad-primary);
+    color: white;
+    border: none; cursor: pointer;
+    box-shadow: 0 4px 16px rgba(99, 56, 207, 0.3);
+    font-size: 22px; z-index: 90;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .chat-panel {
+    position: fixed; bottom: 95px; right: 24px;
+    width: 360px; max-height: 500px;
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    display: none; flex-direction: column;
+    z-index: 91; overflow: hidden;
+  }
+  .chat-panel.open { display: flex; }
+  .chat-header {
+    background: var(--grad-primary);
+    color: white;
+    padding: 14px 18px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .chat-header h4 { font-size: 14px; margin-bottom: 0; color: white; }
+  .chat-header small { font-size: 11px; opacity: 0.85; }
+  .chat-close { background: none; border: none; color: white; cursor: pointer; font-size: 18px; }
+  .chat-body {
+    flex: 1; overflow-y: auto;
+    padding: 16px;
+    background: #f9fafb;
+    max-height: 300px;
+  }
+  .chat-msg {
+    margin-bottom: 12px;
+    max-width: 85%;
+    padding: 11px 15px;
+    border-radius: 14px;
+    font-size: 13px; line-height: 1.6;
+  }
+  .chat-msg.bot { background: white; border: 1px solid #e2e8f0; border-bottom-left-radius: 4px; }
+  .chat-msg.user {
+    background: var(--purple-600);
+    color: white;
+    margin-left: auto;
+    border-bottom-right-radius: 4px;
+  }
+  .chat-input-row { display: flex; padding: 12px; border-top: 1px solid #e2e8f0; gap: 8px; }
+  .chat-input-row input {
+    flex: 1;
+    border: 1px solid #cbd5e1; border-radius: 20px;
+    padding: 8px 14px;
+    font-size: 13px; outline: none;
+  }
+  .chat-send {
+    background: var(--purple-600); color: white;
+    border: none; border-radius: 50%;
+    width: 34px; height: 34px;
+    cursor: pointer;
+  }
+
+  /* ============================================================
+     📱 RESPONSIVE
+     ============================================================ */
+  @media (min-width: 641px) and (max-width: 1023px) {
+    .container { max-width: 760px; }
+    .section { padding: 40px 36px; }
+    .module-header { padding: 44px 36px; }
+  }
+
+  @media (max-width: 640px) {
+    .container { padding: 20px 14px 100px; }
+    .progress-wrap { display: none; }
+
+    .module-header { padding: 32px 26px; border-radius: 14px; }
+    .module-meta { gap: 16px; font-size: 12px; }
+
+    .section { padding: 32px 24px; border-radius: 12px; }
+
+    .shift-compare,
+    .objectives-grid,
+    .habits-grid,
+    .radar-grid,
+    .stance-grid,
+    .profile-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .triadic-grid {
+      grid-template-columns: 1fr;
+    }
+    .triadic-arrow { transform: rotate(90deg); }
+
+    .shift-card,
+    .reflection-box,
+    .quick-check,
+    .profile-card,
+    .pretest-cta,
+    .triadic-block,
+    .practice-quizzes,
+    .mindset-card {
+      padding: 22px 22px;
+      border-radius: 12px;
+    }
+
+    .qc-opt, .submit-btn, .mark-complete-btn,
+    .pretest-button, .bridge-button, .tour-nav-btn {
+      min-height: 44px;
+    }
+
+    .shift-tabs, .tour-tabs { gap: 0; }
+    .shift-tab, .tour-tab { min-width: 0; padding: 12px 8px; font-size: 12px; }
+    .shift-tab .shift-num,
+    .tour-tab .tour-num { font-size: 9px; margin-bottom: 2px; }
+
+    .mark-complete-wrap { flex-direction: column; align-items: stretch; }
+    .mark-complete-btn { justify-content: center; width: 100%; }
+
+    .bridge-card { padding: 28px 22px; }
+
+    .chat-fab { width: 52px; height: 52px; bottom: 18px; right: 18px; }
+    .chat-panel { width: calc(100vw - 24px); right: 12px; bottom: 80px; }
+
+    .road-mod { width: 140px; }
+
+    .sg-row { grid-template-columns: 1fr; gap: 6px; }
+    .sg-tag { display: inline-block; width: auto; }
+  }
+</style>
+
+<script src="progress.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof ProgressTracker !== 'undefined') ProgressTracker.markStarted('module_0');
+  });
+</script>
+</head>
+<body>
+
+<!-- ============================================================
+     🧭 TOP NAV
+     ============================================================ -->
+<nav class="top-nav">
+  <div class="nav-brand">GenAI Competency Workshop<span>· Module 0 of 6</span></div>
+  <div class="progress-wrap">
+    <span>Progress</span>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <span id="progressPct">0%</span>
+  </div>
+</nav>
+
+<div class="container">
+
+<!-- ============================================================
+     📛 MODULE HEADER
+     ============================================================ -->
+<header class="module-header">
+  <span class="module-tag">FOUNDATION · START HERE</span>
+  <h1>Welcome &amp; Orientation</h1>
+  <p>A 15-minute setup before the workshop begins. By the end, you'll know why this workshop exists, how it works, and how to read your assessment report — the engine that drives the rest of your learning journey.</p>
+  <div class="module-meta">
+    <span>~15 min</span>
+    <span>3 sections</span>
+    <span>Includes pre-test</span>
+  </div>
+</header>
+
+<!-- ============================================================
+     📑 SECTION 0.1
+     ============================================================ -->
+<section class="section" id="section-0-1">
+  <div class="section-num">Section 0.1</div>
+  <h2>Why This Workshop Exists <span class="completed-badge">✓ COMPLETED</span></h2>
+
+  <span class="subsection-tag">0.1.1 · Three Paradigm Shifts from Traditional ICT to GenAI</span>
+  <h3 style="margin-top:8px;">Generative AI Is Not Just Another Educational Technology</h3>
+  <p>Drawing on the journal article that grounds this workshop, the move from traditional ICT (databases, LMSs, search engines) to GenAI represents not an incremental upgrade but <strong>three fundamental paradigm shifts</strong>. Each shift reshapes what teachers do — and what teachers need to know.</p>
+
+  <div class="shift-intro">👇 Click each tab below to explore one shift. Read both columns side-by-side to feel the contrast.</div>
+
+  <div class="shift-tabs">
+    <button class="shift-tab active" data-shift="1" onclick="switchShift(1)"><span class="shift-num">SHIFT 1</span>Epistemological Foundations</button>
+    <button class="shift-tab" data-shift="2" onclick="switchShift(2)"><span class="shift-num">SHIFT 2</span>Interaction Modes</button>
+    <button class="shift-tab" data-shift="3" onclick="switchShift(3)"><span class="shift-num">SHIFT 3</span>Teachers' Role</button>
+  </div>
+
+  <!-- SHIFT 1 -->
+  <div class="shift-content active" id="shift-1">
+    <div class="shift-compare">
+      <div class="shift-card before">
+        <div class="card-label">TRADITIONAL ICT</div>
+        <h4>A Static Epistemology</h4>
+        <p>Traditional ICT <strong>stores, organises, delivers, and displays</strong> pre-existing knowledge through tools such as databases, search engines, and learning management platforms. It does not produce new knowledge but only facilitates access to what already exists.</p>
+      </div>
+      <div class="shift-card after">
+        <div class="card-label">GENAI</div>
+        <h4>A Generative Epistemology</h4>
+        <p>GenAI possesses a generative epistemology, which endows it with disruptive potential to <strong>autonomously produce</strong> original content, pedagogical solutions, and research insights through emergent algorithmic processes.</p>
+      </div>
+    </div>
+    <div class="shift-implication">
+      <span class="label">→ WHAT THIS MEANS FOR YOU</span>
+      Knowledge is no longer just retrieved; it is actively co-produced. Teachers now share authorship of knowledge with their tools.
+    </div>
+  </div>
+
+  <!-- SHIFT 2 -->
+  <div class="shift-content" id="shift-2">
+    <div class="shift-compare">
+      <div class="shift-card before">
+        <div class="card-label">TRADITIONAL ICT</div>
+        <h4>Teacher-Prescribed Adoption</h4>
+        <p>By integrating into regular educational activities, ICTs are mostly used to provide <strong>operational-level convenience</strong> rather than to generate cognitive insights. Humans conduct all thinking — adaptive learning, information synthesis, and error correction.</p>
+      </div>
+      <div class="shift-card after">
+        <div class="card-label">GENAI</div>
+        <h4>Learner-Directed Engagement</h4>
+        <p>Through a rapid <strong>ideation–feedback–iteration</strong> process, GenAI reconfigures some once-human-exclusive traits by augmenting learners' creativity and critical thinking, and prompting them to critically evaluate generated content.</p>
+      </div>
+    </div>
+    <div class="shift-implication">
+      <span class="label">→ WHAT THIS MEANS FOR YOU</span>
+      Students don't just receive instruction — they direct dialogue with intelligent tools. Critical evaluation becomes a core student skill, not just a teacher's role.
+    </div>
+  </div>
+
+  <!-- SHIFT 3 -->
+  <div class="shift-content" id="shift-3">
+    <div class="shift-compare">
+      <div class="shift-card before">
+        <div class="card-label">TRADITIONAL ICT</div>
+        <h4>Leaders and Instructors</h4>
+        <p>Although ICTs are often seen as additional assistive tools, teachers <strong>lead educational design</strong> in most cases. Teachers integrate ICTs into existing pedagogical frameworks as a supplementary tool to enhance delivery, efficiency, and access.</p>
+      </div>
+      <div class="shift-card after">
+        <div class="card-label">GENAI</div>
+        <h4>Coaches and Mediators</h4>
+        <p>GenAI redefines educational missions, theories, and practices. University teachers must now be prepared to address <strong>novel ethical, pedagogical, and technological challenges</strong> brought by AI and to equip students for a future shaped by human-AI collaboration.</p>
+      </div>
+    </div>
+    <div class="shift-implication">
+      <span class="label">→ WHAT THIS MEANS FOR YOU</span>
+      Your value moves from "deliverer of content" toward "designer of meaningful, ethical, AI-rich learning experiences" — and this is precisely what the four-dimension framework helps you build.
+    </div>
+  </div>
+
+  <!-- TRIADIC MODEL -->
+  <div class="triadic-block">
+    <div class="label">🔄 THE BIG-PICTURE IMPLICATION</div>
+    <h4>From a Dyadic to a Triadic Instructional Model</h4>
+    <div class="subline">These three shifts together call for a fundamental reframing: instruction is no longer just between teacher and student. GenAI joins as a <strong>third agent</strong> in the room — one that learns, generates, and responds.</div>
+
+    <div class="triadic-grid">
+      <div class="triadic-card dyadic">
+        <div class="tcard-label">DYADIC · TRADITIONAL</div>
+        <h5>Instructional Model</h5>
+        <div class="nodes">
+          <div class="node">Teacher</div>
+          <div class="arrow">↕</div>
+          <div class="node">Student</div>
+        </div>
+        <div class="meta">Two-way relationship</div>
+      </div>
+      <div class="triadic-arrow">
+        →
+        <span class="ar-label">CO-DESIGN<br>WITH GENAI</span>
+      </div>
+      <div class="triadic-card triadic">
+        <div class="tcard-label">TRIADIC · WITH GENAI</div>
+        <h5>Instructional Model</h5>
+        <div class="nodes">
+          <div class="node">GenAI</div>
+          <div class="node">Teacher</div>
+          <div class="node">Student</div>
+        </div>
+        <div class="meta">Three-way collaboration</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="reflection-box">
+    <label>💭 Before we go further — what brought you to this workshop?</label>
+    <textarea id="reflectStart" placeholder="One or two sentences is plenty. Curiosity? Pressure? An incident? Anything goes."></textarea>
+    <button class="submit-btn" onclick="submitReflection('reflectStart','aiRespStart')">Share</button>
+    <div class="ai-response" id="aiRespStart">
+      <strong>💡 AI Companion</strong>
+      Thanks for sharing — I'll keep this in mind as we go. Many teachers arrive here with a mix of curiosity and quiet worry. Both are useful. Hold onto your reason; you'll come back to it in Module 6 to see how your thinking has shifted.
+    </div>
+  </div>
+
+  <span class="subsection-tag" style="margin-top:36px;">0.1.2 · Learning Objectives</span>
+  <h3 style="margin-top:8px;">By the End of This Workshop, You Will…</h3>
+  <p>Click each objective to see what it looks like in practice.</p>
+
+  <div class="objectives-grid">
+    <div class="objective-card" onclick="this.classList.toggle('expanded')">
+      <span class="obj-toggle">+</span>
+      <div class="obj-num">1</div>
+      <h5>Understand the framework</h5>
+      <div class="obj-detail">Be able to explain the four dimensions and the two perspectives (own literacy vs empowering students) — and why both matter.</div>
+    </div>
+    <div class="objective-card" onclick="this.classList.toggle('expanded')">
+      <span class="obj-toggle">+</span>
+      <div class="obj-num">2</div>
+      <h5>Use the self-assessment tool</h5>
+      <div class="obj-detail">Read your radar chart, identify your level on each dimension, and make sense of strengths and growth areas.</div>
+    </div>
+    <div class="objective-card" onclick="this.classList.toggle('expanded')">
+      <span class="obj-toggle">+</span>
+      <div class="obj-num">3</div>
+      <h5>Build capacities through feedback</h5>
+      <div class="obj-detail">Use feedback loops — across modules and re-assessments — to track your own development over time.</div>
+    </div>
+    <div class="objective-card" onclick="this.classList.toggle('expanded')">
+      <span class="obj-toggle">+</span>
+      <div class="obj-num">4</div>
+      <h5>Apply learning to your classroom</h5>
+      <div class="obj-detail">Translate framework insights into concrete moves in your teaching and assessment practice this term.</div>
+    </div>
+  </div>
+
+  <div class="mark-complete-wrap">
+    <div class="mark-complete-text">✅ Read through the three shifts, the triadic model, and shared what brought you here? Mark this section complete.</div>
+    <button class="mark-complete-btn" onclick="markSectionComplete('section-0-1', this)">
+      <span class="check"></span><span class="btn-text">Mark Section 0.1 as Complete</span>
+    </button>
+  </div>
+</section>
+
+<!-- ============================================================
+     📑 SECTION 0.2
+     ============================================================ -->
+<section class="section" id="section-0-2">
+  <div class="section-num">Section 0.2</div>
+  <h2>How This Workshop Works <span class="completed-badge">✓ COMPLETED</span></h2>
+
+  <span class="subsection-tag">0.2.1 · Workshop Structure</span>
+  <h3 style="margin-top:8px;">Your Seven-Module Journey</h3>
+  <p>Click any module on the roadmap to see what you'll do there.</p>
+  <div class="roadmap-helper">↔ Scroll the roadmap horizontally to see all seven modules.</div>
+
+  <div class="roadmap" id="roadmap">
+    <button class="road-mod current active-pulse" onclick="showRoadDetail(0)">
+      <div class="rm-tag">MOD 0</div>
+      <h5>Welcome &amp; Orientation</h5>
+      <div class="rm-time">15 min</div>
+    </button>
+    <button class="road-mod" onclick="showRoadDetail(1)">
+      <div class="rm-tag">MOD 1</div>
+      <h5>Theoretical Framework</h5>
+      <div class="rm-time">30 min</div>
+    </button>
+    <button class="road-mod" onclick="showRoadDetail(2)">
+      <div class="rm-tag">MOD 2</div>
+      <span class="rm-dim">DIM 1</span>
+      <h5>GenAI Literacy</h5>
+      <div class="rm-time">35 min</div>
+    </button>
+    <button class="road-mod" onclick="showRoadDetail(3)">
+      <div class="rm-tag">MOD 3</div>
+      <span class="rm-dim">DIM 2</span>
+      <h5>Curriculum &amp; Learning Design</h5>
+      <div class="rm-time">40 min</div>
+    </button>
+    <button class="road-mod" onclick="showRoadDetail(4)">
+      <div class="rm-tag">MOD 4</div>
+      <span class="rm-dim">DIM 3</span>
+      <h5>Teaching &amp; Learning</h5>
+      <div class="rm-time">35 min</div>
+    </button>
+    <button class="road-mod" onclick="showRoadDetail(5)">
+      <div class="rm-tag">MOD 5</div>
+      <span class="rm-dim">DIM 4</span>
+      <h5>Assessment</h5>
+      <div class="rm-time">35 min</div>
+    </button>
+    <button class="road-mod" onclick="showRoadDetail(6)">
+      <div class="rm-tag">MOD 6</div>
+      <h5>Summary &amp; Reflection</h5>
+      <div class="rm-time">25 min</div>
+    </button>
+  </div>
+
+  <div class="road-detail" id="roadDetail">
+    <strong>📍 MODULE 0 — YOU'RE HERE</strong>
+    Set up your profile, take a pre-test, and learn how to read your assessment report.
+  </div>
+
+  <span class="subsection-tag" style="margin-top:36px;">0.2.2 · How to Use the Workshop &amp; Platform</span>
+  <h3 style="margin-top:8px;">Five Habits That Make This Work</h3>
+
+  <div class="habits-grid">
+    <div class="habit-card">
+      <span class="habit-icon">📊</span>
+      <h5>Re-take the assessment often</h5>
+      <p>The post-test isn't a one-shot exam. Take it as often as you can — it's a feedback loop that calibrates what you're learning.</p>
+    </div>
+    <div class="habit-card">
+      <span class="habit-icon">🧠</span>
+      <h5>Both consolidation AND practice</h5>
+      <p>Declarative learning (knowing) and procedural learning (doing) together drive long-term memory and real classroom application.</p>
+    </div>
+    <div class="habit-card">
+      <span class="habit-icon">⏱️</span>
+      <h5>10 minutes a day, not 7 hours once</h5>
+      <p>Don't cram. Spaced learning consistently beats marathon sessions. Each module breaks naturally into short sittings.</p>
+    </div>
+    <div class="habit-card">
+      <span class="habit-icon">🎯</span>
+      <h5>Focus, then break</h5>
+      <p>Concentrate fully when learning new concepts — and then take a real break before the next session. Both halves matter.</p>
+    </div>
+  </div>
+
+  <div class="mindset-card">
+    <div class="label">🌱 THE MOST IMPORTANT MINDSET</div>
+    <h4>Stay reflexive — and self-encouraging</h4>
+    <p>"Basic" doesn't mean "bad". "Advanced" doesn't mean "good". The levels are a <strong>reference and guidance</strong> — a way to see where you are and what could come next, not a verdict on your worth as an educator.</p>
+    <div class="mindset-quote">"The framework is a map, not a measuring stick. You're allowed to be at Basic in one dimension and Advanced in another — that's normal, not a flaw."</div>
+  </div>
+
+  <div class="quick-check">
+    <div class="label">⚡ QUICK CHECK</div>
+    <div class="qc-prompt">Which of these mindsets matches the spirit of this workshop?</div>
+    <button class="qc-opt" data-correct="false" onclick="checkQc(this, 'qc1', 'Re-read the four habits — \" 10="" minutes="" a="" day\"="" and="" \"focus="" then="" break\"="" point="" the="" other="" way.')"="">A) Take the assessment once, then push through all modules in a single session</button>
+    <button class="qc-opt" data-correct="true" onclick="checkQc(this, 'qc1', 'Right. Spaced practice, regular re-assessment, and treating levels as guidance — that\'s the spirit.')">B) Use short, focused sessions; re-assess regularly; treat levels as guidance not judgement</button>
+    <button class="qc-opt" data-correct="false" onclick="checkQc(this, 'qc1', 'Aiming to \" score="" advanced\"="" everywhere="" reframes="" the="" levels="" as="" grades="" —="" opposite="" of="" mindset="" section.')"="">C) Aim to score Advanced on every dimension by the end of Module 6</button>
+    <div class="qc-fb" id="qcFb-qc1"></div>
+  </div>
+
+  <div class="mark-complete-wrap">
+    <div class="mark-complete-text">✅ Got the structure and the mindset? Mark this section complete.</div>
+    <button class="mark-complete-btn" onclick="markSectionComplete('section-0-2', this)">
+      <span class="check"></span><span class="btn-text">Mark Section 0.2 as Complete</span>
+    </button>
+  </div>
+</section>
+
+<!-- ============================================================
+     📑 SECTION 0.3
+     ============================================================ -->
+<section class="section" id="section-0-3">
+  <div class="section-num">Section 0.3</div>
+  <h2>Quick Pre-Workshop Check-In <span class="completed-badge">✓ COMPLETED</span></h2>
+  <p>Three quick steps before you dive into Module 1: <strong>complete your profile</strong>, <strong>take the self-assessment</strong>, and <strong>learn how to read your report</strong>.</p>
+
+  <span class="subsection-tag" style="margin-top:24px;">0.3.1 · Complete Your Profile</span>
+  <h3 style="margin-top:8px;">A Bit About You</h3>
+  <p>This helps personalise recommendations and benchmark your journey alongside peers in similar contexts. None of this is shared without your permission.</p>
+
+  <!-- ============================================================
+       🔧 ENGINEER NOTE — PROFILE DATA INTEGRATION
+       ============================================================
+       The form below currently writes to localStorage under the key
+       'genai_workshop_profile_v1' as a placeholder for the demo.
+
+       INTEGRATION POINT:
+       Replace the body of saveProfile() in <script> with a call to your
+       profile-service architecture. Suggested shape:
+
+         POST /api/v1/profile  { country, institution, gender,
+                                 discipline, years_teaching,
+                                 years_with_genai }
+
+       The form fields are tagged with `name="..."` attributes that mirror
+       the JSON keys above so a single FormData → JSON conversion will work.
+
+       The post-save UI feedback (.profile-saved-msg) should remain on
+       successful response. On failure, surface an inline error inside
+       #profile-form-error (already present, hidden by default).
+       ============================================================ -->
+  <form id="profile-form" class="profile-card" onsubmit="event.preventDefault(); saveProfile();">
+    <div class="label">👤 YOUR PROFILE</div>
+    <h4>Tell us a little about your teaching context</h4>
+    <p class="helper">All fields are optional — but the more you share, the better the platform can tailor recommendations and connect you with relevant peers.</p>
+
+    <div class="profile-grid">
+      <div class="profile-field">
+        <label for="pf-country">Country / Region</label>
+        <input id="pf-country" name="country" type="text" placeholder="e.g., United Kingdom">
+      </div>
+      <div class="profile-field">
+        <label for="pf-institution">Institution</label>
+        <input id="pf-institution" name="institution" type="text" placeholder="e.g., University of …">
+      </div>
+      <div class="profile-field">
+        <label for="pf-gender">Gender</label>
+        <select id="pf-gender" name="gender">
+          <option value="">Select…</option>
+          <option>Female</option>
+          <option>Male</option>
+          <option>Non-binary</option>
+          <option>Prefer not to say</option>
+        </select>
+      </div>
+      <div class="profile-field">
+        <label for="pf-discipline">Discipline</label>
+        <input id="pf-discipline" name="discipline" type="text" placeholder="e.g., Public Health">
+      </div>
+      <div class="profile-field">
+        <label for="pf-years">Years of teaching</label>
+        <select id="pf-years" name="years_teaching">
+          <option value="">Select…</option>
+          <option>Less than 1 year</option>
+          <option>1–3 years</option>
+          <option>4–7 years</option>
+          <option>8–15 years</option>
+          <option>More than 15 years</option>
+        </select>
+      </div>
+      <div class="profile-field">
+        <label for="pf-genai-years">Years of teaching with GenAI</label>
+        <select id="pf-genai-years" name="years_with_genai">
+          <option value="">Select…</option>
+          <option>Not yet</option>
+          <option>Less than 6 months</option>
+          <option>6–12 months</option>
+          <option>1–2 years</option>
+          <option>More than 2 years</option>
+        </select>
+      </div>
+    </div>
+
+    <button type="submit" class="submit-btn">Save my profile</button>
+    <div id="profile-form-error" style="display:none;color:#991b1b;margin-top:10px;font-size:13px;"></div>
+    <div class="profile-saved-msg" id="profileSavedMsg">
+      ✓ Profile saved. You can update it any time from your dashboard.
+    </div>
+  </form>
+
+  <span class="subsection-tag" style="margin-top:36px;">0.3.2 · Take the Self-Assessment (Pre-test)</span>
+
+  <!-- ============================================================
+       🔧 ENGINEER NOTE — PRE-TEST INTEGRATION
+       ============================================================
+       The "Start Pre-Assessment" button currently:
+         1. Routes to a placeholder URL stored in PRETEST_URL constant
+            in <script>.
+         2. Writes a marker to localStorage ('genai_workshop_pretest_taken')
+            so the UI can reflect a "completed" state on return.
+
+       INTEGRATION POINT:
+       Replace PRETEST_URL with the route to your assessment platform's
+       pre-test flow (with `?source=workshop&module=0&user_id=...`).
+
+       Once the user returns from the assessment platform, your platform
+       should POST results back to:
+            /api/v1/assessment/results
+       and call window.opener.notifyPreTestComplete(reportPayload) so the
+       report preview at #report-tour can render real values.
+
+       Until then, the report mock in 0.3.3 uses static sample data.
+       ============================================================ -->
+  <div id="pretest-cta" class="pretest-cta">
+    <div class="label">🔒 REQUIRED · OPENS IN A NEW PAGE</div>
+    <h4>Take Your Pre-Workshop Self-Assessment</h4>
+    <p>This 5-minute assessment establishes your starting baseline across all four dimensions. You'll need to complete it before proceeding to Module 1 — and you can re-take it anytime to track growth.</p>
+    <button class="pretest-button" onclick="launchPreTest()">Start Pre-Assessment ↗</button>
+    <div class="pretest-meta">⏱ ~5 minutes · 16 questions · You'll return here to learn how to read your report</div>
+    <div class="pretest-status" id="pretestStatus">
+      ✓ Pre-test marker saved. The full report will load here once your assessment platform pushes results back.
+    </div>
+  </div>
+
+  <span class="subsection-tag" style="margin-top:36px;">0.3.3 · Understand Your Assessment Report</span>
+  <h3 style="margin-top:8px;">A Guided Tour Through Your Report</h3>
+  <div class="tour-intro">📖 Once you've taken the pre-test, your report is generated automatically. It can look dense at first — let's walk through it section by section. Each step below highlights one part of a sample report, explains what it means, and tells you what to <strong>do</strong> with that information.</div>
+
+  <!-- ============================================================
+       🔧 ENGINEER NOTE — REPORT MOCK
+       ============================================================
+       The five tour steps below render a static "sample" report for
+       teaching purposes. Once a real pre-test result is available
+       (see notifyPreTestComplete hook above), swap the mock values:
+
+         Step 1 (.score-num)         ← payload.overall_score
+         Step 1 (.score-level)       ← payload.overall_level_label
+         Step 2 (.radar-mock)        ← payload.radar_teacher / radar_student
+         Step 4 (.sg-block)          ← payload.dimension_strengths_growth[]
+         Step 5 (.rec-row)           ← payload.recommendations[]
+
+       Each placeholder element has a data-mock-key attribute so a
+       generic populateReport(payload) helper can target them.
+       ============================================================ -->
+  <div id="report-tour">
+    <div class="tour-tabs">
+      <button class="tour-tab active" data-step="1" onclick="switchTourStep(1)"><span class="tour-num">STEP 1</span>Overall Score</button>
+      <button class="tour-tab" data-step="2" onclick="switchTourStep(2)"><span class="tour-num">STEP 2</span>Radar Charts</button>
+      <button class="tour-tab" data-step="3" onclick="switchTourStep(3)"><span class="tour-num">STEP 3</span>Two Stances</button>
+      <button class="tour-tab" data-step="4" onclick="switchTourStep(4)"><span class="tour-num">STEP 4</span>Strengths &amp; Growth</button>
+      <button class="tour-tab" data-step="5" onclick="switchTourStep(5)"><span class="tour-num">STEP 5</span>Recommendations</button>
+    </div>
+
+    <!-- STEP 1 -->
+    <div class="tour-content active" id="tour-1">
+      <div class="report-mock">
+        <span class="mock-tag">SAMPLE REPORT · PART 1</span>
+        <div class="mock-header"><strong>Overall Evaluation</strong><span>April 23, 2026</span></div>
+        <div class="score-block">
+          <div class="score-num" data-mock-key="overall_score">64<span>/100</span></div>
+          <div class="score-level" data-mock-key="overall_level_label">Level: 中级 (Intermediate)</div>
+        </div>
+        <div class="score-bands">
+          <div class="band band-1"><strong>基础 · Basic</strong><div class="range">0–33</div>Foundational understanding</div>
+          <div class="band band-2"><strong>中级 · Intermediate</strong><div class="range">34–66</div>Critical engagement</div>
+          <div class="band band-3"><strong>进阶 · Advanced</strong><div class="range">67–100</div>Innovative collaboration</div>
+        </div>
+      </div>
+
+      <div class="tour-explainer">
+        <h5>1️⃣ Overall Score &amp; Level</h5>
+        <p>Your <strong>overall score</strong> is a single number from 0 to 100, calculated from your responses across all four dimensions. The <strong>level label</strong> places you on a three-band scale.</p>
+        <div class="insight"><strong>💡 What to do with this:</strong> Don't read the score as a grade — read it as a <em>starting point</em>. The single number averages four very different competencies; the dimension-level detail (next step) is more useful. Re-takes will show this number change over time — that movement is what really matters.</div>
+      </div>
+
+      <div class="tour-nav">
+        <button class="tour-nav-btn" disabled="">← Previous</button>
+        <button class="tour-nav-btn primary" onclick="switchTourStep(2)">Next: Radar Charts →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="tour-content" id="tour-2">
+      <div class="report-mock">
+        <span class="mock-tag">SAMPLE REPORT · PART 2</span>
+        <div class="mock-header"><strong>Skill Dimensions</strong><span>Two perspectives</span></div>
+        <div class="radar-grid" data-mock-key="radar_pair">
+          <div class="radar-mock">
+            <div class="rm-title">Teacher stance</div>
+            <svg viewBox="0 0 200 180">
+              <polygon points="100,20 175,70 145,160 55,160 25,70" fill="none" stroke="#cbd5e1" stroke-width="1"></polygon>
+              <polygon points="100,55 145,80 130,140 70,140 55,80" fill="none" stroke="#cbd5e1" stroke-width="1"></polygon>
+              <line x1="100" y1="20" x2="100" y2="160" stroke="#e2e8f0"></line>
+              <line x1="25" y1="70" x2="175" y2="70" stroke="#e2e8f0"></line>
+              <polygon points="100,40 150,75 130,150 65,150 45,80" fill="rgba(124,58,237,0.18)" stroke="#7c3aed" stroke-width="2"></polygon>
+              <polygon points="100,55 140,85 125,140 75,140 60,90" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="4,3"></polygon>
+              <text x="100" y="14" text-anchor="middle" class="rm-axis-label">GenAI Literacy</text>
+              <text x="190" y="74" text-anchor="end" class="rm-axis-label">Curr/Learn</text>
+              <text x="155" y="175" text-anchor="middle" class="rm-axis-label">Teaching</text>
+              <text x="45" y="175" text-anchor="middle" class="rm-axis-label">Assess</text>
+            </svg>
+          </div>
+          <div class="radar-mock">
+            <div class="rm-title">Student stance</div>
+            <svg viewBox="0 0 200 180">
+              <polygon points="100,20 175,70 145,160 55,160 25,70" fill="none" stroke="#cbd5e1" stroke-width="1"></polygon>
+              <polygon points="100,55 145,80 130,140 70,140 55,80" fill="none" stroke="#cbd5e1" stroke-width="1"></polygon>
+              <line x1="100" y1="20" x2="100" y2="160" stroke="#e2e8f0"></line>
+              <line x1="25" y1="70" x2="175" y2="70" stroke="#e2e8f0"></line>
+              <polygon points="100,55 130,90 120,135 80,135 70,95" fill="rgba(37,99,235,0.18)" stroke="#2563eb" stroke-width="2"></polygon>
+              <polygon points="100,70 125,100 115,130 85,130 75,105" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="4,3"></polygon>
+              <text x="100" y="14" text-anchor="middle" class="rm-axis-label">GenAI Literacy</text>
+              <text x="190" y="74" text-anchor="end" class="rm-axis-label">Curr/Learn</text>
+              <text x="155" y="175" text-anchor="middle" class="rm-axis-label">Teaching</text>
+              <text x="45" y="175" text-anchor="middle" class="rm-axis-label">Assess</text>
+            </svg>
+          </div>
+        </div>
+        <div class="radar-legend">
+          <span><span class="swatch" style="background:#7c3aed"></span>Current ability level</span>
+          <span><span class="swatch" style="background:transparent;border:1px dashed #3b82f6;height:0;border-radius:0;"></span>Last assessment</span>
+        </div>
+      </div>
+
+      <div class="tour-explainer">
+        <h5>2️⃣ Reading the Radar Charts</h5>
+        <p>Two radar charts are the heart of your report. Each has <strong>four axes</strong> — one for each dimension — and shows two overlaid shapes:</p>
+        <ul>
+          <li><strong>Solid purple shape</strong> = your <em>current</em> ability level</li>
+          <li><strong>Dashed blue shape</strong> = your <em>last</em> assessment (so you can see growth)</li>
+        </ul>
+        <p>The further the shape extends toward an axis edge, the higher you scored on that dimension.</p>
+        <div class="insight"><strong>💡 What to look for:</strong> <em>Asymmetry</em> — a lopsided shape means you're stronger in some dimensions than others (totally normal). <em>Movement</em> — compare solid vs dashed; even small outward shifts are real growth. <em>Difference between the two charts</em> — see Step 3 for what that means.</div>
+      </div>
+
+      <div class="tour-nav">
+        <button class="tour-nav-btn" onclick="switchTourStep(1)">← Previous</button>
+        <button class="tour-nav-btn primary" onclick="switchTourStep(3)">Next: Two Stances →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="tour-content" id="tour-3">
+      <div class="report-mock">
+        <span class="mock-tag">SAMPLE REPORT · PART 3</span>
+        <div class="mock-header"><strong>Skill Dimensions · Two Perspectives</strong><span>Why two charts?</span></div>
+        <div class="stance-grid">
+          <div class="stance-card">
+            <div class="stance-tag">📍 TEACHER STANCE</div>
+            <h5>"Teacher's own literacy"</h5>
+            <p>Your <strong>personal</strong> capacity to use, evaluate, and collaborate with GenAI in your work.</p>
+          </div>
+          <div class="stance-card">
+            <div class="stance-tag">📍 STUDENT STANCE</div>
+            <h5>"Empowering students' literacy"</h5>
+            <p>Your <strong>pedagogical</strong> capacity to guide students' responsible, critical, and creative engagement with GenAI.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="tour-explainer">
+        <h5>3️⃣ Why Two Charts? The Two Perspectives</h5>
+        <p>A core idea of this framework: every dimension has <strong>two perspectives</strong>, and being strong in one doesn't guarantee strength in the other.</p>
+        <div class="insight"><strong>💡 Key insight:</strong> If your two radar charts look <em>very different</em>, that's important information — not a flaw. A common pattern is stronger in personal use, weaker in teaching it. The reverse also happens. The workshop modules address both stances explicitly in every dimension.</div>
+      </div>
+
+      <div class="tour-nav">
+        <button class="tour-nav-btn" onclick="switchTourStep(2)">← Previous</button>
+        <button class="tour-nav-btn primary" onclick="switchTourStep(4)">Next: Strengths &amp; Growth →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="tour-content" id="tour-4">
+      <div class="report-mock">
+        <span class="mock-tag">SAMPLE REPORT · PART 4</span>
+        <div class="mock-header"><strong>Analysis Report</strong><span>Per-dimension breakdown</span></div>
+        <div class="sg-block">
+          <div class="dim-name">GenAI Literacy</div>
+          <div class="stance">TEACHER'S OWN LITERACY · LEVEL: 基础 · 0%</div>
+          <div class="sg-row">
+            <span class="sg-tag strength">✓ STRENGTH</span>
+            <div class="sg-text">You are able to demonstrate foundational understanding of safe, ethical, and effective interaction with GenAI systems.</div>
+          </div>
+          <div class="sg-row">
+            <span class="sg-tag improve">→ IMPROVE</span>
+            <div class="sg-text">Try to critically engage with GenAI outputs, identifying potential issues, biases, and opportunities for improvement.</div>
+          </div>
+        </div>
+        <div class="sg-block">
+          <div class="dim-name">Curriculum / Learning Design</div>
+          <div class="stance">TEACHER'S OWN LITERACY · LEVEL: 进阶 · 80%</div>
+          <div class="sg-row">
+            <span class="sg-tag strength">✓ STRENGTH</span>
+            <div class="sg-text">You are able to co-design interdisciplinary, project-based curricula that integrate GenAI as a co-learner …</div>
+          </div>
+          <div class="sg-row">
+            <span class="sg-tag improve">→ IMPROVE</span>
+            <div class="sg-text">Keep up the great work — and consider mentoring colleagues into Advanced practice.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tour-explainer">
+        <h5>4️⃣ Each Dimension Gets Two Pairs of Strength + Growth</h5>
+        <p>Below the radar charts, the report breaks down <strong>every dimension</strong> into a structured analysis. For each dimension you'll see <strong>two blocks</strong> — one for Teacher stance, one for Student stance — and each block contains:</p>
+        <ul>
+          <li><strong>✓ STRENGTH</strong> — A statement describing what you <em>currently can do</em> at your level. This isn't praise — it's a precise description of your competency.</li>
+          <li><strong>→ AREAS OF IMPROVEMENT</strong> — A statement of the <em>next level up</em>. If you're already Advanced, this becomes "Keep up the great work!"</li>
+        </ul>
+        <div class="insight"><strong>💡 How to use this:</strong> Read the strength + improvement together — they're a <em>pair</em>, not separate ratings. The improvement statement points you to the workshop module that addresses your next step. Use it as a checklist when you re-take the assessment.</div>
+      </div>
+
+      <div class="tour-nav">
+        <button class="tour-nav-btn" onclick="switchTourStep(3)">← Previous</button>
+        <button class="tour-nav-btn primary" onclick="switchTourStep(5)">Next: Recommendations →</button>
+      </div>
+    </div>
+
+    <!-- STEP 5 -->
+    <div class="tour-content" id="tour-5">
+      <div class="report-mock">
+        <span class="mock-tag">SAMPLE REPORT · PART 5</span>
+        <div class="mock-header"><strong>Learning Recommendations</strong><span>Top three matched</span></div>
+        <div class="rec-row">
+          <div class="rec-num">1</div>
+          <div class="rec-content">
+            <h6>Critical Evaluation of GenAI Outputs in Higher Education</h6>
+            <div class="rec-meta">Web · 12 min read</div>
+          </div>
+          <div class="match-pill">Match 100</div>
+        </div>
+        <div class="rec-row">
+          <div class="rec-num">2</div>
+          <div class="rec-content">
+            <h6>Co-Designing AI Evaluation Rubrics with Students</h6>
+            <div class="rec-meta">Toolkit · Includes 4 sample rubrics</div>
+          </div>
+          <div class="match-pill">Match 92</div>
+        </div>
+        <div class="rec-row">
+          <div class="rec-num">3</div>
+          <div class="rec-content">
+            <h6>Getting Ready for Hybrid Teaching</h6>
+            <div class="rec-meta">Video · 18 min</div>
+          </div>
+          <div class="match-pill">Match 43</div>
+        </div>
+      </div>
+
+      <div class="tour-explainer">
+        <h5>5️⃣ Personalised Learning Recommendations</h5>
+        <p>At the bottom of the report, the platform suggests <strong>three resources</strong> from the wider PD pool, matched to your specific gaps. Each recommendation has a <strong>match score</strong> from 0 to 100.</p>
+        <ul>
+          <li><strong>90–100:</strong> Highly aligned with your improvement areas — start here.</li>
+          <li><strong>50–89:</strong> Relevant adjacent skill — useful after the top recommendation.</li>
+          <li><strong>Below 50:</strong> Optional / general background — only if you have time.</li>
+        </ul>
+        <div class="insight"><strong>💡 Recommendations refresh every time you re-take the assessment</strong>, so they evolve with your growth.</div>
+      </div>
+
+      <div class="tour-nav">
+        <button class="tour-nav-btn" onclick="switchTourStep(4)">← Previous</button>
+        <button class="tour-nav-btn primary" onclick="finishTour()">✓ Finish Tour</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- READING PRACTICE -->
+  <div class="practice-quizzes">
+    <div class="label">🎯 READING PRACTICE</div>
+    <h4>Now You Try — Interpret a Sample Profile</h4>
+
+    <div class="pq-prompt">Imagine a teacher's report shows: <em>GenAI Literacy: 基础 (Basic) on Teacher stance, but 进阶 (Advanced) on Student stance.</em> What's the most likely interpretation?</div>
+    <button class="qc-opt" data-correct="false" onclick="checkQc(this, 'pq1', 'No — Step 3 just established that the two stances are independent and can differ.')">A) The report has an error — these two should match</button>
+    <button class="qc-opt" data-correct="true" onclick="checkQc(this, 'pq1', 'Right. The two stances are genuinely different skills. This pattern is uncommon but real — strong pedagogy without strong personal fluency.')">B) The teacher knows how to <em>guide students</em> well, but is less confident in their own personal use of GenAI — these are genuinely different skills</button>
+    <button class="qc-opt" data-correct="false" onclick="checkQc(this, 'pq1', 'Averaging the two would erase the most useful information in the report.')">C) The teacher is overall Intermediate</button>
+    <div class="qc-fb" id="qcFb-pq1"></div>
+
+    <div class="pq-prompt" style="margin-top:24px;">A learner's solid (current) shape is <em>smaller</em> than their dashed (last) shape on one axis. What does that mean?</div>
+    <button class="qc-opt" data-correct="false" onclick="checkQc(this, 'pq2', 'Not the most likely interpretation — re-read the explanation about self-perception.')">A) The platform made a mistake</button>
+    <button class="qc-opt" data-correct="true" onclick="checkQc(this, 'pq2', 'Yes. As you learn more, your sense of what you don\'t yet know often sharpens. That\'s growth, not regression.')">B) Their self-perception got more critical — sometimes growth means being more aware of what you don't yet know</button>
+    <button class="qc-opt" data-correct="false" onclick="checkQc(this, 'pq2', 'The whole workshop is about iteration. Stopping isn\'t in the spirit.')">C) They should not continue the workshop</button>
+    <div class="qc-fb" id="qcFb-pq2"></div>
+  </div>
+
+  <div class="mark-complete-wrap">
+    <div class="mark-complete-text">✅ Profile saved, pre-test taken, and report tutorial complete? Mark this section — and Module 0 — done.</div>
+    <button class="mark-complete-btn" onclick="markSectionComplete('section-0-3', this)">
+      <span class="check"></span><span class="btn-text">Mark Section 0.3 as Complete</span>
+    </button>
+  </div>
+</section>
+
+<!-- ============================================================
+     🌉 BRIDGE CARD
+     ============================================================ -->
+<div class="bridge-card">
+  <div class="label">→ NEXT</div>
+  <h4>Ready for Module 1?</h4>
+  <div class="meta">DIMENSION INTRO · ~30 min · 4 sections</div>
+  <p>Foundation laid. You know <em>why</em> this workshop exists, <em>how</em> to navigate it, and <em>how to read</em> the feedback you'll get along the way. In Module 1, we'll dive into the theoretical framework that drives the next four modules.</p>
+  <button class="bridge-button" onclick="alert('In production: navigation guarded by Module 0 → Module 1 checkpoint.')">Continue to Module 1 →</button>
+</div>
+
+</div>
+
+<!-- ============================================================
+     💬 CHATBOT
+     ============================================================ -->
+<button class="chat-fab" onclick="toggleChat()">💬</button>
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-header">
+    <div><h4>AI Learning Companion</h4><small>Here to help you orient yourself</small></div>
+    <button class="chat-close" onclick="toggleChat()">×</button>
+  </div>
+  <div class="chat-body" id="chatBody">
+    <div class="chat-msg bot">👋 Welcome! I'm here to help you make sense of the workshop. Ask me anything about the structure, your assessment report, or just what to expect next.</div>
+  </div>
+  <div class="chat-input-row">
+    <input type="text" id="chatInput" placeholder="Ask anything..." onkeypress="if(event.key==='Enter') sendChat()">
+    <button class="chat-send" onclick="sendChat()">→</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     🧠 INTERACTIVE LOGIC
+     ============================================================ -->
+<script>
+/* ============================================================
+   🔧 ENGINEER NOTE — INTEGRATION CONSTANTS
+   ============================================================
+   Update these two constants when wiring up to real services:
+     • PROFILE_STORAGE_KEY → currently localStorage; replace saveProfile
+       body with API POST to your profile service.
+     • PRETEST_URL → currently a placeholder anchor; point this to the
+       assessment platform launch URL with appropriate query params.
+   ============================================================ */
+const PROFILE_STORAGE_KEY = 'genai_workshop_profile_v1';
+const PRETEST_STORAGE_KEY = 'genai_workshop_pretest_taken';
+const PRETEST_URL = '#'; // TODO[ENGINEER]: replace with assessment platform URL
+
+/* ---------- Reflection ---------- */
+function submitReflection(inputId, respId) {
+  const text = document.getElementById(inputId).value.trim();
+  if (text.length < 5) { alert('Please share a brief thought.'); return; }
+  document.getElementById(respId).classList.add('show');
+}
+
+/* ---------- Paradigm shift tabs ---------- */
+const shiftVisited = new Set([1]);
+function switchShift(n) {
+  document.querySelectorAll('.shift-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.shift-content').forEach(c => c.classList.remove('active'));
+  document.querySelector(`.shift-tab[data-shift="${n}"]`).classList.add('active');
+  document.getElementById('shift-' + n).classList.add('active');
+  shiftVisited.add(n);
+  document.querySelectorAll('.shift-tab').forEach(t => {
+    if (shiftVisited.has(parseInt(t.dataset.shift))) t.classList.add('completed');
+  });
+}
+
+/* ---------- Roadmap ---------- */
+const roadDetails = [
+  { t: 'MODULE 0 — YOU\'RE HERE',                  b: 'Set up your profile, take a pre-test, and learn how to read your assessment report.' },
+  { t: 'MODULE 1 · THEORETICAL FRAMEWORK',         b: 'A 30-minute deep dive into the four-dimension framework and why both perspectives (own + empowering) matter.' },
+  { t: 'MODULE 2 · GENAI LITERACY (DIM 1)',        b: 'The foundation. Build your own critical literacy and your capacity to grow students\' literacy across three levels.' },
+  { t: 'MODULE 3 · CURRICULUM & LEARNING DESIGN',  b: 'How GenAI strengthens — or quietly undermines — different learning objectives, and how to redesign accordingly.' },
+  { t: 'MODULE 4 · TEACHING & LEARNING',           b: 'Day-to-day pedagogical moves: where GenAI fits as scaffold, simulation, or co-thinker in real lessons.' },
+  { t: 'MODULE 5 · ASSESSMENT',                    b: 'Designing valid, meaningful assessments in a world where students have always-on AI access.' },
+  { t: 'MODULE 6 · SUMMARY & REFLECTION',          b: 'Re-take the post-test, reflect on growth, and turn insights into a concrete classroom action plan.' }
+];
+function showRoadDetail(idx) {
+  const d = roadDetails[idx];
+  document.getElementById('roadDetail').innerHTML = `<strong>${d.t}</strong>${d.b}`;
+}
+
+/* ---------- Quick check / pop quiz ---------- */
+function checkQc(btn, id, msg) {
+  const isCorrect = btn.dataset.correct === 'true';
+  // siblings: only buttons with same id base — find by feedback target
+  const fb = document.getElementById('qcFb-' + id);
+  // Look upwards: clear prior selections in the same logical group
+  let prev = btn.previousElementSibling;
+  while (prev && prev.classList && prev.classList.contains('qc-opt')) {
+    prev.classList.remove('selected', 'correct', 'wrong');
+    prev = prev.previousElementSibling;
+  }
+  let next = btn.nextElementSibling;
+  while (next && next.classList && next.classList.contains('qc-opt')) {
+    next.classList.remove('selected', 'correct', 'wrong');
+    next = next.nextElementSibling;
+  }
+  btn.classList.add('selected', isCorrect ? 'correct' : 'wrong');
+  fb.classList.add('show');
+  fb.classList.remove('correct', 'wrong');
+  fb.classList.add(isCorrect ? 'correct' : 'wrong');
+  fb.textContent = (isCorrect ? '✓ ' : '✗ ') + msg;
+}
+
+/* ============================================================
+   🔧 ENGINEER NOTE — saveProfile()
+   Replace the localStorage write with an authenticated API call.
+   The form already serialises cleanly via FormData.
+   ============================================================ */
+function saveProfile() {
+  const form = document.getElementById('profile-form');
+  const fd = new FormData(form);
+  const payload = {};
+  fd.forEach((v, k) => payload[k] = v);
+
+  // DEMO IMPLEMENTATION — replace with API call
+  try {
+    localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(payload));
+    document.getElementById('profileSavedMsg').classList.add('show');
+    document.getElementById('profile-form-error').style.display = 'none';
+  } catch (e) {
+    const err = document.getElementById('profile-form-error');
+    err.style.display = 'block';
+    err.textContent = 'Could not save profile locally: ' + e.message;
+  }
+  /*
+   * 🔧 ENGINEER: replace the try block above with:
+   *
+   *   fetch('/api/v1/profile', {
+   *     method: 'POST',
+   *     headers: { 'Content-Type': 'application/json',
+   *                'Authorization': 'Bearer ' + getAuthToken() },
+   *     body: JSON.stringify(payload)
+   *   })
+   *   .then(r => r.ok ? r.json() : Promise.reject(r))
+   *   .then(()  => document.getElementById('profileSavedMsg').classList.add('show'))
+   *   .catch(e => { ... show #profile-form-error ... });
+   */
+}
+
+// Restore previously-saved profile on page load (demo only)
+document.addEventListener('DOMContentLoaded', () => {
+  try {
+    const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      Object.entries(data).forEach(([k, v]) => {
+        const el = document.querySelector(`[name="${k}"]`);
+        if (el && v) el.value = v;
+      });
+    }
+    if (localStorage.getItem(PRETEST_STORAGE_KEY)) {
+      document.getElementById('pretestStatus').classList.add('show');
+    }
+  } catch (e) { /* silent */ }
+});
+
+/* ============================================================
+   🔧 ENGINEER NOTE — launchPreTest()
+   Replace with a redirect (or window.open) to the assessment
+   platform. The assessment platform should call back into this
+   page (or post a message to the parent) on completion.
+   ============================================================ */
+function launchPreTest() {
+  // DEMO: mark a flag so users can preview the report tour
+  try {
+    localStorage.setItem(PRETEST_STORAGE_KEY, JSON.stringify({ taken_at: new Date().toISOString() }));
+    document.getElementById('pretestStatus').classList.add('show');
+  } catch (e) { /* silent */ }
+
+  if (PRETEST_URL && PRETEST_URL !== '#') {
+    window.open(PRETEST_URL, '_blank', 'noopener');
+  } else {
+    alert('Demo mode: The pre-test will open in a new page once the assessment platform is connected. For now, browse the report tour below to see how results will be presented.');
+  }
+}
+
+/* Hook for the assessment platform to call when results are ready.
+   🔧 ENGINEER: implement populateReport(payload) to swap mock values
+   for live data inside #report-tour. */
+window.notifyPreTestComplete = function(payload) {
+  // populateReport(payload);  // TODO[ENGINEER]
+  console.log('Pre-test results received:', payload);
+};
+
+/* ---------- Tour tabs ---------- */
+const tourVisited = new Set([1]);
+function switchTourStep(n) {
+  document.querySelectorAll('.tour-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tour-content').forEach(c => c.classList.remove('active'));
+  document.querySelector(`.tour-tab[data-step="${n}"]`).classList.add('active');
+  document.getElementById('tour-' + n).classList.add('active');
+  tourVisited.add(n);
+  document.querySelectorAll('.tour-tab').forEach(t => {
+    if (tourVisited.has(parseInt(t.dataset.step))) t.classList.add('completed');
+  });
+  // Smooth-scroll to top of tour
+  const tour = document.getElementById('report-tour');
+  if (tour) tour.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function finishTour() {
+  alert('Nice — you\'ve walked through all five parts of the report.\n\nWhen you take the actual pre-test, the same five sections will appear with your own data.');
+}
+
+/* ---------- Section completion ---------- */
+const completedSections = new Set();
+const totalSections = 3;
+function markSectionComplete(sectionId, btn) {
+  const section = document.getElementById(sectionId);
+  const txt = btn.querySelector('.btn-text');
+  if (completedSections.has(sectionId)) {
+    completedSections.delete(sectionId);
+    btn.classList.remove('completed');
+    if (section) section.classList.remove('completed');
+    const num = sectionId.replace('section-', '').replace('-', '.');
+    txt.textContent = 'Mark Section ' + num + ' as Complete';
+  } else {
+    completedSections.add(sectionId);
+    btn.classList.add('completed');
+    if (section) section.classList.add('completed');
+    txt.textContent = '✓ Section Marked as Complete';
+  }
+  const pct = Math.round((completedSections.size / totalSections) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+  if (completedSections.size === totalSections && typeof ProgressTracker !== 'undefined') {
+    ProgressTracker.markCompleted('module_0');
+  }
+}
+
+/* ---------- Chatbot ---------- */
+function toggleChat() { document.getElementById('chatPanel').classList.toggle('open'); }
+function sendChat() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const body = document.getElementById('chatBody');
+  body.innerHTML += `<div class="chat-msg user">${text}</div>`;
+  input.value = '';
+  setTimeout(() => {
+    const responses = [
+      "Good question. Module 0 is meant to feel like setup — the 'real' learning starts in Module 2 once the framework is laid out in Module 1.",
+      "Your radar charts will look uneven the first time. That's normal. Most teachers are stronger in one or two dimensions and growing in others.",
+      "Re-take the assessment whenever something shifts in your teaching — even mid-semester. The platform will refresh your recommendations each time.",
+      "If 'Basic' feels like it's pulling you down, remember: it just means foundational. Many advanced practitioners cycle back through Basic when a tool changes."
+    ];
+    body.innerHTML += `<div class="chat-msg bot">${responses[Math.floor(Math.random() * responses.length)]}</div>`;
+    body.scrollTop = body.scrollHeight;
+  }, 700);
+  body.scrollTop = body.scrollHeight;
+}
+</script>
+
+
+
+</body></html>
