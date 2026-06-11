@@ -1,734 +1,1130 @@
-<!DOCTYPE html><html lang="en"><head><meta name="x-poe-datastore-behavior" content="local_only"><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Workshop Dashboard — GenAI Competency</title>
+
+<!-- ====================================================================
+     ✉️  ENGINEER HANDOFF NOTE — DYNAMIC DATA WIRING
+     ────────────────────────────────────────────────────────────────────
+     This dashboard is now FULLY DATA-DRIVEN. For the live product,
+     replace the localStorage demo layer (see <script id="demo-state">)
+     with authenticated API calls. The render layer (renderDashboard())
+     is reusable as-is — just feed it the same shape of object.
+
+     ▸ AUTH REQUIREMENT
+       All endpoints below require an authenticated session
+       (JWT in Authorization header or session cookie). On 401, redirect
+       to /login and preserve the intended return URL.
+
+     ▸ SUGGESTED ENDPOINTS  (single aggregate is preferred for one round-trip)
+       GET  /api/me/dashboard       → returns the full state object below
+         { user, modules, reflections, actionItems,
+           selfChecksDone, selfChecksTotal, assessment }
+
+       Or split:
+       GET  /api/me/profile
+       GET  /api/me/modules         → array with per-module status
+       GET  /api/me/progress
+       GET  /api/me/assessment/latest
+       POST /api/me/modules/:id/complete    → on module completion
+       POST /api/me/streak/ping             → on each session
+
+     ▸ DERIVED VALUES (computed client-side, do NOT store)
+       - modulesCompleted    = modules.filter(m=>m.status==='complete').length
+       - overallPct          = round( modulesCompleted / modules.length * 100 )
+       - nextModuleId        = first module where status==='next' || 'in-progress'
+       - estTimeRemainingMin = sum of durationMin for non-complete modules
+       - "Continue Module N" button href + label use nextModuleId
+
+     ▸ LOCKING RULES
+       - A module is 'locked' until the previous module is 'complete'.
+       - Module 6 is additionally gated on Self-Assessment #3 being submitted.
+       The render layer enforces these — server should also validate.
+
+     ▸ REPLACE THIS BLOCK
+       const state = loadState();          // ← localStorage demo
+       // becomes:
+       const state = await fetch('/api/me/dashboard',{credentials:'include'})
+                         .then(r => r.ok ? r.json() : Promise.reject(r));
+     ==================================================================== -->
+
 <style>
-  /* =============== RESET & BASE =============== */
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { font-size: clamp(14px, 1vw + 0.5rem, 17px); }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.6; min-height: 100vh; }
-  .wrap { width: 100%; max-width: min(1200px, 95vw); margin: 0 auto; padding: clamp(12px, 2vw, 24px) clamp(10px, 2vw, 20px) 80px; }
+:root {
+  --purple-50:#faf5ff; --purple-100:#f3e8ff; --purple-200:#e9d5ff;
+  --purple-300:#d8b4fe; --purple-500:#a855f7; --purple-600:#9333ea;
+  --purple-700:#7e22ce; --purple-800:#6b21a8; --purple-900:#581c87;
+  --blue-50:#eff6ff; --blue-100:#dbeafe; --blue-200:#bfdbfe;
+  --blue-400:#60a5fa; --blue-500:#3b82f6; --blue-600:#2563eb;
+  --blue-700:#1d4ed8; --blue-900:#1e3a8a;
+  --gold-50:#fffbeb; --gold-100:#fef3c7; --gold-200:#fde68a;
+  --gold-400:#facc15; --gold-500:#eab308; --gold-600:#ca8a04; --gold-700:#a16207;
+  --teal-50:#f0fdfa; --teal-100:#ccfbf1; --teal-400:#2dd4bf;
+  --teal-500:#14b8a6; --teal-600:#0d9488; --teal-700:#0f766e;
+  --pink-400:#f472b6; --pink-500:#ec4899; --orange-500:#f97316;
+  --slate-50:#f8fafc; --slate-100:#f1f5f9; --slate-200:#e2e8f0;
+  --slate-300:#cbd5e1; --slate-400:#94a3b8; --slate-500:#64748b;
+  --slate-600:#475569; --slate-700:#334155; --slate-800:#1e293b; --slate-900:#0f172a;
+  --green-100:#dcfce7; --green-500:#22c55e; --green-600:#16a34a; --green-700:#15803d;
+  --space-2xs:.25rem; --space-xs:.5rem; --space-sm:.75rem;
+  --space-md:1rem; --space-lg:1.5rem; --space-xl:2rem;
+  --space-2xl:3rem; --space-3xl:4rem; --space-4xl:6rem;
+  --text-xs:clamp(.75rem,.7rem + .2vw,.85rem);
+  --text-sm:clamp(.875rem,.82rem + .25vw,.95rem);
+  --text-base:clamp(1.05rem,.98rem + .3vw,1.15rem);
+  --text-lg:clamp(1.2rem,1.1rem + .5vw,1.35rem);
+  --text-xl:clamp(1.4rem,1.25rem + .7vw,1.65rem);
+  --text-2xl:clamp(1.7rem,1.5rem + 1vw,2.1rem);
+  --text-3xl:clamp(2.1rem,1.8rem + 1.5vw,2.8rem);
+  --text-4xl:clamp(2.6rem,2.2rem + 2vw,3.6rem);
+  --content-width:1280px;
+  --radius-sm:8px; --radius-md:14px; --radius-lg:20px; --radius-xl:28px;
+  --shadow-sm:0 1px 3px rgba(15,23,42,.06),0 1px 2px rgba(15,23,42,.04);
+  --shadow-md:0 4px 12px rgba(15,23,42,.07),0 2px 4px rgba(15,23,42,.04);
+  --shadow-lg:0 12px 28px rgba(91,33,182,.10),0 4px 8px rgba(15,23,42,.05);
+  --shadow-xl:0 22px 50px rgba(91,33,182,.14),0 6px 12px rgba(15,23,42,.06);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  font-size:var(--text-base);line-height:1.7;color:var(--slate-800);
+  background:linear-gradient(180deg,#fbfaff 0%,#f7f6fc 100%);-webkit-font-smoothing:antialiased;}
+.container{max-width:var(--content-width);margin:0 auto;padding:0 var(--space-lg);}
 
-  /* =============== BRAND HEADER (NO NAV) =============== */
-  .brandbar { display: flex; align-items: center; gap: 12px; padding: 12px 4px; margin-bottom: 18px; }
-  .brand-mark { width: 42px; height: 42px; border-radius: 11px; background: linear-gradient(135deg, #7c3aed, #0d9488); display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 19px; flex-shrink: 0; }
-  .brand-text strong { display: block; font-size: clamp(14px, 1.5vw, 16px); color: #0f172a; }
-  .brand-text span { font-size: clamp(10px, 1vw, 12px); color: #64748b; letter-spacing: 0.5px; }
+.ribbon{background:linear-gradient(95deg,var(--purple-800),var(--purple-600),var(--blue-700));
+  color:#fff;padding:var(--space-md) 0;font-size:var(--text-sm);position:sticky;top:0;z-index:50;}
+.ribbon-inner{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:var(--space-sm);}
+.ribbon-left{display:flex;gap:var(--space-md);align-items:center;}
+.ribbon-logo{width:38px;height:38px;border-radius:11px;
+  background:linear-gradient(135deg,var(--gold-400),var(--orange-500));
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;
+  box-shadow:0 2px 6px rgba(0,0,0,.2);text-decoration:none;}
+.ribbon-title{font-weight:700;font-size:var(--text-base);}
+.ribbon-version{font-size:var(--text-xs);opacity:.8;letter-spacing:.04em;}
+.ribbon-right{display:flex;gap:var(--space-md);align-items:center;font-size:var(--text-xs);}
+.ribbon-link{color:#fff;text-decoration:none;opacity:.85;font-weight:600;}
+.ribbon-link:hover{opacity:1;}
+.sync-pill{background:rgba(255,255,255,.18);padding:5px 12px;border-radius:999px;display:flex;align-items:center;gap:6px;}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#86efac;box-shadow:0 0 0 4px rgba(134,239,172,.25);}
 
-  /* =============== HERO BANNER =============== */
-  .hero { background: linear-gradient(135deg, #1e3a8a 0%, #5b21b6 60%, #0d9488 100%); color: white; border-radius: 18px; padding: clamp(22px, 3vw, 36px); margin-bottom: 24px; position: relative; overflow: hidden; }
-  .hero::before { content: ''; position: absolute; top: -60px; right: -60px; width: 220px; height: 220px; background: rgba(255,255,255,0.06); border-radius: 50%; }
-  .hero::after { content: ''; position: absolute; bottom: -80px; left: 30%; width: 180px; height: 180px; background: rgba(255,255,255,0.04); border-radius: 50%; }
-  .hero-inner { position: relative; z-index: 1; display: grid; grid-template-columns: 1.5fr 1fr; gap: clamp(18px, 3vw, 30px); align-items: center; }
-  @media (max-width: 800px) { .hero-inner { grid-template-columns: 1fr; } }
-  .hero-greet { font-size: clamp(10px, 1vw, 12px); letter-spacing: 1.5px; opacity: 0.85; font-weight: 600; margin-bottom: 6px; }
-  .hero h1 { font-size: clamp(20px, 2.6vw, 28px); line-height: 1.25; margin-bottom: 10px; }
-  .hero h1 .wave { display: inline-block; animation: wave 2s ease-in-out infinite; }
-  @keyframes wave { 0%,60%,100%{transform:rotate(0)} 10%{transform:rotate(14deg)} 20%{transform:rotate(-8deg)} 30%{transform:rotate(14deg)} 40%{transform:rotate(-4deg)} 50%{transform:rotate(10deg)} }
-  .hero-sub { font-size: clamp(13px, 1.2vw, 14px); opacity: 0.92; max-width: 540px; margin-bottom: 16px; }
-  .hero-cta { display: inline-flex; align-items: center; gap: 8px; background: white; color: #5b21b6; padding: 11px 20px; border-radius: 10px; font-size: clamp(12px, 1.1vw, 13px); font-weight: 700; text-decoration: none; transition: all 0.2s; border: none; cursor: pointer; }
-  .hero-cta:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.15); }
-  .hero-stats { background: rgba(255,255,255,0.12); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.18); border-radius: 14px; padding: clamp(14px, 1.5vw, 18px); }
-  .hero-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .hero-stat { text-align: center; padding: 10px 6px; background: rgba(255,255,255,0.08); border-radius: 10px; }
-  .hero-stat .num { font-size: clamp(18px, 2vw, 22px); font-weight: 800; }
-  .hero-stat .lbl { font-size: clamp(9px, 0.9vw, 10px); opacity: 0.85; letter-spacing: 0.8px; font-weight: 600; margin-top: 2px; }
-  .hero-streak { margin-top: 10px; padding: 8px 12px; background: rgba(255,255,255,0.1); border-radius: 8px; font-size: clamp(11px, 1vw, 12px); text-align: center; }
+.hero{padding:var(--space-3xl) 0 var(--space-2xl);position:relative;overflow:hidden;}
+.hero-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:var(--space-2xl);align-items:center;}
+@media (max-width:880px){.hero-grid{grid-template-columns:1fr;}}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;
+  font-size:var(--text-xs);font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--purple-700);background:var(--purple-100);
+  padding:8px 16px;border-radius:999px;margin-bottom:var(--space-lg);}
+.hero-title{font-size:var(--text-4xl);font-weight:800;color:var(--slate-900);
+  line-height:1.1;margin:0 0 var(--space-md);letter-spacing:-.02em;}
+.hero-title .accent{background:linear-gradient(95deg,var(--purple-700),var(--blue-700));
+  -webkit-background-clip:text;background-clip:text;color:transparent;}
+.hero-sub{font-size:var(--text-lg);color:var(--slate-600);line-height:1.6;
+  margin:0 0 var(--space-xl);max-width:60ch;}
+.hero-cta-row{display:flex;flex-wrap:wrap;gap:var(--space-md);align-items:center;}
+.btn-primary{display:inline-flex;align-items:center;gap:10px;
+  background:linear-gradient(135deg,var(--purple-600),var(--blue-600));
+  color:#fff;border:none;font-family:inherit;font-size:var(--text-base);font-weight:700;
+  padding:14px 28px;border-radius:999px;cursor:pointer;text-decoration:none;
+  box-shadow:var(--shadow-md);transition:transform .2s ease,box-shadow .2s ease;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
+.btn-primary.disabled{background:var(--slate-300);cursor:not-allowed;pointer-events:none;}
+.hero-progress{display:flex;align-items:center;gap:var(--space-md);
+  font-size:var(--text-sm);color:var(--slate-600);font-weight:600;}
+.hero-progress-bar{width:160px;height:8px;background:var(--slate-200);border-radius:999px;overflow:hidden;}
+.hero-progress-fill{height:100%;width:0%;border-radius:999px;
+  background:linear-gradient(90deg,var(--purple-500),var(--blue-500));
+  transition:width .8s ease;}
+.streak-banner{margin-top:var(--space-lg);
+  display:inline-flex;align-items:center;gap:10px;
+  background:linear-gradient(135deg,var(--gold-50),#fff7ed);
+  border:1px solid var(--gold-200);
+  padding:10px 18px;border-radius:999px;
+  font-size:var(--text-sm);font-weight:600;color:var(--slate-700);}
+.hero-illustration{width:100%;max-width:520px;margin-left:auto;display:block;
+  filter:drop-shadow(0 16px 28px rgba(91,33,182,.18));}
 
-  /* =============== LAYOUT =============== */
-  .grid-main { display: grid; grid-template-columns: 1fr 320px; gap: 22px; }
-  @media (max-width: 980px) { .grid-main { grid-template-columns: 1fr; } }
+.stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-md);margin-top:var(--space-xl);}
+@media (max-width:720px){.stats-strip{grid-template-columns:repeat(2,1fr);}}
+.stat-card{background:#fff;border:1px solid var(--slate-200);
+  border-radius:var(--radius-lg);padding:var(--space-lg);
+  box-shadow:var(--shadow-sm);text-decoration:none;color:inherit;display:block;
+  transition:transform .15s ease,box-shadow .15s ease;}
+.stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);}
+.stat-num{font-size:var(--text-2xl);font-weight:800;
+  background:linear-gradient(135deg,var(--purple-700),var(--blue-700));
+  -webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.1;}
+.stat-label{font-size:var(--text-xs);font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--slate-500);margin-top:6px;}
 
-  /* =============== CARDS =============== */
-  .card { background: white; border-radius: 14px; padding: clamp(18px, 2vw, 26px); box-shadow: 0 2px 12px rgba(0,0,0,0.04); margin-bottom: 22px; overflow: visible; }
-  .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
-  .card-tag { font-size: 11px; font-weight: 800; color: #0d9488; letter-spacing: 1.5px; }
-  .card-tag.purple { color: #7c3aed; }
-  .card-tag.amber { color: #b45309; }
-  .card h2 { font-size: clamp(16px, 1.7vw, 19px); color: #0f172a; margin-top: 4px; }
-  .card-link { font-size: 12px; color: #7c3aed; text-decoration: none; font-weight: 700; cursor: pointer; }
-  .card-link:hover { text-decoration: underline; }
+.dash-grid{display:grid;grid-template-columns:1fr 360px;gap:var(--space-2xl);margin-top:var(--space-3xl);}
+@media (max-width:1024px){.dash-grid{grid-template-columns:1fr;}}
+.section{padding:var(--space-2xl) 0;}
+.section-head{display:flex;align-items:center;justify-content:space-between;
+  gap:var(--space-md);margin-bottom:var(--space-md);flex-wrap:wrap;}
+.section-head-left{display:flex;align-items:center;gap:var(--space-md);}
+.section-icon{width:56px;height:56px;border-radius:14px;
+  background:linear-gradient(135deg,var(--purple-600),var(--blue-600));
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;color:#fff;box-shadow:var(--shadow-md);}
+.section-eyebrow{font-size:var(--text-xs);font-weight:700;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--purple-700);margin-bottom:2px;}
+.section-title{font-size:var(--text-2xl);font-weight:800;color:var(--slate-900);
+  margin:0;line-height:1.2;letter-spacing:-.02em;}
+.section-action{font-size:var(--text-sm);font-weight:600;color:var(--purple-700);text-decoration:none;}
+.section-action:hover{text-decoration:underline;}
+.section-intro{font-size:var(--text-base);color:var(--slate-600);
+  max-width:75ch;margin:0 0 var(--space-xl);line-height:1.7;}
 
-  /* =============== READ THE PAPER =============== */
-  .paper { background: linear-gradient(135deg, #f5f3ff, #ecfdf5); border: 1px solid #c4b5fd; border-radius: 14px; padding: clamp(18px, 2vw, 24px); margin-bottom: 22px; }
-  .paper-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  @media (max-width: 700px) { .paper-grid { grid-template-columns: 1fr; } }
-  .paper-card { background: white; border-radius: 10px; padding: 16px 18px; border: 1px solid #ddd6fe; transition: all 0.2s; cursor: pointer; text-decoration: none; color: inherit; display: block; }
-  .paper-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(124,58,237,0.12); border-color: #a78bfa; }
-  .paper-card.module0 { border-color: #fcd34d; background: linear-gradient(135deg, #fffbeb, #ffffff); }
-  .paper-card.module0:hover { border-color: #f59e0b; box-shadow: 0 6px 16px rgba(245,158,11,0.18); }
-  .paper-card .icon { font-size: 24px; margin-bottom: 8px; }
-  .paper-card h4 { font-size: 14px; color: #5b21b6; margin-bottom: 4px; }
-  .paper-card.module0 h4 { color: #b45309; }
-  .paper-card p { font-size: 12px; color: #64748b; }
-  .paper-card .meta { display: inline-block; margin-top: 8px; font-size: 10.5px; font-weight: 700; color: #0d9488; letter-spacing: 0.5px; }
-  .paper-card.module0 .meta { color: #b45309; }
+.found-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-lg);}
+@media (max-width:880px){.found-grid{grid-template-columns:1fr;}}
+.found-card{background:#fff;border:1.5px solid var(--slate-200);
+  border-radius:var(--radius-xl);padding:var(--space-xl);
+  box-shadow:var(--shadow-sm);
+  transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease;
+  text-decoration:none;color:inherit;display:block;position:relative;overflow:hidden;}
+.found-card:hover{border-color:var(--purple-300);box-shadow:var(--shadow-lg);transform:translateY(-3px);}
+.found-card-icon{width:56px;height:56px;border-radius:14px;
+  background:linear-gradient(135deg,var(--purple-100),var(--blue-100));
+  display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:var(--space-md);}
+.found-card h3{margin:0 0 var(--space-xs);font-size:var(--text-lg);color:var(--slate-900);font-weight:800;}
+.found-card p{margin:0 0 var(--space-md);color:var(--slate-700);line-height:1.6;}
+.found-card .citation{font-size:var(--text-sm);color:var(--slate-600);font-style:italic;
+  line-height:1.55;border-left:3px solid var(--purple-200);padding-left:12px;margin-bottom:var(--space-md);}
+.found-card-meta{font-size:var(--text-xs);font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--purple-700);}
 
-  /* =============== MODULES LIST =============== */
-  .modules-wrap { position: relative; overflow: visible; }
-  .modules-list { display: grid; gap: 12px; position: relative; overflow: visible; }
-  .module-item { position: relative; background: white; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 16px 18px; display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s; cursor: pointer; }
-  .module-item:hover { border-color: #14b8a6; transform: translateX(3px); box-shadow: 0 4px 14px rgba(13,148,136,0.1); z-index: 50; }
-  .module-item:hover .module-tooltip { z-index: 999; }
-  .module-item.locked { opacity: 0.65; cursor: not-allowed; background: #f8fafc; }
-  .module-item.locked:hover { transform: none; border-color: #e2e8f0; box-shadow: none; }
-  .module-num { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; color: white; background: linear-gradient(135deg, #7c3aed, #0d9488); flex-shrink: 0; }
-  .module-item.locked .module-num { background: #cbd5e1; }
-  .module-item.complete .module-num { background: linear-gradient(135deg, #16a34a, #22c55e); }
-  .module-info { min-width: 0; }
-  .module-info h4 { font-size: clamp(13px, 1.3vw, 15px); color: #0f172a; margin-bottom: 2px; }
-  .module-info .meta { font-size: 11.5px; color: #64748b; display: flex; gap: 10px; flex-wrap: wrap; }
-  .module-info .meta span::before { content: '·'; margin-right: 8px; }
-  .module-info .meta span:first-child::before { content: ''; margin-right: 0; }
-  .module-bar-mini { width: 100%; height: 4px; background: #e2e8f0; border-radius: 2px; margin-top: 6px; overflow: hidden; }
-  .module-bar-mini-fill { height: 100%; background: linear-gradient(90deg, #0d9488, #14b8a6); border-radius: 2px; transition: width 0.4s; }
-  .module-status { font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 10px; letter-spacing: 0.5px; flex-shrink: 0; white-space: nowrap; }
-  .status-complete { background: #dcfce7; color: #166534; }
-  .status-progress { background: #fef3c7; color: #92400e; }
-  .status-locked { background: #f1f5f9; color: #64748b; }
-  .status-ready { background: #dbeafe; color: #1e40af; }
+.filter-row{display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:var(--space-lg);gap:var(--space-md);flex-wrap:wrap;}
+.filter-pill{display:inline-flex;align-items:center;gap:8px;background:#fff;
+  border:1.5px solid var(--slate-200);padding:8px 16px;border-radius:999px;
+  font-size:var(--text-sm);font-weight:600;color:var(--slate-700);cursor:pointer;}
+.tip-pill{display:inline-flex;align-items:center;gap:8px;
+  background:linear-gradient(135deg,var(--gold-50),#fffbeb);
+  border:1px solid var(--gold-200);color:var(--slate-700);
+  font-size:var(--text-sm);padding:8px 14px;border-radius:999px;}
 
-  /* TOOLTIP - properly stacked */
-  .module-tooltip { position: absolute; left: 0; right: 0; top: calc(100% + 6px); background: white; border: 1px solid #ddd6fe; border-radius: 12px; padding: 16px 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.18); opacity: 0; visibility: hidden; transform: translateY(-6px); transition: opacity 0.2s, transform 0.2s, visibility 0s linear 0.2s; pointer-events: none; z-index: 999; }
-  .module-item:hover .module-tooltip,
-  .module-item:focus-within .module-tooltip { opacity: 1; visibility: visible; transform: translateY(0); transition: opacity 0.2s, transform 0.2s, visibility 0s; }
-  .module-tooltip h5 { font-size: 11px; font-weight: 800; color: #7c3aed; letter-spacing: 1.2px; margin-bottom: 8px; }
-  .module-tooltip h6 { font-size: 13px; color: #0f172a; margin: 8px 0 4px; }
-  .module-tooltip ul { list-style: none; padding: 0; }
-  .module-tooltip li { font-size: 12px; color: #475569; padding: 3px 0 3px 16px; position: relative; }
-  .module-tooltip li::before { content: '→'; position: absolute; left: 0; color: #14b8a6; font-weight: 700; }
-  .module-tooltip .gain { background: #ecfdf5; padding: 8px 10px; border-radius: 6px; margin-top: 8px; font-size: 11.5px; color: #065f46; font-style: italic; }
-  .module-tooltip .gain strong { font-style: normal; color: #047857; }
-  .module-item.locked .module-tooltip { display: none; }
+.modules-list{display:grid;gap:var(--space-md);}
+.module-card{background:#fff;border:1.5px solid var(--slate-200);
+  border-radius:var(--radius-lg);padding:var(--space-lg);
+  display:grid;grid-template-columns:auto 1fr auto;
+  gap:var(--space-lg);align-items:center;
+  transition:all .2s ease;cursor:pointer;
+  box-shadow:var(--shadow-sm);position:relative;}
+.module-card:hover{border-color:var(--purple-300);box-shadow:var(--shadow-md);transform:translateY(-2px);}
+.module-card.locked{opacity:.7;cursor:not-allowed;}
+.module-card.locked:hover{transform:none;border-color:var(--slate-200);box-shadow:var(--shadow-sm);}
+.module-num{width:64px;height:64px;border-radius:16px;
+  background:linear-gradient(135deg,var(--purple-100),var(--blue-100));
+  display:flex;align-items:center;justify-content:center;
+  font-size:var(--text-2xl);font-weight:800;color:var(--purple-700);}
+.module-card.complete .module-num{background:linear-gradient(135deg,var(--green-100),#bbf7d0);color:var(--green-700);}
+.module-card.next .module-num{background:linear-gradient(135deg,var(--gold-100),var(--gold-200));color:var(--gold-700);}
+.module-card.in-progress .module-num{background:linear-gradient(135deg,var(--blue-100),var(--blue-200));color:var(--blue-700);}
+.module-card.locked .module-num{background:var(--slate-100);color:var(--slate-400);}
+.module-content h4{margin:0 0 var(--space-xs);font-size:var(--text-lg);color:var(--slate-900);font-weight:800;}
+.module-meta{display:flex;flex-wrap:wrap;gap:var(--space-md);
+  font-size:var(--text-xs);color:var(--slate-500);font-weight:600;}
+.module-meta span{display:inline-flex;align-items:center;gap:4px;}
+.module-status{font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;margin-top:var(--space-xs);}
+.module-card.complete .module-status{color:var(--green-700);}
+.module-card.next .module-status{color:var(--gold-700);}
+.module-card.in-progress .module-status{color:var(--blue-700);}
+.module-card.locked .module-status{color:var(--slate-400);}
 
-  .module-actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
-  .mini-btn { font-size: 10.5px; font-weight: 700; padding: 4px 9px; border-radius: 6px; border: 1px solid #ddd6fe; background: white; color: #7c3aed; cursor: pointer; text-decoration: none; transition: all 0.2s; display: inline-block; }
-  .mini-btn:hover { background: #f5f3ff; }
-  .mini-btn.teal { border-color: #99f6e4; color: #0d9488; }
-  .mini-btn.teal:hover { background: #f0fdfa; }
+.module-actions{display:flex;flex-direction:column;gap:8px;align-items:flex-end;}
+.module-actions .module-btn{font-family:inherit;font-size:var(--text-xs);font-weight:700;
+  padding:8px 16px;border-radius:999px;cursor:pointer;
+  border:1.5px solid var(--slate-200);background:#fff;color:var(--slate-700);text-decoration:none;
+  display:inline-flex;align-items:center;gap:6px;letter-spacing:.04em;transition:all .15s ease;}
+.module-btn:hover{border-color:var(--purple-400);color:var(--purple-700);}
+.module-btn.primary{background:linear-gradient(135deg,var(--purple-600),var(--blue-600));
+  color:#fff;border-color:transparent;}
+.module-btn.primary:hover{transform:translateY(-1px);box-shadow:var(--shadow-md);color:#fff;}
+.module-btn.disabled{opacity:.5;cursor:not-allowed;pointer-events:none;}
 
-  /* =============== SELF-ASSESSMENT =============== */
-  .assess { background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 1px solid #fde68a; border-radius: 14px; padding: clamp(18px, 2vw, 24px); margin-bottom: 22px; }
-  .assess-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 14px; flex-wrap: wrap; }
-  .assess-tag { font-size: 11px; font-weight: 800; color: #b45309; letter-spacing: 1.5px; margin-bottom: 4px; }
-  .assess-head h2 { font-size: clamp(16px, 1.7vw, 19px); color: #78350f; margin-bottom: 4px; }
-  .assess-head p { font-size: clamp(12px, 1.1vw, 13px); color: #92400e; }
-  .assess-required { background: #fee2e2; border: 1px solid #fecaca; color: #991b1b; padding: 5px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; flex-shrink: 0; }
-  .assess-required.done { background: #dcfce7; border-color: #bbf7d0; color: #166534; }
-  .assess-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px; }
-  @media (max-width: 700px) { .assess-grid { grid-template-columns: 1fr; } }
-  .assess-recent, .assess-cta { background: white; border-radius: 10px; padding: 16px 18px; }
-  .assess-recent h4 { font-size: 13px; color: #0f172a; margin-bottom: 8px; }
-  .assess-recent .date { font-size: 11px; color: #64748b; margin-bottom: 12px; }
-  .score-circle-row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
-  .score-circle { width: 70px; height: 70px; border-radius: 50%; background: conic-gradient(#0d9488 0% 72%, #e2e8f0 72% 100%); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .score-circle-inner { width: 56px; height: 56px; background: white; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-  .score-circle-inner .num { font-size: 18px; font-weight: 800; color: #0d9488; line-height: 1; }
-  .score-circle-inner .max { font-size: 9px; color: #64748b; }
-  .score-detail { font-size: 12px; color: #475569; flex: 1; min-width: 140px; }
-  .score-detail strong { color: #0f172a; }
-  .dim-bars { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
-  .dim-bar-row { display: grid; grid-template-columns: minmax(80px, 100px) 1fr 30px; align-items: center; gap: 8px; font-size: 11px; }
-  .dim-bar-row .lbl { color: #475569; font-weight: 600; }
-  .dim-bar-row .bar { height: 6px; background: #f1f5f9; border-radius: 3px; overflow: hidden; }
-  .dim-bar-row .fill { height: 100%; border-radius: 3px; }
-  .dim-bar-row .pct { font-size: 10.5px; font-weight: 700; color: #0d9488; text-align: right; }
-  .assess-cta { display: flex; flex-direction: column; }
-  .assess-cta h4 { font-size: 13px; color: #0f172a; margin-bottom: 6px; }
-  .assess-cta p { font-size: 12px; color: #475569; margin-bottom: 12px; flex: 1; }
-  .assess-btn { background: linear-gradient(135deg, #f59e0b, #f97316); color: white; border: none; padding: 11px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; text-align: center; width: 100%; }
-  .assess-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(249,115,22,0.3); }
-  .assess-btn.report { background: linear-gradient(135deg, #0d9488, #14b8a6); margin-top: 8px; }
-  .assess-btn.report:hover { box-shadow: 0 4px 14px rgba(13,148,136,0.3); }
+.module-expand{grid-column:1 / -1;max-height:0;overflow:hidden;transition:max-height .3s ease;}
+.module-card.open .module-expand{max-height:400px;}
+.module-expand-inner{padding-top:var(--space-md);margin-top:var(--space-md);
+  border-top:1px dashed var(--slate-200);}
+.module-expand-inner h5{margin:0 0 var(--space-xs);font-size:var(--text-xs);
+  letter-spacing:.1em;text-transform:uppercase;color:var(--purple-700);}
+.module-expand-inner ul{margin:0 0 var(--space-md);padding-left:20px;
+  color:var(--slate-700);font-size:var(--text-sm);line-height:1.7;}
+.module-expand-inner ul li{margin-bottom:4px;}
+.module-expand-inner p{margin:0;color:var(--slate-700);font-size:var(--text-sm);line-height:1.7;}
 
-  /* =============== SIDEBAR =============== */
-  .side { display: flex; flex-direction: column; gap: 22px; }
-  .profile-card { background: white; border-radius: 14px; padding: 22px 22px 18px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); text-align: center; position: relative; overflow: hidden; }
-  .profile-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 70px; background: linear-gradient(135deg, #7c3aed, #0d9488); }
-  .profile-avatar { position: relative; width: 76px; height: 76px; border-radius: 50%; background: linear-gradient(135deg, #fbbf24, #f97316); margin: 16px auto 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 30px; font-weight: 800; border: 4px solid white; box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
-  .profile-name { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 2px; }
-  .profile-role { font-size: 12px; color: #64748b; margin-bottom: 14px; }
-  .profile-badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-bottom: 14px; }
-  .profile-badge { background: #f5f3ff; color: #5b21b6; padding: 3px 9px; border-radius: 10px; font-size: 10.5px; font-weight: 700; border: 1px solid #ddd6fe; }
-  .profile-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-top: 12px; border-top: 1px solid #f1f5f9; }
-  .profile-meta-item { padding: 6px; }
-  .profile-meta-item .num { font-size: 16px; font-weight: 800; color: #0d9488; }
-  .profile-meta-item .lbl { font-size: 9.5px; color: #64748b; letter-spacing: 0.6px; font-weight: 700; }
-  .profile-edit { display: block; margin-top: 12px; font-size: 11px; color: #7c3aed; text-decoration: none; font-weight: 600; padding-top: 10px; border-top: 1px dashed #e2e8f0; cursor: pointer; }
+.sidebar{display:grid;gap:var(--space-lg);align-content:start;}
+.profile-card{background:#fff;border:1px solid var(--slate-200);
+  border-radius:var(--radius-xl);overflow:hidden;box-shadow:var(--shadow-md);}
+.profile-banner{height:90px;
+  background:linear-gradient(95deg,var(--purple-700),var(--purple-500),var(--teal-500));
+  position:relative;}
+.profile-avatar{position:absolute;left:50%;bottom:-32px;transform:translateX(-50%);
+  width:74px;height:74px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold-400),var(--orange-500));
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:800;font-size:22px;
+  border:4px solid #fff;box-shadow:var(--shadow-md);}
+.profile-body{padding:48px var(--space-lg) var(--space-lg);text-align:center;}
+.profile-name{font-size:var(--text-lg);font-weight:800;color:var(--slate-900);margin:0 0 4px;}
+.profile-title{font-size:var(--text-sm);color:var(--slate-600);margin:0 0 var(--space-md);}
+.profile-tags{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:var(--space-md);}
+.profile-tag{font-size:var(--text-xs);font-weight:600;
+  background:var(--purple-50);color:var(--purple-800);
+  border:1px solid var(--purple-200);padding:4px 12px;border-radius:999px;
+  display:inline-flex;align-items:center;gap:4px;text-decoration:none;}
+.profile-stats{display:grid;grid-template-columns:1fr 1fr;
+  gap:var(--space-sm);padding:var(--space-md) 0;
+  border-top:1px solid var(--slate-200);
+  border-bottom:1px dashed var(--slate-200);
+  margin-bottom:var(--space-md);}
+.profile-stat-num{font-size:var(--text-xl);font-weight:800;color:var(--green-600);line-height:1.1;}
+.profile-stat-label{font-size:10px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--slate-500);margin-top:2px;}
+.profile-edit{font-size:var(--text-sm);color:var(--purple-700);text-decoration:none;font-weight:600;}
+.profile-edit:hover{text-decoration:underline;}
 
-  .progress-card { background: white; border-radius: 14px; padding: 22px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
-  .progress-card h3 { font-size: 15px; color: #0f172a; margin-bottom: 4px; }
-  .progress-card .sub { font-size: 12px; color: #64748b; margin-bottom: 14px; }
-  .progress-ring-wrap { display: flex; justify-content: center; margin-bottom: 14px; }
-  .progress-ring { width: 130px; height: 130px; border-radius: 50%; background: conic-gradient(#0d9488 0% 50%, #14b8a6 50% 67%, #f1f5f9 67% 100%); display: flex; align-items: center; justify-content: center; position: relative; }
-  .progress-ring-inner { width: 100px; height: 100px; background: white; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-  .progress-ring-inner .num { font-size: 26px; font-weight: 800; color: #0d9488; line-height: 1; }
-  .progress-ring-inner .lbl { font-size: 10px; color: #64748b; letter-spacing: 0.5px; font-weight: 700; margin-top: 2px; }
-  .progress-list { display: flex; flex-direction: column; gap: 8px; }
-  .progress-row { display: flex; justify-content: space-between; font-size: 12px; padding: 6px 0; border-bottom: 1px solid #f1f5f9; }
-  .progress-row:last-child { border: 0; }
-  .progress-row .lbl { color: #475569; }
-  .progress-row .val { font-weight: 700; color: #0f172a; }
-  .progress-row .val.green { color: #16a34a; }
-  .progress-row .val.amber { color: #b45309; }
+.progress-card{background:#fff;border:1px solid var(--slate-200);
+  border-radius:var(--radius-xl);padding:var(--space-xl);box-shadow:var(--shadow-md);}
+.progress-card h3{margin:0 0 4px;font-size:var(--text-lg);color:var(--slate-900);
+  font-weight:800;display:flex;align-items:center;gap:8px;}
+.progress-card-sub{margin:0 0 var(--space-lg);font-size:var(--text-sm);color:var(--slate-500);}
+.donut-wrap{display:flex;justify-content:center;margin:var(--space-md) 0 var(--space-lg);}
+.donut{position:relative;width:180px;height:180px;}
+.donut svg{transform:rotate(-90deg);}
+.donut-track{stroke:var(--slate-200);}
+.donut-fill{stroke:url(#donutGrad);transition:stroke-dashoffset .8s ease;}
+.donut-label{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;}
+.donut-label .pct{font-size:var(--text-3xl);font-weight:800;color:var(--teal-600);line-height:1;}
+.donut-label .lbl{font-size:11px;font-weight:700;letter-spacing:.1em;
+  color:var(--slate-500);text-transform:uppercase;margin-top:4px;}
+.progress-row{display:flex;justify-content:space-between;align-items:center;
+  padding:var(--space-sm) 0;border-bottom:1px dashed var(--slate-200);font-size:var(--text-sm);}
+.progress-row:last-child{border-bottom:none;}
+.progress-row .label{color:var(--slate-700);}
+.progress-row .value{font-weight:700;color:var(--slate-900);}
+.progress-row .value.green{color:var(--green-600);}
+.progress-row .value.fire{color:var(--orange-500);}
 
-  .notice { background: linear-gradient(135deg, #fef3c7, #fce7f3); border: 1px solid #fde68a; border-radius: 14px; padding: 18px 20px; }
-  .notice h3 { font-size: 14px; color: #78350f; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
-  .notice-item { background: white; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; font-size: 12px; color: #475569; border-left: 3px solid #f59e0b; }
-  .notice-item:last-child { margin-bottom: 0; }
-  .notice-item strong { color: #78350f; display: block; margin-bottom: 2px; font-size: 12.5px; }
-  .notice-item .when { font-size: 10.5px; color: #94a3b8; margin-top: 3px; display: block; }
+.assess-section{background:linear-gradient(135deg,var(--gold-50) 0%,#fffef0 100%);
+  border:1.5px solid var(--gold-200);border-radius:var(--radius-xl);
+  padding:var(--space-2xl);margin-top:var(--space-2xl);box-shadow:var(--shadow-sm);}
+.assess-eyebrow{font-size:var(--text-xs);font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--gold-700);
+  display:inline-flex;align-items:center;gap:6px;}
+.assess-title{font-size:var(--text-2xl);font-weight:800;
+  color:var(--slate-900);margin:var(--space-xs) 0 var(--space-sm);}
+.assess-intro{font-size:var(--text-base);color:var(--slate-700);
+  margin:0 0 var(--space-md);max-width:75ch;line-height:1.6;}
+.assess-status-pill{display:inline-flex;align-items:center;gap:6px;
+  background:var(--green-100);color:var(--green-700);
+  padding:6px 14px;border-radius:999px;
+  font-size:var(--text-xs);font-weight:700;letter-spacing:.06em;
+  margin-bottom:var(--space-lg);}
+.assess-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:var(--space-lg);}
+@media (max-width:880px){.assess-grid{grid-template-columns:1fr;}}
+.assess-card{background:#fff;border-radius:var(--radius-lg);padding:var(--space-xl);
+  box-shadow:var(--shadow-sm);border:1px solid var(--slate-200);}
+.assess-card h4{margin:0 0 4px;font-size:var(--text-lg);color:var(--slate-900);}
+.assess-card .meta{font-size:var(--text-sm);color:var(--slate-500);margin:0 0 var(--space-lg);
+  display:flex;align-items:center;gap:6px;}
+.assess-summary{display:grid;grid-template-columns:auto 1fr;gap:var(--space-lg);
+  align-items:center;margin-bottom:var(--space-lg);}
+.mini-donut{position:relative;width:100px;height:100px;}
+.mini-donut svg{transform:rotate(-90deg);}
+.mini-donut-label{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;}
+.mini-donut-label .num{font-size:var(--text-xl);font-weight:800;color:var(--teal-600);line-height:1;}
+.mini-donut-label .sub{font-size:10px;color:var(--slate-500);text-transform:uppercase;
+  letter-spacing:.06em;margin-top:2px;}
+.summary-text{font-size:var(--text-sm);color:var(--slate-700);line-height:1.6;margin:0;}
+.summary-text strong{color:var(--purple-800);}
+.dim-bars{display:grid;gap:var(--space-sm);}
+.dim-bar{display:grid;grid-template-columns:140px 1fr 50px;gap:var(--space-sm);
+  align-items:center;font-size:var(--text-sm);}
+.dim-bar .label{color:var(--slate-700);font-weight:600;display:flex;align-items:center;gap:6px;}
+.dim-bar-track{height:10px;background:var(--slate-100);border-radius:999px;overflow:hidden;}
+.dim-bar-fill{height:100%;border-radius:999px;transition:width .8s ease;}
+.dim-bar-fill.literacy{background:linear-gradient(90deg,var(--blue-400),var(--blue-600));}
+.dim-bar-fill.curriculum{background:linear-gradient(90deg,var(--gold-400),var(--gold-600));}
+.dim-bar-fill.teaching{background:linear-gradient(90deg,var(--teal-400),var(--teal-600));}
+.dim-bar-fill.assessment{background:linear-gradient(90deg,var(--pink-400),var(--pink-500));}
+.dim-bar .pct{font-weight:700;color:var(--slate-900);text-align:right;}
 
-  .footer { text-align: center; margin-top: 30px; font-size: 11.5px; color: #94a3b8; padding: 0 12px; }
-  .footer a { color: #7c3aed; text-decoration: none; font-weight: 600; }
+.assess-next{display:flex;flex-direction:column;justify-content:space-between;}
+.assess-next h4{margin:0 0 var(--space-xs);font-size:var(--text-lg);color:var(--slate-900);}
+.assess-next > p{font-size:var(--text-sm);color:var(--slate-700);
+  line-height:1.6;margin:0 0 var(--space-lg);}
+.btn-cta-orange{display:flex;align-items:center;justify-content:center;gap:8px;
+  background:linear-gradient(135deg,var(--orange-500),var(--gold-500));
+  color:#fff;padding:14px 24px;border-radius:var(--radius-md);
+  border:none;font-family:inherit;font-weight:700;font-size:var(--text-base);
+  cursor:pointer;text-decoration:none;
+  box-shadow:var(--shadow-md);transition:transform .2s ease;margin-bottom:var(--space-sm);}
+.btn-cta-orange:hover{transform:translateY(-2px);color:#fff;}
+.btn-cta-teal{display:flex;align-items:center;justify-content:center;gap:8px;
+  background:linear-gradient(135deg,var(--teal-500),var(--teal-700));
+  color:#fff;padding:14px 24px;border-radius:var(--radius-md);
+  border:none;font-family:inherit;font-weight:700;font-size:var(--text-base);
+  cursor:pointer;text-decoration:none;
+  box-shadow:var(--shadow-md);transition:transform .2s ease;}
+.btn-cta-teal:hover{transform:translateY(-2px);color:#fff;}
 
-  /* Sync indicator */
-  .sync-pill { position: fixed; bottom: 16px; right: 16px; background: white; border: 1px solid #e2e8f0; border-radius: 999px; padding: 8px 14px; font-size: 11.5px; color: #475569; box-shadow: 0 4px 14px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 8px; z-index: 100; }
-  .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #16a34a; animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.dash-footer{margin-top:var(--space-3xl);padding:var(--space-xl) 0;
+  border-top:1px solid var(--slate-200);
+  font-size:var(--text-sm);color:var(--slate-500);
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:var(--space-md);}
+.dash-footer a{color:var(--slate-600);text-decoration:none;margin:0 var(--space-sm);}
+.dash-footer a:hover{color:var(--purple-700);}
 
-  @media (max-width: 600px) {
-    .module-item { grid-template-columns: auto 1fr; }
-    .module-status { grid-column: 1 / -1; justify-self: start; margin-top: 4px; }
-    .hero-stat-grid { grid-template-columns: 1fr 1fr; }
-  }
+/* === DEMO CONTROL PANEL (REMOVE BEFORE PRODUCTION) === */
+#demo-fab{position:fixed;bottom:20px;right:20px;z-index:100;
+  width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--purple-600),var(--blue-600));
+  color:#fff;font-size:22px;box-shadow:var(--shadow-lg);
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .2s ease;}
+#demo-fab:hover{transform:scale(1.08);}
+#demo-panel{position:fixed;bottom:90px;right:20px;z-index:100;
+  width:300px;background:#fff;border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-xl);border:1px solid var(--slate-200);
+  padding:var(--space-lg);transform:translateY(20px);opacity:0;
+  pointer-events:none;transition:all .25s ease;}
+#demo-panel.open{transform:translateY(0);opacity:1;pointer-events:auto;}
+#demo-panel h4{margin:0 0 4px;font-size:var(--text-sm);color:var(--slate-900);
+  font-weight:800;display:flex;align-items:center;gap:6px;}
+#demo-panel .demo-sub{font-size:11px;color:var(--slate-500);margin-bottom:var(--space-md);
+  line-height:1.4;}
+.demo-section{margin-bottom:var(--space-md);}
+.demo-section-label{font-size:10px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--slate-500);margin-bottom:6px;}
+.demo-btn{display:block;width:100%;text-align:left;
+  font-family:inherit;font-size:var(--text-xs);font-weight:600;
+  padding:8px 12px;border-radius:8px;cursor:pointer;
+  border:1px solid var(--slate-200);background:#fff;color:var(--slate-700);
+  margin-bottom:6px;transition:all .15s ease;}
+.demo-btn:hover{border-color:var(--purple-400);background:var(--purple-50);color:var(--purple-700);}
+.demo-btn.danger:hover{border-color:#fca5a5;background:#fef2f2;color:#b91c1c;}
+.demo-banner{background:#fef3c7;border:1px solid #fde68a;
+  color:#a16207;padding:8px 10px;border-radius:8px;
+  font-size:11px;line-height:1.4;margin-bottom:var(--space-md);}
 </style>
-<script src="progress.js"></script>
 </head>
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    let data = ProgressTracker.load();
-    
-    // First visit? Ask for their name
-    if (!data.userName) {
-      const name = prompt("Welcome! What's your name?") || 'Learner';
-      ProgressTracker.setUserName(name);
-      data = ProgressTracker.load();
-    }
-    
-    // Show name and progress % (only if these elements exist)
-    const nameEl = document.getElementById('user-name');
-    if (nameEl) nameEl.textContent = data.userName;
-    
-    const progressEl = document.getElementById('overall-progress');
-    if (progressEl) progressEl.textContent = ProgressTracker.getCompletionPercent() + '%';
-    
-    // Update each module's status badge
-    Object.keys(data.modules).forEach(modId => {
-      const mod = data.modules[modId];
-      const statusEl = document.getElementById('status-' + modId);
-      if (!statusEl) return;
-      
-      statusEl.classList.remove('status-complete', 'status-progress', 'status-ready', 'status-locked');
-
-      if (mod.completed) {
-        statusEl.textContent = '✓ COMPLETE';
-        statusEl.classList.add('status-complete');
-      } else if (mod.started) {
-        statusEl.textContent = '🟡 IN PROGRESS';
-        statusEl.classList.add('status-progress');
-      } else {
-        statusEl.textContent = '▶ START';
-        statusEl.classList.add('status-ready');
-      }
-    });
-  });
-  
-  // Auto-refresh dashboard when a module finishes in another tab
-  window.addEventListener('storage', (e) => {
-    if (e.key === 'genai_workshop_progress') {
-      location.reload();
-    }
-  });
-</script>
 <body>
-<div class="wrap">
 
-  <!-- ========== BRAND HEADER (no nav) ========== -->
-  <div class="brandbar">
-    <div class="brand-mark">G</div>
-    <div class="brand-text">
-      <strong>GenAI Competency Workshop</strong>
-      <span>Educator Edition · v1.1</span>
-    </div>
-  </div>
-
-  <!-- ========== HERO BANNER ========== -->
-  <div class="hero">
-    <div class="hero-inner">
+<!-- ====================== TOP RIBBON ====================== -->
+<div class="ribbon">
+  <div class="container ribbon-inner">
+    <div class="ribbon-left">
+      <a href="index.html" class="ribbon-logo" aria-label="Workshop home">G</a>
       <div>
-        <div class="hero-greet">WELCOME BACK</div>
-        <h1>Hi <span id="user-name">there</span>! 👋</h1>
-        <p>Overall progress: <span id="overall-progress">0%</span></p>
-        <button class="hero-cta" onclick="WorkshopAPI.openModule(1)">▶ Continue Module 1 →</button>
-      </div>
-      <div class="hero-stats">
-        <div class="hero-stat-grid">
-          <div class="hero-stat"><div class="num" id="statModules">4 / 6</div><div class="lbl">MODULES DONE</div></div>
-          <div class="hero-stat"><div class="num" id="statTime">3h 42m</div><div class="lbl">TIME INVESTED</div></div>
-          <div class="hero-stat"><div class="num" id="statReflect">12</div><div class="lbl">REFLECTIONS</div></div>
-          <div class="hero-stat"><div class="num" id="statChecks">2</div><div class="lbl">SELF-CHECKS</div></div>
-        </div>
-        <div class="hero-streak">🔥 <strong id="statStreak">4-day learning streak</strong> — keep it going!</div>
+        <div class="ribbon-title">GenAI Competency Workshop</div>
+        <div class="ribbon-version">Educator Edition · v1.1</div>
       </div>
     </div>
+    <div class="ribbon-right">
+      <div class="sync-pill"><span class="sync-dot"></span> Synced just now</div>
+      <a class="ribbon-link" href="help.html">Help</a>
+      <a class="ribbon-link" href="profile-settings.html">Settings</a>
+    </div>
   </div>
+</div>
 
-  <!-- ========== READ THE PAPER + MODULE 0 ========== -->
-  <div class="paper" id="paper">
-    <div class="card-head">
+<!-- ====================== HERO ====================== -->
+<header class="hero">
+  <div class="container">
+    <div class="hero-grid">
       <div>
-        <div class="card-tag purple">📄 FOUNDATIONAL READING &amp; ORIENTATION</div>
-        <h2 style="color:#5b21b6;">Read the Paper &amp; Get Oriented</h2>
+        <span class="hero-eyebrow">👋 Welcome back</span>
+        <h1 class="hero-title">Hi <span class="accent" data-bind="user.firstName">there</span>! 👋</h1>
+        <p class="hero-sub">
+          You're making real progress. Pick up where you left off, or revisit any
+          completed module — your reflections and notes are saved.
+        </p>
+        <div class="hero-cta-row">
+          <!-- DYNAMIC: href + label set from nextModule -->
+          <a id="continueBtn" href="#" class="btn-primary">▶ Continue</a>
+          <div class="hero-progress">
+            <span>Overall progress</span>
+            <div class="hero-progress-bar"><div class="hero-progress-fill" id="overallProgressFill"></div></div>
+            <span data-bind="overallPctLabel">0%</span>
+          </div>
+        </div>
+        <div class="streak-banner">🔥 <span><strong><span data-bind="user.streakDays">0</span>-day learning streak</strong> — keep it going!</span></div>
       </div>
-      <a class="card-link" onclick="WorkshopAPI.viewAllResources()">View all resources →</a>
+
+      <svg class="hero-illustration" viewBox="0 0 480 380" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="hg1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#a855f7"/><stop offset="100%" stop-color="#3b82f6"/>
+          </linearGradient>
+          <linearGradient id="hg2" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#f97316"/>
+          </linearGradient>
+          <radialGradient id="bgr" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#ede9fe"/><stop offset="100%" stop-color="#dbeafe"/>
+          </radialGradient>
+        </defs>
+        <circle cx="240" cy="190" r="180" fill="url(#bgr)"/>
+        <circle cx="60" cy="80" r="4" fill="#a78bfa" opacity=".5"/>
+        <circle cx="420" cy="60" r="6" fill="#fbbf24" opacity=".5"/>
+        <circle cx="100" cy="320" r="5" fill="#60a5fa" opacity=".5"/>
+        <circle cx="400" cy="310" r="4" fill="#c084fc" opacity=".5"/>
+        <g transform="translate(80,290)">
+          <rect x="0" y="-30" width="60" height="30" rx="6" fill="#c4b5fd"/>
+          <rect x="60" y="-60" width="60" height="60" rx="6" fill="#a78bfa"/>
+          <rect x="120" y="-90" width="60" height="90" rx="6" fill="#8b5cf6"/>
+          <rect x="180" y="-120" width="60" height="120" rx="6" fill="#7c3aed"/>
+          <rect x="240" y="-150" width="60" height="150" rx="6" fill="#6d28d9" opacity=".7"/>
+          <rect x="300" y="-180" width="60" height="180" rx="6" fill="#5b21b6" opacity=".4"/>
+        </g>
+        <g transform="translate(290,125)">
+          <circle cx="0" cy="0" r="18" fill="url(#hg1)"/>
+          <circle cx="0" cy="0" r="8" fill="#fff"/>
+          <circle cx="0" cy="0" r="3" fill="url(#hg1)"/>
+          <rect x="-44" y="-44" width="88" height="22" rx="11" fill="#fff" stroke="#a855f7" stroke-width="1.5"/>
+          <text x="0" y="-29" text-anchor="middle" font-size="10" font-weight="700" fill="#7c3aed">YOU ARE HERE</text>
+        </g>
+      </svg>
     </div>
-    <p style="font-size:13px;color:#64748b;margin-bottom:14px;">The peer-reviewed manuscript that grounds this workshop — and a 15-minute orientation that sets you up for everything that follows.</p>
-    <div class="paper-grid">
-      <!-- Linked to the actual PDF manuscript -->
-      <a class="paper-card" href="GenAI-Responsive Competency Framework for University Teachers.pdf" target="_blank" rel="noopener" onclick="WorkshopAPI.trackEvent('paper_opened','manuscript')">
-        <div class="icon">📑</div>
-        <h4>Full Manuscript (PDF)</h4>
-        <p>Sun, Ba, Cha, Yu, Chiang, Dai &amp; Lim (2026). <em>Empowering university teachers in higher education: A generative AI-responsive competency framework.</em> Computers and Education: Artificial Intelligence, 10, 100542.</p>
-        <span class="meta">📖 ~38 MIN READ · OPEN ACCESS · CC BY 4.0</span>
+
+    <!-- Stats strip — DYNAMIC -->
+    <div class="stats-strip">
+      <a href="modules-overview.html" class="stat-card">
+        <div class="stat-num"><span data-bind="modulesCompleted">–</span> / <span data-bind="modulesTotal">–</span></div>
+        <div class="stat-label">Modules Done</div>
       </a>
-      <!-- Module 0 replaces the Knowledge Shortcut -->
-      <a class="paper-card module0" href="module_0_pic.html" onclick="WorkshopAPI.trackEvent('module_opened',0)">
-        <div class="icon">🧭</div>
-        <h4>Module 0 · Welcome &amp; Orientation</h4>
-        <p>Before the four dimensions, take 15 minutes to set up your profile, take the pre-test, and learn how to read your assessment report — the engine that drives the rest of your journey.</p>
-        <span class="meta">⏱ ~15 MIN · 3 SECTIONS · INCLUDES PRE-TEST</span>
+      <a href="progress-detail.html" class="stat-card">
+        <div class="stat-num" data-bind="timeInvestedLabel">–</div>
+        <div class="stat-label">Time Invested</div>
+      </a>
+      <a href="reflections.html" class="stat-card">
+        <div class="stat-num" data-bind="reflections">–</div>
+        <div class="stat-label">Reflections</div>
+      </a>
+      <a href="self-assessments.html" class="stat-card">
+        <div class="stat-num"><span data-bind="selfChecksDone">–</span> / <span data-bind="selfChecksTotal">–</span></div>
+        <div class="stat-label">Self-Checks</div>
       </a>
     </div>
   </div>
+</header>
 
-  <!-- ========== MAIN GRID ========== -->
-  <div class="grid-main">
-    <div class="main-col">
-
-      <!-- =================== MODULES LIST =================== -->
-      <div class="card" id="modules">
-        <div class="card-head">
-          <div>
-            <div class="card-tag">🗂 ALL MODULES</div>
-            <h2>Your Learning Path</h2>
-          </div>
-          <a class="card-link" onclick="WorkshopAPI.filterModules()">Filter: All ▾</a>
-        </div>
-        <p style="font-size:12.5px;color:#64748b;margin-bottom:14px;">💡 <strong>Hover</strong> any module to preview its contents. <strong>Click</strong> a completed module to revisit its wrap-up.</p>
-
-        <div class="modules-wrap">
-          <div class="modules-list">
-
-            <!-- Module 1 → links to module_1_pic.html -->
-            <div class="module-item complete" tabindex="0" onclick="WorkshopAPI.openModule(1)" data-module="1">
-              <div class="module-num">1</div>
-              <div class="module-info">
-                <h4>Introduction &amp; Framework Overview</h4>
-                <div class="meta"><span>⏱ 25 min</span><span>3 sections</span><span>✓ Completed Mar 3</span></div>
-                <div class="module-bar-mini"><div class="module-bar-mini-fill" style="width:100%;"></div></div>
-                <div class="module-actions">
-                  <a class="mini-btn teal" href="module_1_pic.html" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();WorkshopAPI.trackEvent('module_wrapup',1)">📋 Wrap-up</a>
-                  <a class="mini-btn" href="module_1_pic.html" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();WorkshopAPI.trackEvent('module_revisit',1)">↻ Revisit</a>
-                </div>
-              </div>
-              <span id="status-module_1_pic" class="module-status status-complete">✓ COMPLETE</span>
-              <div class="module-tooltip">
-                <h5>📋 WHAT YOU'LL GET</h5>
-                <h6>Sections covered:</h6>
-                <ul>
-                  <li>1.1 The Big Picture — the 4×3×2 framework structure</li>
-                  <li>1.2 How the framework connects to your practice</li>
-                  <li>1.3 Recap of user instructions from Module 0</li>
-                </ul>
-                <div class="gain"><strong>You'll leave with:</strong> a personal learning plan, a clear sense of why the framework is structured this way, and three context layers (discipline, learner profile, culture) for reading every module ahead.</div>
-              </div>
-            </div>
-
-            <!-- Module 2 → links to module_2_pic.html -->
-            <div class="module-item complete" tabindex="0" onclick="WorkshopAPI.openModule(2)" data-module="2">
-              <div class="module-num">2</div>
-              <div class="module-info">
-                <h4>Dimension 1 · GenAI Literacy</h4>
-                <div class="meta"><span>⏱ 30–40 min</span><span>4 sections</span><span>✓ Completed Mar 5</span></div>
-                <div class="module-bar-mini"><div class="module-bar-mini-fill" style="width:100%;"></div></div>
-                <div class="module-actions">
-                  <a class="mini-btn teal" href="module_2_pic.html" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();WorkshopAPI.trackEvent('module_wrapup',1)">📋 Wrap-up</a>
-                  <a class="mini-btn" href="module_2_pic.html" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();WorkshopAPI.trackEvent('module_revisit',1)">↻ Revisit</a>
-                </div>
-              </div>
-              <span id="status-module_2" class="module-status status-complete">✓ COMPLETE</span>
-              <div class="module-tooltip">
-                <h5>📋 WHAT YOU'LL GET</h5>
-                <h6>Sections covered:</h6>
-                <ul>
-                  <li>2.1 What is GenAI Literacy in this framework?</li>
-                  <li>2.2 Teacher's own literacy across levels (with Dr. Chen)</li>
-                  <li>2.3 Empowering students' literacy across levels</li>
-                  <li>2.4 Module wrap-up &amp; knowledge recap</li>
-                </ul>
-                <div class="gain"><strong>You'll leave with:</strong> a sharper internal "BS detector" for AI outputs, six concrete takeaways, and five moves you can apply tomorrow.</div>
-              </div>
-            </div>
-
-            <!-- Module 3 -->
-            <div class="module-item complete" tabindex="0" onclick="WorkshopAPI.openModule(3)" data-module="3">
-              <div class="module-num">3</div>
-              <div class="module-info">
-                <h4>Dimension 2 · Curriculum &amp; Learning Design</h4>
-                <div class="meta"><span>⏱ 30 min</span><span>3 sections</span><span>✓ Completed Mar 9</span></div>
-                <div class="module-bar-mini"><div class="module-bar-mini-fill" style="width:100%;"></div></div>
-                <div class="module-actions">
-                  <a class="mini-btn teal" href="module_3.html" onclick="event.stopPropagation();WorkshopAPI.trackEvent('module_wrapup',3)">📋 Wrap-up</a>
-                  <a class="mini-btn" href="module_3.html" onclick="event.stopPropagation();WorkshopAPI.trackEvent('module_revisit',3)">↻ Revisit</a>
-                </div>
-              </div>
-              <span class="module-status status-complete">✓ COMPLETE</span>
-              <div class="module-tooltip">
-                <h5>📋 WHAT YOU'LL GET</h5>
-                <h6>Sections covered:</h6>
-                <ul><li>3.1 Learning objectives in the GenAI era</li><li>3.2 Redesigning syllabi &amp; units</li><li>3.3 Stress-testing your curriculum</li></ul>
-                <div class="gain"><strong>You'll leave with:</strong> a redesign checklist + a worked example of a unit before/after GenAI integration.</div>
-              </div>
-            </div>
-
-            <!-- Module 4 -->
-            <div class="module-item complete" tabindex="0" onclick="WorkshopAPI.openModule(4)" data-module="4">
-              <div class="module-num">4</div>
-              <div class="module-info">
-                <h4>Dimension 3 · Teaching &amp; Learning Practice</h4>
-                <div class="meta"><span>⏱ 28 min</span><span>3 sections</span><span>✓ Completed Mar 12</span></div>
-                <div class="module-bar-mini"><div class="module-bar-mini-fill" style="width:100%;"></div></div>
-                <div class="module-actions">
-                  <a class="mini-btn teal" href="module_4.html" onclick="event.stopPropagation();WorkshopAPI.trackEvent('module_wrapup',4)">📋 Wrap-up</a>
-                  <a class="mini-btn" href="module_4.html" onclick="event.stopPropagation();WorkshopAPI.trackEvent('module_revisit',4)">↻ Revisit</a>
-                </div>
-              </div>
-              <span class="module-status status-complete">✓ COMPLETE</span>
-              <div class="module-tooltip">
-                <h5>📋 WHAT YOU'LL GET</h5>
-                <h6>Sections covered:</h6>
-                <ul><li>4.1 GenAI as scaffold, simulation &amp; partner</li><li>4.2 Activity design patterns</li><li>4.3 Common pitfalls in classroom use</li></ul>
-                <div class="gain"><strong>You'll leave with:</strong> 3 concrete classroom activities you can run in your next teaching week.</div>
-              </div>
-            </div>
-
-            <!-- Module 5 - Ready -->
-            <div class="module-item" tabindex="0" onclick="WorkshopAPI.openModule(5)" data-module="5">
-              <div class="module-num">5</div>
-              <div class="module-info">
-                <h4>Dimension 4 · Assessment</h4>
-                <div class="meta"><span>⏱ 32 min</span><span>3 sections</span><span>📍 Up next</span></div>
-                <div class="module-bar-mini"><div class="module-bar-mini-fill" style="width:0%;"></div></div>
-              </div>
-              <span class="module-status status-ready">▶ START</span>
-              <div class="module-tooltip">
-                <h5>📋 WHAT YOU'LL GET</h5>
-                <h6>Sections covered:</h6>
-                <ul><li>5.1 Validity &amp; AI-aware assessment</li><li>5.2 Designing assessment tasks</li><li>5.3 Rubrics that grade reasoning, not artefacts</li></ul>
-                <div class="gain"><strong>You'll leave with:</strong> a redesigned rubric for one of your own assessments — done by the end of the module.</div>
-              </div>
-            </div>
-
-            <!-- Module 6 - Locked -->
-            <div class="module-item locked" data-module="6">
-              <div class="module-num">6</div>
-              <div class="module-info">
-                <h4>Synthesis &amp; Next Steps</h4>
-                <div class="meta"><span>⏱ 20 min</span><span>2 sections</span><span>🔒 Complete Module 5 to unlock</span></div>
-                <div class="module-bar-mini"><div class="module-bar-mini-fill" style="width:0%;"></div></div>
-              </div>
-              <span class="module-status status-locked">🔒 LOCKED</span>
-            </div>
-
-          </div>
+<!-- ====================== FOUNDATIONAL READING ====================== -->
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-head-left">
+        <div class="section-icon">📄</div>
+        <div>
+          <div class="section-eyebrow">Foundational Reading & Orientation</div>
+          <h2 class="section-title">Read the Paper & Get Oriented</h2>
         </div>
       </div>
+      <a class="section-action" href="resources.html">View all resources →</a>
+    </div>
+    <p class="section-intro">
+      The peer-reviewed manuscript that grounds this workshop — and a 15-minute
+      orientation that sets you up for everything that follows.
+    </p>
 
-      <!-- =================== SELF-ASSESSMENT =================== -->
-      <div class="assess" id="assess">
-        <div class="assess-head">
+    <div class="found-grid">
+      <a href="GenAI-Responsive Competency Framework for University Teachers.pdf" target="_blank" rel="noopener" class="found-card">
+        <div class="found-card-icon">📑</div>
+        <h3>Full Manuscript (PDF)</h3>
+        <div class="citation">
+          Sun, Ba, Cha, Yu, Chiang, Dai &amp; Lim (2026). <em>Empowering university teachers
+          in higher education: A generative AI-responsive competency framework.</em>
+          Computers and Education: Artificial Intelligence, 10, 100542.
+        </div>
+        <div class="found-card-meta">📖 ~38 min read · Open Access · CC BY 4.0</div>
+      </a>
+      <a href="module_0_pic.html" class="found-card">
+        <div class="found-card-icon">🧭</div>
+        <h3>Module 0 · Welcome &amp; Orientation</h3>
+        <p>Before the four dimensions, take 15 minutes to set up your profile, take the
+          pre-test, and learn how to read your assessment report — the engine that drives
+          the rest of your journey.</p>
+        <div class="found-card-meta">⏱ ~15 min · 3 sections · Includes pre-test</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== MAIN DASHBOARD GRID ====================== -->
+<section class="container">
+  <div class="dash-grid">
+
+    <!-- ============ LEFT: MODULE LIST (DYNAMIC) ============ -->
+    <div>
+      <div class="section-head">
+        <div class="section-head-left">
+          <div class="section-icon">🗂</div>
           <div>
-            <div class="assess-tag">📊 SELF-ASSESSMENT CHECKPOINT</div>
-            <h2>Your Most Recent Self-Check</h2>
-            <p>Required between Module 4 → Module 5. Take it again any time to see how your thinking has shifted.</p>
-          </div>
-          <span class="assess-required done">✓ COMPLETED · NEXT REQUIRED AFTER MOD 5</span>
-        </div>
-
-        <div class="assess-grid">
-          <div class="assess-recent">
-            <h4>Self-Assessment #2 — Mid-workshop</h4>
-            <div class="date">📅 Taken Mar 12, 2026 · 11 min</div>
-            <div class="score-circle-row">
-              <div class="score-circle">
-                <div class="score-circle-inner">
-                  <div class="num">72%</div>
-                  <div class="max">overall</div>
-                </div>
-              </div>
-              <div class="score-detail">
-                <strong>Strong growth</strong> since your baseline (51% → 72%). Biggest jumps in <strong>Curriculum Design</strong> and <strong>Teaching Practice</strong>.
-              </div>
-            </div>
-            <div class="dim-bars">
-              <div class="dim-bar-row"><span class="lbl">🧠 Literacy</span><div class="bar"><div class="fill" style="width:78%;background:linear-gradient(90deg,#3b82f6,#60a5fa);"></div></div><span class="pct">78%</span></div>
-              <div class="dim-bar-row"><span class="lbl">🎯 Curriculum</span><div class="bar"><div class="fill" style="width:75%;background:linear-gradient(90deg,#f59e0b,#fbbf24);"></div></div><span class="pct">75%</span></div>
-              <div class="dim-bar-row"><span class="lbl">💡 Teaching</span><div class="bar"><div class="fill" style="width:80%;background:linear-gradient(90deg,#10b981,#34d399);"></div></div><span class="pct">80%</span></div>
-              <div class="dim-bar-row"><span class="lbl">📊 Assessment</span><div class="bar"><div class="fill" style="width:54%;background:linear-gradient(90deg,#ec4899,#f472b6);"></div></div><span class="pct">54%</span></div>
-            </div>
-          </div>
-
-          <div class="assess-cta">
-            <h4>📌 Next checkpoint required</h4>
-            <p>You'll need to complete <strong>Self-Assessment #3</strong> after finishing Module 5 to unlock Module 6 (Synthesis). It takes ~10 minutes and is structured exactly like the first two — just with deeper questions on assessment design.</p>
-            <button class="assess-btn" onclick="WorkshopAPI.startAssessment(3)">▶ Take Self-Assessment #3</button>
-            <button class="assess-btn report" onclick="WorkshopAPI.viewReport()">📈 View detailed report</button>
+            <div class="section-eyebrow">All Modules</div>
+            <h2 class="section-title">Your Learning Path</h2>
           </div>
         </div>
+        <button class="filter-pill">Filter: All ▾</button>
       </div>
 
+      <div class="filter-row">
+        <span class="tip-pill">💡 <strong>Hover</strong> any module to preview · <strong>Click</strong> to expand wrap-up</span>
+      </div>
+
+      <!-- Modules rendered by JS into this container -->
+      <div class="modules-list" id="modulesList"></div>
     </div>
 
-    <!-- =================== SIDEBAR =================== -->
-    <aside class="side">
+    <!-- ============ RIGHT: SIDEBAR (DYNAMIC) ============ -->
+    <aside class="sidebar">
 
-      <div class="profile-card" id="profile">
-        <div class="profile-avatar" id="avatarInitials">DC</div>
-        <div class="profile-name" id="profileName">Dr. Mei Chen</div>
-        <div class="profile-role" id="profileRole">Senior Lecturer · Public Health</div>
-        <div class="profile-badges">
-          <span class="profile-badge">🏛 University of Auckland</span>
-          <span class="profile-badge">🧪 Researcher</span>
+      <div class="profile-card">
+        <div class="profile-banner"></div>
+        <div class="profile-avatar" data-bind="user.avatarInitials">–</div>
+        <div class="profile-body">
+          <h3 class="profile-name" data-bind="user.fullName">–</h3>
+          <div class="profile-title" data-bind="user.title">–</div>
+          <div class="profile-tags">
+            <a href="profile-settings.html#org" class="profile-tag">🏛 <span data-bind="user.org">–</span></a>
+            <a href="profile-settings.html#role" class="profile-tag">🧪 <span data-bind="user.role">–</span></a>
+          </div>
+          <div class="profile-stats">
+            <div>
+              <div class="profile-stat-num" data-bind="modulesCompleted">–</div>
+              <div class="profile-stat-label">Modules Done</div>
+            </div>
+            <div>
+              <div class="profile-stat-num" data-bind="user.badgesEarned">–</div>
+              <div class="profile-stat-label">Badges Earned</div>
+            </div>
+          </div>
+          <a href="profile-settings.html" class="profile-edit">⚙ Edit profile &amp; preferences</a>
         </div>
-        <div class="profile-meta">
-          <div class="profile-meta-item"><div class="num">4</div><div class="lbl">MODULES DONE</div></div>
-          <div class="profile-meta-item"><div class="num">3</div><div class="lbl">BADGES EARNED</div></div>
-        </div>
-        <a class="profile-edit" onclick="WorkshopAPI.editProfile()">⚙ Edit profile &amp; preferences</a>
       </div>
 
       <div class="progress-card">
         <h3>📈 Progress Dashboard</h3>
-        <p class="sub">Your learning at a glance</p>
-        <div class="progress-ring-wrap">
-          <div class="progress-ring">
-            <div class="progress-ring-inner">
-              <div class="num">67%</div>
-              <div class="lbl">COMPLETE</div>
+        <p class="progress-card-sub">Your learning at a glance</p>
+
+        <div class="donut-wrap">
+          <div class="donut">
+            <svg width="180" height="180" viewBox="0 0 180 180">
+              <defs>
+                <linearGradient id="donutGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#2dd4bf"/><stop offset="100%" stop-color="#0d9488"/>
+                </linearGradient>
+              </defs>
+              <circle class="donut-track" cx="90" cy="90" r="74" fill="none" stroke-width="14"/>
+              <circle class="donut-fill" id="donutFill" cx="90" cy="90" r="74" fill="none" stroke-width="14"
+                      stroke-linecap="round" stroke-dasharray="464.96" stroke-dashoffset="464.96"/>
+            </svg>
+            <div class="donut-label">
+              <div class="pct" data-bind="overallPctLabel">0%</div>
+              <div class="lbl">Complete</div>
             </div>
           </div>
         </div>
-        <div class="progress-list">
-          <div class="progress-row"><span class="lbl">Modules completed</span><span class="val green">4 / 6</span></div>
-          <div class="progress-row"><span class="lbl">Self-assessments</span><span class="val green">2 / 3</span></div>
-          <div class="progress-row"><span class="lbl">Reflections written</span><span class="val">12</span></div>
-          <div class="progress-row"><span class="lbl">Action items saved</span><span class="val">0</span></div>
-          <div class="progress-row"><span class="lbl">Current streak</span><span class="val amber">🔥 4 days</span></div>
-          <div class="progress-row"><span class="lbl">Est. time remaining</span><span class="val">~ 52 min</span></div>
-        </div>
-      </div>
 
-      <div class="notice">
-        <h3>📢 Notice Board</h3>
-        <div class="notice-item">
-          <strong>🎯 You're 1 module from your action map!</strong>
-          Finish Module 5 + the self-check to unlock the Synthesis module.
-          <span class="when">Personal nudge · today</span>
+        <div class="progress-row">
+          <span class="label"><a href="modules-overview.html" style="color:inherit;text-decoration:none;">Modules completed</a></span>
+          <span class="value green"><span data-bind="modulesCompleted">–</span> / <span data-bind="modulesTotal">–</span></span>
         </div>
-        <div class="notice-item">
-          <strong>🆕 New community thread</strong>
-          "Anyone redesigned a STEM lab assessment with GenAI?" — 14 replies.
-          <span class="when">Posted yesterday</span>
+        <div class="progress-row">
+          <span class="label"><a href="self-assessments.html" style="color:inherit;text-decoration:none;">Self-assessments</a></span>
+          <span class="value green"><span data-bind="selfChecksDone">–</span> / <span data-bind="selfChecksTotal">–</span></span>
         </div>
-        <div class="notice-item">
-          <strong>📅 Live workshop</strong>
-          Optional Q&amp;A session with the framework authors — Mar 22, 4pm NZT.
-          <span class="when">In 8 days</span>
+        <div class="progress-row">
+          <span class="label"><a href="reflections.html" style="color:inherit;text-decoration:none;">Reflections written</a></span>
+          <span class="value" data-bind="reflections">–</span>
+        </div>
+        <div class="progress-row">
+          <span class="label"><a href="action-items.html" style="color:inherit;text-decoration:none;">Action items saved</a></span>
+          <span class="value" data-bind="actionItems">–</span>
+        </div>
+        <div class="progress-row">
+          <span class="label">Current streak</span>
+          <span class="value fire">🔥 <span data-bind="user.streakDays">–</span> days</span>
+        </div>
+        <div class="progress-row">
+          <span class="label">Est. time remaining</span>
+          <span class="value">~ <span data-bind="estTimeRemainingMin">–</span> min</span>
         </div>
       </div>
 
     </aside>
   </div>
 
-  <div class="footer">
-    GenAI Competency Workshop · Built for educators, by educators · <a onclick="WorkshopAPI.openHelp()">Help</a> · <a onclick="WorkshopAPI.openPrivacy()">Privacy</a>
+  <!-- ASSESSMENT SECTION (DYNAMIC) -->
+  <section class="assess-section">
+    <div class="assess-eyebrow">📊 Self-Assessment Checkpoint</div>
+    <h2 class="assess-title">Your Most Recent Self-Check</h2>
+    <p class="assess-intro">
+      Required between Module 4 → Module 5. Take it again any time to see how your thinking has shifted.
+    </p>
+    <div class="assess-status-pill">✓ Completed · Next required after Mod 5</div>
+
+    <div class="assess-grid">
+      <div class="assess-card">
+        <h4 data-bind="assessment.label">–</h4>
+        <div class="meta">
+          📅 Taken <span data-bind="assessment.takenAt">–</span>
+          · <span data-bind="assessment.durationMin">–</span> min
+        </div>
+
+        <div class="assess-summary">
+          <div class="mini-donut">
+            <svg width="100" height="100" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="#e2e8f0" stroke-width="9"/>
+              <circle id="miniDonutFill" cx="50" cy="50" r="40" fill="none" stroke="url(#donutGrad)" stroke-width="9"
+                stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2"/>
+            </svg>
+            <div class="mini-donut-label">
+              <div class="num"><span data-bind="assessment.overallPct">0</span>%</div>
+              <div class="sub">Overall</div>
+            </div>
+          </div>
+          <p class="summary-text">
+            <strong>Strong growth</strong> since your baseline (<span data-bind="assessment.baselinePct">–</span>% → <span data-bind="assessment.overallPct">–</span>%).
+            Biggest jumps in <strong>Curriculum Design</strong> and <strong>Teaching Practice</strong>.
+          </p>
+        </div>
+
+        <div class="dim-bars">
+          <div class="dim-bar">
+            <span class="label">🧠 Literacy</span>
+            <div class="dim-bar-track"><div class="dim-bar-fill literacy" id="bar-literacy" style="width:0%"></div></div>
+            <span class="pct"><span data-bind="assessment.dimensions.literacy">0</span>%</span>
+          </div>
+          <div class="dim-bar">
+            <span class="label">🎯 Curriculum</span>
+            <div class="dim-bar-track"><div class="dim-bar-fill curriculum" id="bar-curriculum" style="width:0%"></div></div>
+            <span class="pct"><span data-bind="assessment.dimensions.curriculum">0</span>%</span>
+          </div>
+          <div class="dim-bar">
+            <span class="label">💡 Teaching</span>
+            <div class="dim-bar-track"><div class="dim-bar-fill teaching" id="bar-teaching" style="width:0%"></div></div>
+            <span class="pct"><span data-bind="assessment.dimensions.teaching">0</span>%</span>
+          </div>
+          <div class="dim-bar">
+            <span class="label">📊 Assessment</span>
+            <div class="dim-bar-track"><div class="dim-bar-fill assessment" id="bar-assessment" style="width:0%"></div></div>
+            <span class="pct"><span data-bind="assessment.dimensions.assessment">0</span>%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="assess-card assess-next">
+        <div>
+          <h4>📌 Next checkpoint required</h4>
+          <p>
+            You'll need to complete <strong>Self-Assessment #3</strong> after finishing
+            Module 5 to unlock Module 6 (Synthesis). It takes ~10 minutes and is structured
+            exactly like the first two — just with deeper questions on assessment design.
+          </p>
+        </div>
+        <div>
+          <a href="self-assessment-3.html" class="btn-cta-orange">▶ Take Self-Assessment #3</a>
+          <a href="assessment-report.html" class="btn-cta-teal">📈 View detailed report</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="dash-footer">
+    <div>GenAI Competency Workshop · Built for educators, by educators</div>
+    <div>
+      <a href="help.html">Help</a> ·
+      <a href="privacy.html">Privacy</a> ·
+      <a href="accessibility.html">Accessibility</a>
+    </div>
+  </footer>
+</section>
+
+<div style="height:80px;"></div>
+
+<!-- ============ DEMO CONTROL PANEL — REMOVE BEFORE PRODUCTION ============ -->
+<button id="demo-fab" title="Demo controls (remove in production)">⚙</button>
+<div id="demo-panel">
+  <h4>🛠 Demo Controls</h4>
+  <div class="demo-sub">Local-only state for demo purposes. In production this will be replaced by authenticated API calls.</div>
+  <div class="demo-banner">⚠ Visible only in demo build. Engineer should strip this panel before launch.</div>
+
+  <div class="demo-section">
+    <div class="demo-section-label">Quick scenarios</div>
+    <button class="demo-btn" data-scenario="fresh">🌱 Fresh user (just signed up)</button>
+    <button class="demo-btn" data-scenario="halfway">📍 Halfway through (current demo)</button>
+    <button class="demo-btn" data-scenario="finishing">🏁 Almost finished</button>
+    <button class="demo-btn" data-scenario="complete">🎓 Workshop complete</button>
+  </div>
+
+  <div class="demo-section">
+    <div class="demo-section-label">Quick actions</div>
+    <button class="demo-btn" id="advance-btn">▶ Mark next module complete</button>
+    <button class="demo-btn danger" id="reset-btn">↺ Reset to default demo</button>
   </div>
 </div>
 
-<!-- ========== SYNC STATUS PILL ========== -->
-<div class="sync-pill" id="syncPill" title="Synced with workshop platform">
-  <span class="sync-dot"></span>
-  <span id="syncStatus">Synced just now</span>
-</div>
+<!-- ============ DEMO STATE LAYER (REPLACE WITH API CALLS) ============ -->
+<script id="demo-state">
+/* ────────────────────────────────────────────────────────────────────
+   ⚠️  ENGINEER:  This entire <script id="demo-state"> block is a DEMO
+   layer using localStorage. In production:
+     1. Delete the LS_KEY / loadState / saveState / scenarios block.
+     2. Replace `const state = loadState();` with an authenticated
+        fetch to /api/me/dashboard (see header comment).
+     3. Replace markComplete() with a POST to /api/me/modules/:id/complete
+        followed by a re-fetch + renderDashboard(state).
+   The renderDashboard() function below is production-ready as-is.
+   ──────────────────────────────────────────────────────────────────── */
 
-<!-- ========================================================
-     WORKSHOP API LAYER
-     Connects this dashboard to your external platform/database.
-     Configure WORKSHOP_CONFIG.apiBase to your backend endpoint.
-     All actions emit events that can be POSTed to your DB.
-     ======================================================== -->
-<script>
-(function () {
-  'use strict';
+const LS_KEY = 'genai_workshop_demo_state_v1';
 
-  // ============== CONFIGURATION ==============
-  // Edit these values to point at your real backend.
-  const WORKSHOP_CONFIG = {
-    apiBase: 'https://api.your-platform.example.com/v1',  // ← replace with real API URL
-    apiKey:  '',                                          // ← inject server-side or via auth flow
-    userId:  null,                                        // ← will be filled after auth
-    syncInterval: 60000,                                  // background sync every 60s
-    moduleRoutes: {
-      0: 'module_0_pic.html',
-      1: 'module_1_pic.html',
-      2: 'module_2_pic.html',
-      3: 'module_3.html',
-      4: 'module_4.html',
-      5: 'module_5.html',
-      6: 'module_6.html'
-    }
-  };
-
-  // ============== INTERNAL HELPERS ==============
-  function authHeaders() {
-    const h = { 'Content-Type': 'application/json' };
-    if (WORKSHOP_CONFIG.apiKey) h['Authorization'] = 'Bearer ' + WORKSHOP_CONFIG.apiKey;
-    return h;
-  }
-
-  function apiCall(path, method, body) {
-    if (!WORKSHOP_CONFIG.apiBase || WORKSHOP_CONFIG.apiBase.includes('your-platform.example.com')) {
-      // Demo mode — log to console instead of making a real network call.
-      console.info('[WorkshopAPI · demo]', method, path, body || '');
-      return Promise.resolve({ ok: true, demo: true, body });
-    }
-    return fetch(WORKSHOP_CONFIG.apiBase + path, {
-      method: method || 'GET',
-      headers: authHeaders(),
-      credentials: 'include',
-      body: body ? JSON.stringify(body) : undefined
-    }).then(function (r) { return r.json(); });
-  }
-
-  function setSyncStatus(msg) {
-    const el = document.getElementById('syncStatus');
-    if (el) el.textContent = msg;
-  }
-
-  // ============== PUBLIC API ==============
-  const WorkshopAPI = {
-    config: WORKSHOP_CONFIG,
-
-    // ---- Auth & user data ----
-    init: function () {
-      // Pull user data from backend on load (or from sessionStorage cache).
-      const cached = sessionStorage.getItem('workshop_user');
-      if (cached) this.applyUser(JSON.parse(cached));
-      apiCall('/me', 'GET').then(function (user) {
-        if (user && !user.demo) {
-          sessionStorage.setItem('workshop_user', JSON.stringify(user));
-          WorkshopAPI.applyUser(user);
-        }
-      }).catch(function () { /* silent in demo */ });
-
-      // Pull progress
-      apiCall('/me/progress', 'GET').then(function (p) {
-        if (p && !p.demo) WorkshopAPI.applyProgress(p);
-      }).catch(function () {});
-
-      // Background sync
-      setInterval(function () {
-        apiCall('/me/sync', 'POST', { client: 'dashboard', ts: Date.now() })
-          .then(function () { setSyncStatus('Synced just now'); })
-          .catch(function () { setSyncStatus('Offline — changes saved locally'); });
-      }, WORKSHOP_CONFIG.syncInterval);
-    },
-
-    applyUser: function (user) {
-      if (!user) return;
-      WORKSHOP_CONFIG.userId = user.id || null;
-      if (user.firstName) document.getElementById('userFirstName').textContent = user.firstName;
-      if (user.fullName)  document.getElementById('profileName').textContent  = user.fullName;
-      if (user.role)      document.getElementById('profileRole').textContent  = user.role;
-      if (user.initials)  document.getElementById('avatarInitials').textContent = user.initials;
-    },
-
-    applyProgress: function (p) {
-      if (p.modulesDone)   document.getElementById('statModules').textContent  = p.modulesDone + ' / 6';
-      if (p.timeInvested)  document.getElementById('statTime').textContent     = p.timeInvested;
-      if (p.reflections)   document.getElementById('statReflect').textContent  = p.reflections;
-      if (p.selfChecks)    document.getElementById('statChecks').textContent   = p.selfChecks;
-      if (p.streakLabel)   document.getElementById('statStreak').textContent   = p.streakLabel;
-    },
-
-    // ---- Module navigation ----
-    openModule: function (n) {
-    this.trackEvent('module_opened', n);
-    const route = WORKSHOP_CONFIG.moduleRoutes[n];
-    if (!route) {
-      alert('Module ' + n + ' is not yet available.');
-      return;
-    }
-    // Check if the file actually exists before navigating
-    fetch(route, { method: 'HEAD' })
-      .then(function (r) {
-        if (r.ok) {
-          window.open(route, '_blank', 'noopener');  // open in NEW tab
-        } else {
-          alert('🚧 Module ' + n + ' is coming soon!\n\nOnly Modules 0, 1, and 2 are ready in this demo.');
-        }
-      })
-      .catch(function () {
-        // If fetch fails (e.g., file://), just try opening anyway
-        window.open(route, '_blank', 'noopener');
-      });
+const SCENARIOS = {
+  // Fresh user — just logged in, nothing done yet
+  fresh: {
+    user: { firstName:"Mei", fullName:"Dr. Mei Chen", avatarInitials:"MC",
+      title:"Senior Lecturer · Public Health", org:"University of Auckland",
+      role:"Researcher", badgesEarned:0, streakDays:1 },
+    modules: buildModules(0),
+    reflections: 0, actionItems: 0, timeInvestedMin: 0,
+    selfChecksDone: 0, selfChecksTotal: 3,
+    assessment: null
   },
-
-    // ---- Assessment ----
-    startAssessment: function (n) {
-      this.trackEvent('assessment_started', n);
-      apiCall('/assessments/start', 'POST', { number: n });
-      window.location.href = 'self_assessment.html?n=' + encodeURIComponent(n);
-    },
-    viewReport: function () {
-      this.trackEvent('report_viewed', null);
-      window.location.href = 'assessment_report.html';
-    },
-
-    // ---- Profile / settings ----
-    editProfile: function () {
-      this.trackEvent('profile_edit_clicked', null);
-      window.location.href = 'profile.html';
-    },
-
-    // ---- Misc ----
-    viewAllResources: function () { window.location.href = 'resources.html'; },
-    filterModules:    function () { /* hook for filter UI */ },
-    openHelp:         function () { window.open('help.html', '_blank'); },
-    openPrivacy:      function () { window.open('privacy.html', '_blank'); },
-
-    // ---- Telemetry ----
-    trackEvent: function (event, value) {
-      const payload = { event: event, value: value, ts: new Date().toISOString(), userId: WORKSHOP_CONFIG.userId };
-      apiCall('/events', 'POST', payload);
-      // Also forward to any analytics layer if present (GA4, Plausible, etc.)
-      if (window.dataLayer && typeof window.dataLayer.push === 'function') {
-        window.dataLayer.push(payload);
-      }
+  // Halfway through (this is the default demo state)
+  halfway: {
+    user: { firstName:"Mei", fullName:"Dr. Mei Chen", avatarInitials:"MC",
+      title:"Senior Lecturer · Public Health", org:"University of Auckland",
+      role:"Researcher", badgesEarned:3, streakDays:4 },
+    modules: buildModules(4),
+    reflections: 12, actionItems: 0, timeInvestedMin: 222,
+    selfChecksDone: 2, selfChecksTotal: 3,
+    assessment: {
+      label:"Self-Assessment #2 — Mid-workshop",
+      takenAt:"Mar 12, 2026", durationMin:11,
+      overallPct:72, baselinePct:51,
+      dimensions:{ literacy:78, curriculum:75, teaching:80, assessment:54 }
     }
-  };
+  },
+  // Almost finished — module 5 done, only synthesis left
+  finishing: {
+    user: { firstName:"Mei", fullName:"Dr. Mei Chen", avatarInitials:"MC",
+      title:"Senior Lecturer · Public Health", org:"University of Auckland",
+      role:"Researcher", badgesEarned:5, streakDays:9 },
+    modules: buildModules(5),
+    reflections: 18, actionItems: 4, timeInvestedMin: 320,
+    selfChecksDone: 3, selfChecksTotal: 3,
+    assessment: {
+      label:"Self-Assessment #3 — Late-workshop",
+      takenAt:"Mar 18, 2026", durationMin:9,
+      overallPct:84, baselinePct:51,
+      dimensions:{ literacy:88, curriculum:85, teaching:88, assessment:76 }
+    }
+  },
+  // Workshop complete
+  complete: {
+    user: { firstName:"Mei", fullName:"Dr. Mei Chen", avatarInitials:"MC",
+      title:"Senior Lecturer · Public Health", org:"University of Auckland",
+      role:"Researcher", badgesEarned:7, streakDays:14 },
+    modules: buildModules(6),
+    reflections: 22, actionItems: 7, timeInvestedMin: 380,
+    selfChecksDone: 3, selfChecksTotal: 3,
+    assessment: {
+      label:"Self-Assessment #3 — Late-workshop",
+      takenAt:"Mar 21, 2026", durationMin:9,
+      overallPct:91, baselinePct:51,
+      dimensions:{ literacy:92, curriculum:90, teaching:93, assessment:88 }
+    }
+  }
+};
 
-  // Expose globally so inline handlers work
-  window.WorkshopAPI = WorkshopAPI;
-
-  // ---- Boot ----
-  document.addEventListener('DOMContentLoaded', function () {
-    WorkshopAPI.init();
+// Module catalogue (the static content). `completedThrough` sets the status of each.
+function buildModules(completedThrough) {
+  const catalog = [
+    { id:1, title:"Introduction & Framework Overview", durationMin:25, sections:3,
+      sectionsList:[
+        "1.1 The Big Picture — the 4×3×2 framework structure",
+        "1.2 How the framework connects to your practice",
+        "1.3 Recap of user instructions from Module 0"],
+      takeaway:"a personal learning plan, a clear sense of why the framework is structured this way, and three context layers (discipline, learner profile, culture) for reading every module ahead.",
+      completedAt:"Mar 3" },
+    { id:2, title:"Dimension 1 · GenAI Literacy", durationMin:35, sections:4,
+      sectionsList:[
+        "2.1 What is GenAI Literacy in this framework?",
+        "2.2 Teacher's own literacy across levels (with your companion)",
+        "2.3 Empowering students' literacy across levels",
+        "2.4 Module wrap-up & knowledge recap"],
+      takeaway:"a sharper internal \"BS detector\" for AI outputs, six concrete takeaways, and five moves you can apply tomorrow.",
+      completedAt:"Mar 5" },
+    { id:3, title:"Dimension 2 · Curriculum & Learning Design", durationMin:30, sections:3,
+      sectionsList:[
+        "3.1 Learning objectives in the GenAI era",
+        "3.2 Redesigning syllabi & units",
+        "3.3 Stress-testing your curriculum"],
+      takeaway:"a redesign checklist + a worked example of a unit before/after GenAI integration.",
+      completedAt:"Mar 9" },
+    { id:4, title:"Dimension 3 · Teaching & Learning Practice", durationMin:28, sections:3,
+      sectionsList:[
+        "4.1 GenAI as scaffold, simulation & partner",
+        "4.2 Activity design patterns",
+        "4.3 Common pitfalls in classroom use"],
+      takeaway:"3 concrete classroom activities you can run in your next teaching week.",
+      completedAt:"Mar 12" },
+    { id:5, title:"Dimension 4 · Assessment", durationMin:32, sections:3,
+      sectionsList:[
+        "5.1 Validity & AI-aware assessment",
+        "5.2 Designing assessment tasks",
+        "5.3 Rubrics that grade reasoning, not artefacts"],
+      takeaway:"a redesigned rubric for one of your own assessments — done by the end of the module.",
+      completedAt:"Mar 16" },
+    { id:6, title:"Synthesis & Next Steps", durationMin:20, sections:2,
+      sectionsList:[
+        "6.1 Tying the four dimensions together",
+        "6.2 Your personal action map"],
+      takeaway:"your personal action map and a downloadable plan to take into your next semester.",
+      completedAt:"Mar 21" }
+  ];
+  return catalog.map(m => {
+    let status;
+    if (m.id <= completedThrough) status = "complete";
+    else if (m.id === completedThrough + 1) status = "next";
+    else status = "locked";
+    // Module 6 also requires self-check #3 — handled in render layer
+    return { ...m, status };
   });
-})();
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) { console.warn('LS read failed', e); }
+  // Default to halfway scenario
+  const fresh = JSON.parse(JSON.stringify(SCENARIOS.halfway));
+  saveState(fresh);
+  return fresh;
+}
+function saveState(s) {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+  catch(e) { console.warn('LS write failed (sandboxed iframe?)', e); }
+}
 </script>
 
+<!-- ============ RENDER LAYER (PRODUCTION-READY) ============ -->
+<script>
+/* ────────────────────────────────────────────────────────────────────
+   ENGINEER: this entire script block is reusable as-is in production.
+   Just feed renderDashboard() an object with the same shape produced
+   by GET /api/me/dashboard.
+   ──────────────────────────────────────────────────────────────────── */
 
+let state = loadState();   // ← in production: await fetch('/api/me/dashboard')
 
-</body></html>
+function fmtTime(min) {
+  if (!min) return '0m';
+  const h = Math.floor(min/60), m = min%60;
+  return h ? `${h}h ${m}m` : `${m}m`;
+}
+
+function getDeep(obj, path) {
+  return path.split('.').reduce((o,k)=>o==null?undefined:o[k], obj);
+}
+
+function bindAll(scope) {
+  document.querySelectorAll('[data-bind]').forEach(el => {
+    const path = el.getAttribute('data-bind');
+    let val = getDeep(scope, path);
+    if (val === undefined || val === null) val = '–';
+    el.textContent = val;
+  });
+}
+
+function renderModules(modules, nextModuleId) {
+  const list = document.getElementById('modulesList');
+  list.innerHTML = '';
+  modules.forEach(m => {
+    const card = document.createElement('div');
+    card.className = `module-card ${m.status}`;
+    card.dataset.mod = m.id;
+
+    let statusText = '🔒 Locked';
+    let metaCompletion = `🔒 Complete previous module to unlock`;
+    if (m.status === 'complete') {
+      statusText = '✓ Complete';
+      metaCompletion = `✓ Completed ${m.completedAt || ''}`;
+    } else if (m.status === 'next') {
+      statusText = '📍 Up next';
+      metaCompletion = '📍 Up next';
+    } else if (m.status === 'in-progress') {
+      statusText = '⏳ In progress';
+      metaCompletion = '⏳ In progress';
+    }
+
+    let actionsHTML = '';
+    if (m.status === 'complete') {
+      actionsHTML = `
+        <a href="module_${m.id}_pic.html#wrap-up" class="module-btn">📋 Wrap-up</a>
+        <a href="module_${m.id}_pic.html" class="module-btn primary">↻ Revisit</a>`;
+    } else if (m.status === 'next' || m.status === 'in-progress') {
+      actionsHTML = `<a href="module_${m.id}_pic.html" class="module-btn primary">▶ ${m.status==='in-progress'?'Resume':'Start'}</a>`;
+    } else {
+      actionsHTML = `<span class="module-btn disabled">🔒 Locked</span>`;
+    }
+
+    const sectionsListHTML = m.sectionsList.map(s => `<li>${s}</li>`).join('');
+    const expandHTML = m.status === 'locked'
+      ? `<p>This module unlocks once the previous one is complete${m.id===6?' and Self-Assessment #3 has been submitted':''}.</p>`
+      : `<h5>📋 What you'll get</h5>
+         <ul>${sectionsListHTML}</ul>
+         <p><strong>You'll leave with:</strong> ${m.takeaway}</p>`;
+
+    card.innerHTML = `
+      <div class="module-num">${m.id}</div>
+      <div class="module-content">
+        <h4>${m.title}</h4>
+        <div class="module-meta">
+          <span>⏱ ${m.durationMin} min</span>
+          <span>${m.sections} sections</span>
+          <span>${metaCompletion}</span>
+        </div>
+        <div class="module-status">${statusText}</div>
+      </div>
+      <div class="module-actions">${actionsHTML}</div>
+      <div class="module-expand"><div class="module-expand-inner">${expandHTML}</div></div>
+    `;
+
+    // Click to expand (but not on action buttons)
+    card.addEventListener('click', e => {
+      if (e.target.closest('.module-btn') || e.target.closest('a')) return;
+      if (m.status === 'locked') return;
+      card.classList.toggle('open');
+    });
+
+    list.appendChild(card);
+  });
+}
+
+function renderDashboard(s) {
+  // ---- Compute derived values
+  const modulesTotal = s.modules.length;
+  const modulesCompleted = s.modules.filter(m => m.status === 'complete').length;
+  const overallPct = Math.round(modulesCompleted / modulesTotal * 100);
+
+  // Find next module (first 'next' or 'in-progress', else first non-complete)
+  const nextModule = s.modules.find(m => m.status === 'next' || m.status === 'in-progress')
+                 || s.modules.find(m => m.status !== 'complete');
+
+  const estTimeRemainingMin = s.modules
+    .filter(m => m.status !== 'complete')
+    .reduce((sum, m) => sum + m.durationMin, 0);
+
+  // ---- Assemble the bind scope
+  const scope = {
+    user: s.user,
+    modulesCompleted, modulesTotal,
+    overallPct, overallPctLabel: `${overallPct}%`,
+    timeInvestedMin: s.timeInvestedMin,
+    timeInvestedLabel: fmtTime(s.timeInvestedMin),
+    reflections: s.reflections, actionItems: s.actionItems,
+    selfChecksDone: s.selfChecksDone, selfChecksTotal: s.selfChecksTotal,
+    estTimeRemainingMin,
+    assessment: s.assessment || {
+      label:'No self-assessment yet', takenAt:'—', durationMin:0,
+      overallPct:0, baselinePct:0,
+      dimensions:{ literacy:0, curriculum:0, teaching:0, assessment:0 }
+    }
+  };
+  bindAll(scope);
+
+  // ---- "Continue" button
+  const btn = document.getElementById('continueBtn');
+  if (nextModule) {
+    btn.href = `module-${nextModule.id}.html`;
+    const verb = nextModule.status === 'in-progress' ? 'Resume' : 'Continue';
+    btn.innerHTML = `▶ ${verb} Module ${nextModule.id}`;
+    btn.classList.remove('disabled');
+  } else {
+    btn.href = '#';
+    btn.innerHTML = '🎓 Workshop Complete!';
+    btn.classList.add('disabled');
+  }
+
+  // ---- Overall progress bar
+  document.getElementById('overallProgressFill').style.width = `${overallPct}%`;
+
+  // ---- Donut (sidebar)
+  const donut = document.getElementById('donutFill');
+  const C = 2 * Math.PI * 74; // 464.96
+  donut.setAttribute('stroke-dashoffset', String(C));
+  requestAnimationFrame(() => setTimeout(() => {
+    donut.setAttribute('stroke-dashoffset', String(C * (1 - overallPct/100)));
+  }, 50));
+
+  // ---- Mini-donut + dimension bars (assessment)
+  const a = scope.assessment;
+  const Cm = 2 * Math.PI * 40; // 251.2
+  const mini = document.getElementById('miniDonutFill');
+  mini.setAttribute('stroke-dashoffset', String(Cm));
+  requestAnimationFrame(() => setTimeout(() => {
+    mini.setAttribute('stroke-dashoffset', String(Cm * (1 - a.overallPct/100)));
+  }, 50));
+
+  ['literacy','curriculum','teaching','assessment'].forEach(k => {
+    const el = document.getElementById(`bar-${k}`);
+    if (el) requestAnimationFrame(() => setTimeout(() => {
+      el.style.width = `${a.dimensions[k] || 0}%`;
+    }, 100));
+  });
+
+  // ---- Modules list
+  renderModules(s.modules, nextModule ? nextModule.id : null);
+}
+
+// Initial render
+renderDashboard(state);
+
+/* ===== Demo control wiring (remove in production) ===== */
+const fab = document.getElementById('demo-fab');
+const panel = document.getElementById('demo-panel');
+fab.addEventListener('click', () => panel.classList.toggle('open'));
+document.addEventListener('click', e => {
+  if (!panel.contains(e.target) && !fab.contains(e.target)) panel.classList.remove('open');
+});
+
+document.querySelectorAll('[data-scenario]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const key = btn.getAttribute('data-scenario');
+    state = JSON.parse(JSON.stringify(SCENARIOS[key]));
+    saveState(state);
+    renderDashboard(state);
+  });
+});
+
+document.getElementById('advance-btn').addEventListener('click', () => {
+  // Mark the next module complete (simulates a POST /api/me/modules/:id/complete)
+  const next = state.modules.find(m => m.status === 'next' || m.status === 'in-progress');
+  if (!next) return;
+  next.status = 'complete';
+  next.completedAt = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  // Promote the following locked module to 'next'
+  const idx = state.modules.findIndex(m => m.id === next.id);
+  if (idx + 1 < state.modules.length && state.modules[idx+1].status === 'locked') {
+    state.modules[idx+1].status = 'next';
+  }
+  state.timeInvestedMin += next.durationMin;
+  state.user.badgesEarned = (state.user.badgesEarned || 0) + 1;
+  saveState(state);
+  renderDashboard(state);
+});
+
+document.getElementById('reset-btn').addEventListener('click', () => {
+  state = JSON.parse(JSON.stringify(SCENARIOS.halfway));
+  saveState(state);
+  renderDashboard(state);
+});
+</script>
+</body>
+</html>
