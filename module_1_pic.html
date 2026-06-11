@@ -1,1366 +1,729 @@
-<!DOCTYPE html><html lang="en"><head><meta name="x-poe-datastore-behavior" content="local_only"><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 1 — Understanding the Framework | GenAI Competency Workshop</title>
+<title>Module 1 — Understanding the Framework as a Whole</title>
 <style>
-/* ==========================================================
-   DESIGN TOKENS — aligned with Module 0 & Module 2
-   ========================================================== */
 :root {
-  /* Palette */
-  --purple-50:  #faf5ff;
-  --purple-100: #f3e8ff;
-  --purple-200: #e9d5ff;
-  --purple-300: #d8b4fe;
-  --purple-500: #a855f7;
-  --purple-600: #9333ea;
-  --purple-700: #7e22ce;
-  --purple-800: #6b21a8;
-  --purple-900: #581c87;
+  --purple-50:#faf5ff; --purple-100:#f3e8ff; --purple-200:#e9d5ff;
+  --purple-300:#d8b4fe; --purple-400:#c084fc; --purple-500:#a855f7;
+  --purple-600:#9333ea; --purple-700:#7e22ce; --purple-800:#6b21a8; --purple-900:#581c87;
+  --blue-50:#eff6ff; --blue-100:#dbeafe; --blue-200:#bfdbfe;
+  --blue-300:#93c5fd; --blue-400:#60a5fa; --blue-500:#3b82f6;
+  --blue-600:#2563eb; --blue-700:#1d4ed8; --blue-900:#1e3a8a;
+  --gold-50:#fffbeb; --gold-100:#fef3c7; --gold-200:#fde68a;
+  --gold-300:#fcd34d; --gold-400:#facc15; --gold-500:#eab308;
+  --gold-600:#ca8a04; --gold-700:#a16207;
+  --orange-500:#f97316;
+  --slate-50:#f8fafc; --slate-100:#f1f5f9; --slate-200:#e2e8f0;
+  --slate-300:#cbd5e1; --slate-400:#94a3b8; --slate-500:#64748b;
+  --slate-600:#475569; --slate-700:#334155; --slate-800:#1e293b; --slate-900:#0f172a;
+  --green-50:#f0fdf4; --green-100:#dcfce7; --green-200:#bbf7d0;
+  --green-500:#22c55e; --green-600:#16a34a; --green-700:#15803d;
+  --red-50:#fef2f2; --red-100:#fee2e2; --red-500:#ef4444; --red-700:#b91c1c;
 
-  --blue-50:   #eff6ff;
-  --blue-100:  #dbeafe;
-  --blue-200:  #bfdbfe;
-  --blue-400:  #60a5fa;
-  --blue-500:  #3b82f6;
-  --blue-600:  #2563eb;
-  --blue-700:  #1d4ed8;
-  --blue-900:  #1e3a8a;
+  /* LARGER, MORE GENEROUS TYPE SCALE */
+  --text-xs:clamp(.85rem,.78rem + .25vw,.95rem);
+  --text-sm:clamp(.98rem,.92rem + .3vw,1.08rem);
+  --text-base:clamp(1.18rem,1.08rem + .4vw,1.32rem);
+  --text-lg:clamp(1.35rem,1.22rem + .6vw,1.55rem);
+  --text-xl:clamp(1.6rem,1.4rem + .9vw,1.95rem);
+  --text-2xl:clamp(2rem,1.7rem + 1.3vw,2.5rem);
+  --text-3xl:clamp(2.4rem,2rem + 1.8vw,3.2rem);
+  --text-4xl:clamp(2.8rem,2.3rem + 2.4vw,4.1rem);
 
-  --gold-50:   #fffbeb;
-  --gold-100:  #fef3c7;
-  --gold-200:  #fde68a;
-  --gold-400:  #facc15;
-  --gold-500:  #eab308;
-  --gold-600:  #ca8a04;
-  --gold-700:  #a16207;
-
-  --slate-50:  #f8fafc;
-  --slate-100: #f1f5f9;
-  --slate-200: #e2e8f0;
-  --slate-300: #cbd5e1;
-  --slate-400: #94a3b8;
-  --slate-500: #64748b;
-  --slate-600: #475569;
-  --slate-700: #334155;
-  --slate-800: #1e293b;
-  --slate-900: #0f172a;
-
-  --green-100: #dcfce7;
-  --green-600: #16a34a;
-  --green-700: #15803d;
-
-  /* Spacing tokens */
-  --space-2xs: 0.25rem;
-  --space-xs: 0.5rem;
-  --space-sm: 0.75rem;
-  --space-md: 1rem;
-  --space-lg: 1.5rem;
-  --space-xl: 2rem;
-  --space-2xl: 3rem;
-  --space-3xl: 4rem;
-  --space-4xl: 6rem;
-
-  /* Fluid type */
-  --text-xs:   clamp(0.75rem, 0.7rem + 0.2vw, 0.85rem);
-  --text-sm:   clamp(0.875rem, 0.82rem + 0.25vw, 0.95rem);
-  --text-base: clamp(1.05rem, 0.98rem + 0.3vw, 1.15rem);
-  --text-lg:   clamp(1.2rem, 1.1rem + 0.5vw, 1.35rem);
-  --text-xl:   clamp(1.4rem, 1.25rem + 0.7vw, 1.65rem);
-  --text-2xl:  clamp(1.7rem, 1.5rem + 1vw, 2.1rem);
-  --text-3xl:  clamp(2.1rem, 1.8rem + 1.5vw, 2.8rem);
-  --text-4xl:  clamp(2.6rem, 2.2rem + 2vw, 3.6rem);
-
-  /* Layout */
-  --content-width: 1200px;
-  --reading-width: 760px;
-
-  /* Effects */
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
-  --radius-xl: 28px;
-  --shadow-sm: 0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
-  --shadow-md: 0 4px 12px rgba(15,23,42,0.07), 0 2px 4px rgba(15,23,42,0.04);
-  --shadow-lg: 0 12px 28px rgba(91,33,182,0.10), 0 4px 8px rgba(15,23,42,0.05);
-  --shadow-xl: 0 22px 50px rgba(91,33,182,0.14), 0 6px 12px rgba(15,23,42,0.06);
+  --content-width:1200px;
+  --radius-sm:10px; --radius-md:16px; --radius-lg:22px; --radius-xl:32px;
+  --shadow-sm:0 1px 3px rgba(15,23,42,.06),0 1px 2px rgba(15,23,42,.04);
+  --shadow-md:0 6px 16px rgba(15,23,42,.07),0 2px 6px rgba(15,23,42,.04);
+  --shadow-lg:0 16px 36px rgba(91,33,182,.10),0 6px 12px rgba(15,23,42,.05);
+  --shadow-xl:0 28px 60px rgba(91,33,182,.14),0 8px 16px rgba(15,23,42,.06);
 }
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  font-size:var(--text-base);
+  line-height:1.85;
+  color:var(--slate-800);
+  background:linear-gradient(180deg,#fbfaff 0%,#f7f6fc 100%);
+  -webkit-font-smoothing:antialiased;
+  letter-spacing:-.005em;
+}
+.container{max-width:var(--content-width);margin:0 auto;padding:0 2rem;}
+@media (max-width:680px){.container{padding:0 1.25rem;}}
 
-* { box-sizing: border-box; }
+/* ========== TOP RIBBON ========== */
+.ribbon{
+  background:linear-gradient(95deg,var(--purple-800),var(--purple-600),var(--blue-700));
+  color:#fff;padding:1.1rem 0;font-size:var(--text-sm);
+  position:sticky;top:0;z-index:50;
+}
+.ribbon-inner{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:1rem;}
+.ribbon-left{display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;}
+.ribbon-back{color:#fff;text-decoration:none;font-weight:600;opacity:.85;
+  display:inline-flex;align-items:center;gap:8px;}
+.ribbon-back:hover{opacity:1;}
+.ribbon-crumb{font-weight:700;}
+.ribbon-crumb .sep{opacity:.5;margin:0 10px;}
+.ribbon-progress{display:flex;align-items:center;gap:14px;font-size:var(--text-xs);}
+.ribbon-bar{width:170px;height:7px;background:rgba(255,255,255,.18);
+  border-radius:999px;overflow:hidden;}
+.ribbon-bar-fill{height:100%;width:0%;
+  background:linear-gradient(90deg,var(--gold-300),var(--gold-500));
+  border-radius:999px;transition:width .6s ease;}
 
-html { scroll-behavior: smooth; }
-
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  font-size: var(--text-base);
-  line-height: 1.7;
-  color: var(--slate-800);
-  background: linear-gradient(180deg, #fbfaff 0%, #f7f6fc 100%);
-  -webkit-font-smoothing: antialiased;
+/* ========== HERO ========== */
+.hero{padding:5.5rem 0 3rem;position:relative;overflow:hidden;}
+.hero::before{content:"";position:absolute;top:-120px;right:-100px;width:420px;height:420px;
+  background:radial-gradient(closest-side,rgba(168,85,247,.15),transparent);border-radius:50%;}
+.hero::after{content:"";position:absolute;bottom:-140px;left:-120px;width:380px;height:380px;
+  background:radial-gradient(closest-side,rgba(59,130,246,.12),transparent);border-radius:50%;}
+.hero-inner{position:relative;z-index:1;}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:10px;
+  font-size:var(--text-xs);font-weight:700;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--purple-700);background:var(--purple-100);
+  padding:11px 22px;border-radius:999px;margin-bottom:2rem;
 }
-
-.container {
-  max-width: var(--content-width);
-  margin: 0 auto;
-  padding: 0 var(--space-lg);
+.hero-title{
+  font-size:var(--text-4xl);font-weight:800;color:var(--slate-900);
+  line-height:1.1;margin:0 0 1.5rem;letter-spacing:-.025em;
+  display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;
 }
-
-/* ==========================================================
-   TOP RIBBON
-   ========================================================== */
-.ribbon {
-  background: linear-gradient(95deg, var(--purple-800), var(--purple-600), var(--blue-700));
-  color: #fff;
-  padding: var(--space-md) 0;
-  font-size: var(--text-sm);
+.hero-title .title-icon{font-size:.85em;}
+.hero-title .accent{
+  background:linear-gradient(95deg,var(--purple-700),var(--blue-700));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
 }
-.ribbon-inner {
-  display: flex; flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--space-sm);
+.hero-sub{
+  font-size:var(--text-lg);color:var(--slate-600);
+  line-height:1.65;margin:0 0 2.25rem;max-width:62ch;
 }
-.ribbon-left { display: flex; gap: var(--space-md); align-items: center; }
-.ribbon-badge {
-  background: rgba(255,255,255,0.18);
-  padding: 4px 12px;
-  border-radius: 999px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  font-size: var(--text-xs);
-}
-.ribbon-progress {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  font-size: var(--text-xs);
-}
-.ribbon-bar {
-  width: 140px; height: 6px; background: rgba(255,255,255,0.22);
-  border-radius: 999px; overflow: hidden;
-}
-.ribbon-bar-fill {
-  height: 100%; width: 0;
-  background: linear-gradient(90deg, var(--gold-400), #fff);
-  border-radius: 999px;
-  transition: width .4s ease;
+.hero-meta{display:flex;flex-wrap:wrap;gap:1rem;margin-bottom:1rem;}
+.meta-pill{
+  display:inline-flex;align-items:center;gap:10px;background:#fff;
+  border:1.5px solid var(--slate-200);padding:12px 22px;border-radius:999px;
+  font-size:var(--text-sm);font-weight:600;color:var(--slate-700);box-shadow:var(--shadow-sm);
 }
 
-/* ==========================================================
-   HERO
-   ========================================================== */
-.hero {
-  padding: var(--space-3xl) 0 var(--space-2xl);
-  position: relative;
-  overflow: hidden;
+/* ===== Protagonist card ===== */
+.protagonist-card{
+  margin-top:3rem;
+  background:linear-gradient(135deg,#fff 0%,var(--purple-50) 100%);
+  border:1.5px solid var(--purple-200);border-radius:var(--radius-xl);
+  padding:2.5rem;display:grid;grid-template-columns:auto 1fr;gap:2rem;
+  align-items:center;box-shadow:var(--shadow-md);
 }
-.hero-grid {
-  display: grid;
-  grid-template-columns: 1.3fr 1fr;
-  gap: var(--space-2xl);
-  align-items: center;
+@media (max-width:680px){.protagonist-card{grid-template-columns:1fr;text-align:center;padding:1.75rem;}}
+.protagonist-avatar{
+  width:96px;height:96px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold-400),var(--orange-500));
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:800;font-size:32px;
+  box-shadow:0 8px 18px rgba(249,115,22,.32);
+  border:5px solid #fff;margin:0 auto;
 }
-@media (max-width: 880px) {
-  .hero-grid { grid-template-columns: 1fr; }
+.protagonist-meta{
+  font-size:var(--text-xs);font-weight:700;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--purple-700);margin-bottom:.65rem;
 }
-.hero-eyebrow {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: var(--text-xs);
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--purple-700);
-  background: var(--purple-100);
-  padding: 8px 16px;
-  border-radius: 999px;
-  margin-bottom: var(--space-lg);
-}
-.hero-title {
-  font-size: var(--text-4xl);
-  font-weight: 800;
-  color: var(--slate-900);
-  line-height: 1.1;
-  margin: 0 0 var(--space-lg);
-  letter-spacing: -0.02em;
-}
-.hero-title .accent {
-  background: linear-gradient(95deg, var(--purple-700), var(--blue-700));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-.hero-subtitle {
-  font-size: var(--text-lg);
-  color: var(--slate-600);
-  line-height: 1.6;
-  margin: 0 0 var(--space-xl);
-  max-width: 60ch;
-}
-.hero-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-md);
-}
-.hero-chip {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: #fff;
-  border: 1px solid var(--slate-200);
-  padding: 10px 18px;
-  border-radius: 999px;
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--slate-700);
-  box-shadow: var(--shadow-sm);
-}
-.hero-chip .chip-icon { font-size: 16px; }
-
-.hero-illustration {
-  width: 100%; max-width: 520px;
-  margin-left: auto;
-  display: block;
-  filter: drop-shadow(0 16px 28px rgba(91,33,182,0.18));
+.protagonist-card h3{margin:0 0 .85rem;font-size:var(--text-xl);color:var(--slate-900);font-weight:800;line-height:1.3;}
+.protagonist-card p{margin:0 0 1.1rem;color:var(--slate-700);line-height:1.75;font-size:var(--text-base);}
+.protagonist-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  background:#fff;border:1px solid var(--purple-200);
+  padding:8px 18px;border-radius:999px;
+  font-size:var(--text-sm);font-weight:600;color:var(--purple-700);
 }
 
-/* ==========================================================
-   WELCOME CARD
-   ========================================================== */
-.welcome-card {
-  background: linear-gradient(135deg, #fff 0%, var(--purple-50) 100%);
-  border: 1px solid var(--purple-200);
-  border-radius: var(--radius-xl);
-  padding: var(--space-xl) var(--space-2xl);
-  margin: var(--space-xl) 0 var(--space-3xl);
-  box-shadow: var(--shadow-md);
-  position: relative;
-  overflow: hidden;
+/* ========== SECTIONS ========== */
+.section-block{margin:6rem 0;scroll-margin-top:90px;}
+.section-header{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:1.25rem;flex-wrap:wrap;margin-bottom:1rem;
 }
-.welcome-card::before {
-  content: '';
-  position: absolute;
-  top: -40px; right: -40px;
-  width: 180px; height: 180px;
-  background: radial-gradient(circle, var(--purple-200) 0%, transparent 70%);
-  opacity: 0.6;
+.section-eyebrow{
+  font-size:var(--text-xs);font-weight:800;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--purple-700);
 }
-.welcome-card h3 {
-  margin: 0 0 var(--space-md);
-  font-size: var(--text-xl);
-  color: var(--purple-900);
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.section-status{
+  font-size:var(--text-xs);font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;padding:8px 18px;border-radius:999px;
+  background:var(--slate-100);color:var(--slate-500);
+  display:inline-flex;align-items:center;gap:8px;transition:all .25s ease;
 }
-.welcome-card p {
-  margin: 0 0 var(--space-sm);
-  font-size: var(--text-base);
-  color: var(--slate-700);
-  position: relative;
-  max-width: 75ch;
+.section-status.complete{background:var(--green-100);color:var(--green-700);}
+.section-title{
+  font-size:var(--text-3xl);font-weight:800;color:var(--slate-900);
+  margin:0 0 1.5rem;letter-spacing:-.025em;line-height:1.2;
 }
-.welcome-end {
-  margin-top: var(--space-md);
-  padding-top: var(--space-md);
-  border-top: 1px dashed var(--purple-200);
-  font-weight: 600;
-  color: var(--purple-700);
+.section-intro{
+  font-size:var(--text-lg);color:var(--slate-600);
+  margin:0 0 1.5rem;max-width:68ch;line-height:1.7;
+}
+.section-intro.small{font-size:var(--text-base);color:var(--slate-600);}
+
+/* ========== SUBSECTION ========== */
+.subsection{margin:4rem 0;}
+.sub-num{
+  font-size:var(--text-xs);font-weight:700;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--purple-600);margin-bottom:.7rem;
+}
+.sub-title{
+  font-size:var(--text-2xl);font-weight:800;color:var(--slate-900);
+  margin:0 0 1.25rem;letter-spacing:-.015em;line-height:1.25;
+}
+.sub-lede{
+  font-size:var(--text-base);color:var(--slate-600);
+  margin:0 0 2rem;max-width:70ch;line-height:1.75;
 }
 
-/* ==========================================================
-   SECTIONS
-   ========================================================== */
-.section {
-  padding: var(--space-3xl) 0;
-  border-top: 1px solid var(--slate-200);
+/* ========== RECALL BAR ========== */
+.recall-bar{
+  background:linear-gradient(135deg,var(--blue-50),var(--purple-50));
+  border:1.5px solid var(--blue-200);border-radius:var(--radius-lg);
+  padding:1.85rem 2.25rem;margin:0 0 2.5rem;
 }
-.section-head {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: var(--space-md);
-  margin-bottom: var(--space-md);
+.recall-eyebrow{
+  font-size:var(--text-xs);font-weight:800;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--blue-700);margin-bottom:.55rem;
 }
-.section-num {
-  background: linear-gradient(135deg, var(--purple-600), var(--blue-600));
-  color: #fff;
-  width: 64px; height: 64px;
-  border-radius: 16px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: var(--text-lg);
-  font-weight: 800;
-  box-shadow: var(--shadow-md);
+.recall-q{font-weight:700;color:var(--slate-900);margin:0 0 1.25rem;font-size:var(--text-base);line-height:1.5;}
+.recall-options{display:flex;flex-wrap:wrap;gap:.7rem;}
+.recall-opt{
+  font-family:inherit;font-size:var(--text-sm);font-weight:600;
+  padding:11px 22px;border-radius:999px;cursor:pointer;
+  border:1.5px solid var(--slate-200);background:#fff;color:var(--slate-700);
+  transition:all .15s ease;
 }
-.section-eyebrow {
-  font-size: var(--text-xs);
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--purple-700);
-  margin-bottom: 4px;
-}
-.section-title {
-  font-size: var(--text-2xl);
-  font-weight: 800;
-  color: var(--slate-900);
-  margin: 0;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-}
-.section-status {
-  font-size: var(--text-xs);
-  font-weight: 700;
-  color: var(--slate-400);
-  letter-spacing: 0.1em;
-}
-.section-status.done { color: var(--green-600); }
-.section-intro {
-  font-size: var(--text-base);
-  color: var(--slate-600);
-  max-width: 75ch;
-  margin: 0 0 var(--space-2xl);
-  line-height: 1.7;
-}
-.section-intro a { color: var(--purple-700); font-weight: 600; }
+.recall-opt:hover{border-color:var(--blue-400);}
+.recall-opt.correct{background:var(--green-100);border-color:var(--green-500);color:var(--green-700);}
+.recall-opt.wrong{background:var(--red-50);border-color:var(--red-500);color:var(--red-700);}
+.recall-feedback{margin-top:1rem;font-size:var(--text-sm);color:var(--slate-700);min-height:1.4em;}
 
-/* ==========================================================
-   SUBSECTION HEADER
-   ========================================================== */
-.subsection {
-  margin-top: var(--space-2xl);
+/* ========== FRAMEWORK SANDBOX ========== */
+.fw-sandbox{
+  background:#fff;border:1.5px solid var(--slate-200);
+  border-radius:var(--radius-xl);padding:2.5rem;
+  box-shadow:var(--shadow-md);margin:2rem 0;
 }
-.subsection-label {
-  font-size: var(--text-xs);
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--blue-700);
-  margin-bottom: var(--space-xs);
+@media (max-width:680px){.fw-sandbox{padding:1.5rem;}}
+.fw-sandbox-eyebrow{
+  font-size:var(--text-xs);font-weight:800;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--purple-700);margin-bottom:.5rem;
 }
-.subsection-title {
-  font-size: var(--text-xl);
-  font-weight: 800;
-  color: var(--slate-900);
-  margin: 0 0 var(--space-md);
-  letter-spacing: -0.01em;
-}
-.subsection-intro {
-  font-size: var(--text-base);
-  color: var(--slate-600);
-  max-width: 70ch;
-  line-height: 1.7;
-  margin-bottom: var(--space-lg);
-}
+.fw-sandbox-title{font-size:var(--text-xl);font-weight:800;color:var(--slate-900);margin:0 0 .5rem;}
+.fw-sandbox-sub{font-size:var(--text-base);color:var(--slate-600);margin:0 0 1.75rem;line-height:1.65;}
 
-/* ==========================================================
-   ILLUSTRATION ROW
-   ========================================================== */
-.illustration-row {
-  display: grid;
-  grid-template-columns: 1fr 1.3fr;
-  gap: var(--space-2xl);
-  align-items: center;
-  margin: var(--space-2xl) 0;
+.fw-toggles{
+  display:flex;flex-wrap:wrap;gap:.7rem;margin-bottom:1.75rem;
+  padding:1rem;background:var(--slate-50);border-radius:var(--radius-md);
+  border:1px dashed var(--slate-200);
 }
-@media (max-width: 880px) {
-  .illustration-row { grid-template-columns: 1fr; }
+.fw-toggle{
+  font-family:inherit;font-size:var(--text-sm);font-weight:700;
+  padding:11px 20px;border-radius:999px;cursor:pointer;
+  border:1.5px solid transparent;background:#fff;color:var(--slate-700);
+  transition:all .15s ease;display:inline-flex;align-items:center;gap:8px;
 }
-.illustration-row.reverse {
-  grid-template-columns: 1.3fr 1fr;
-}
-.illustration-row svg {
-  width: 100%; max-width: 420px;
-  display: block;
-  margin: 0 auto;
-}
+.fw-toggle:hover{border-color:var(--purple-300);}
+.fw-toggle.active{background:var(--purple-600);color:#fff;border-color:var(--purple-600);}
+.fw-toggle .swatch{width:14px;height:14px;border-radius:4px;display:inline-block;}
+.fw-toggle .swatch.blue{background:var(--blue-500);}
+.fw-toggle .swatch.gold{background:var(--gold-500);}
 
-/* ==========================================================
-   INTERACTIVE FRAMEWORK MAP
-   ========================================================== */
-.fw-map {
-  background: #fff;
-  border: 1px solid var(--slate-200);
-  border-radius: var(--radius-xl);
-  padding: var(--space-xl);
-  box-shadow: var(--shadow-md);
-  margin: var(--space-lg) 0;
+.fw-grid{
+  display:grid;grid-template-columns:auto repeat(4,1fr);gap:10px;
+  font-size:var(--text-xs);
 }
-.fw-map-head {
-  text-align: center;
-  margin-bottom: var(--space-lg);
+.fw-grid-corner,.fw-grid-col-head,.fw-grid-row-head{
+  font-weight:800;color:var(--slate-700);padding:.85rem;text-align:center;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;
 }
-.fw-map-eyebrow {
-  display: inline-block;
-  font-size: var(--text-xs);
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--purple-700);
-  background: var(--purple-100);
-  padding: 6px 14px;
-  border-radius: 999px;
-  margin-bottom: var(--space-sm);
+.fw-grid-col-head{
+  background:var(--slate-50);border-radius:var(--radius-sm);
+  display:flex;align-items:center;justify-content:center;line-height:1.35;
 }
-.fw-map-title {
-  font-size: var(--text-xl);
-  font-weight: 800;
-  color: var(--slate-900);
-  margin: 0 0 var(--space-xs);
+.fw-grid-row-head{
+  background:var(--slate-50);border-radius:var(--radius-sm);
+  writing-mode:vertical-rl;transform:rotate(180deg);
+  display:flex;align-items:center;justify-content:center;
 }
-.fw-map-sub {
-  color: var(--slate-600);
-  font-size: var(--text-sm);
-  margin: 0;
+.fw-cell{
+  border-radius:var(--radius-sm);padding:1rem;cursor:pointer;
+  display:flex;flex-direction:column;gap:8px;justify-content:center;
+  min-height:110px;border:2px solid transparent;
+  transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease;
+  position:relative;overflow:hidden;
 }
-.fw-toggle {
-  display: flex; flex-wrap: wrap; gap: 8px;
-  justify-content: center;
-  margin: var(--space-lg) 0 var(--space-md);
+.fw-cell:hover{
+  transform:translateY(-3px);box-shadow:var(--shadow-md);
+  border-color:var(--purple-400);
 }
-.fw-toggle button {
-  font-family: inherit;
-  font-size: var(--text-sm);
-  font-weight: 600;
-  padding: 8px 18px;
-  border: 1.5px solid var(--slate-200);
-  background: #fff;
-  border-radius: 999px;
-  cursor: pointer;
-  color: var(--slate-600);
-  transition: all .15s ease;
+.fw-cell.selected{border-color:var(--purple-700);box-shadow:var(--shadow-lg);}
+.fw-cell .perspectives{display:flex;gap:5px;}
+.fw-cell .pdot{flex:1;height:8px;border-radius:4px;}
+.fw-cell .pdot.blue.b{background:#bfdbfe;}
+.fw-cell .pdot.blue.i{background:#60a5fa;}
+.fw-cell .pdot.blue.a{background:#1d4ed8;}
+.fw-cell .pdot.gold.b{background:#fde68a;}
+.fw-cell .pdot.gold.i{background:#facc15;}
+.fw-cell .pdot.gold.a{background:#a16207;}
+.fw-cell-label{
+  font-size:11px;font-weight:700;color:var(--slate-700);
+  letter-spacing:.06em;text-align:center;line-height:1.3;
 }
-.fw-toggle button.active {
-  background: var(--slate-900);
-  border-color: var(--slate-900);
-  color: #fff;
-}
-.fw-toggle button:hover:not(.active) {
-  border-color: var(--slate-400);
-  color: var(--slate-800);
-}
+.fw-mode-blue .pdot.gold,.fw-mode-gold .pdot.blue{display:none;}
 
-.fw-grid-wrap {
-  overflow-x: auto;
-  padding-bottom: var(--space-sm);
+.fw-readout{
+  margin-top:1.5rem;background:var(--slate-50);
+  border:1.5px dashed var(--slate-200);border-radius:var(--radius-md);
+  padding:1.75rem;min-height:140px;
 }
-.fw-grid {
-  display: grid;
-  grid-template-columns: 110px repeat(4, 1fr);
-  gap: 6px;
-  min-width: 720px;
+.fw-readout.empty{
+  display:flex;align-items:center;justify-content:center;
+  color:var(--slate-500);font-style:italic;text-align:center;
+  font-size:var(--text-base);
 }
-.fw-grid .fw-corner {
-  background: linear-gradient(135deg, var(--slate-50), var(--slate-100));
-  border-radius: var(--radius-sm);
-  padding: 12px 10px;
-  font-size: var(--text-xs);
-  color: var(--slate-500);
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  display: flex;
-  align-items: flex-end;
-  text-align: center;
+.fw-readout-head{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:.85rem;}
+.fw-readout-pill{
+  font-size:11px;font-weight:800;letter-spacing:.1em;
+  text-transform:uppercase;padding:6px 14px;border-radius:999px;
 }
-.fw-grid .fw-dim-head {
-  background: linear-gradient(135deg, var(--purple-100), var(--purple-50));
-  border-radius: var(--radius-sm);
-  padding: 14px 10px;
-  text-align: center;
-  font-weight: 700;
-  font-size: var(--text-xs);
-  color: var(--purple-800);
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  justify-content: center;
+.fw-readout-pill.blue{background:var(--blue-100);color:var(--blue-700);}
+.fw-readout-pill.gold{background:var(--gold-100);color:var(--gold-700);}
+.fw-readout-pill.level{background:var(--purple-100);color:var(--purple-700);}
+.fw-readout-title{font-weight:800;color:var(--slate-900);margin:0;font-size:var(--text-lg);}
+.fw-readout-row{display:grid;gap:.85rem;margin-top:.5rem;}
+.fw-perspective-block{
+  background:#fff;border-radius:var(--radius-md);
+  padding:1.1rem 1.4rem;border-left:5px solid var(--blue-500);
+  font-size:var(--text-base);line-height:1.7;color:var(--slate-700);
 }
-.fw-grid .fw-dim-head .icon { font-size: 22px; }
-.fw-grid .fw-level-label {
-  background: linear-gradient(135deg, var(--slate-100), var(--slate-50));
-  border-radius: var(--radius-sm);
-  padding: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: var(--text-xs);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--slate-700);
-  min-height: 80px;
+.fw-perspective-block.gold{border-left-color:var(--gold-500);}
+.fw-perspective-label{
+  font-size:11px;font-weight:800;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--blue-700);margin-bottom:6px;
 }
-.fw-grid .fw-cell {
-  border-radius: var(--radius-sm);
-  padding: 10px;
-  cursor: pointer;
-  transition: transform .15s ease, box-shadow .15s ease;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  border: 2px solid transparent;
-  font-family: inherit;
-  text-align: left;
-}
-.fw-grid .fw-cell:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-.fw-grid .fw-cell.active {
-  outline: 3px solid var(--purple-600);
-  outline-offset: 2px;
-}
-.fw-cell-perspective {
-  display: flex; gap: 4px;
-}
-.fw-pill {
-  flex: 1;
-  font-size: 10px;
-  font-weight: 700;
-  text-align: center;
-  padding: 4px 0;
-  border-radius: 4px;
-  color: #fff;
-  letter-spacing: 0.04em;
-}
-.fw-pill.t { background: var(--blue-500); }
-.fw-pill.s { background: var(--gold-500); color: var(--slate-900); }
+.fw-perspective-block.gold .fw-perspective-label{color:var(--gold-700);}
 
-/* level shading via row */
-.fw-row-basic .fw-cell        { background: linear-gradient(135deg, #f3f4ff 0%, #f8fafc 100%); }
-.fw-row-intermediate .fw-cell { background: linear-gradient(135deg, #e2e8ff 0%, #ebf0ff 100%); }
-.fw-row-advanced .fw-cell     { background: linear-gradient(135deg, #c7d2fe 0%, #dbeafe 100%); }
+/* ========== 4×3×2 EXPLAINER ========== */
+.formula-row{
+  display:flex;align-items:center;justify-content:center;
+  gap:1.25rem;flex-wrap:wrap;margin:2.5rem 0;font-size:var(--text-2xl);
+  font-weight:800;color:var(--slate-700);
+}
+.formula-num{
+  display:flex;flex-direction:column;align-items:center;
+  background:#fff;border:1.5px solid var(--slate-200);border-radius:var(--radius-md);
+  padding:1.1rem 1.6rem;cursor:pointer;min-width:108px;
+  box-shadow:var(--shadow-sm);transition:all .2s ease;
+}
+.formula-num:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);
+  border-color:var(--purple-300);}
+.formula-num.active{
+  background:linear-gradient(135deg,var(--purple-600),var(--blue-600));
+  color:#fff;border-color:transparent;
+}
+.formula-num .n{font-size:var(--text-3xl);line-height:1;}
+.formula-num .lbl{
+  font-size:11px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;margin-top:8px;color:var(--slate-500);
+}
+.formula-num.active .lbl{color:rgba(255,255,255,.88);}
+.formula-op{color:var(--slate-400);}
+.formula-explainer{
+  background:linear-gradient(135deg,var(--purple-50),var(--blue-50));
+  border:1.5px solid var(--purple-200);border-radius:var(--radius-lg);
+  padding:1.75rem 2rem;margin-top:1.5rem;min-height:110px;
+}
+.formula-explainer h5{
+  margin:0 0 .55rem;color:var(--purple-800);
+  font-size:var(--text-base);font-weight:800;letter-spacing:.02em;
+}
+.formula-explainer p{margin:0;color:var(--slate-700);font-size:var(--text-base);line-height:1.7;}
 
-.fw-cell-text {
-  font-size: var(--text-xs);
-  font-weight: 600;
-  color: var(--slate-700);
-  line-height: 1.35;
+.why-design{
+  background:linear-gradient(135deg,var(--gold-50),#fffbeb);
+  border:1.5px solid var(--gold-200);border-radius:var(--radius-lg);
+  padding:2rem;margin-top:2rem;
 }
+.why-design h4{
+  margin:0 0 .85rem;color:var(--gold-700);font-size:var(--text-lg);
+  font-weight:800;display:flex;align-items:center;gap:10px;
+}
+.why-design p{margin:0;color:var(--slate-700);font-size:var(--text-base);line-height:1.85;}
+.why-design strong{color:var(--purple-800);}
 
-.fw-detail {
-  margin-top: var(--space-lg);
-  background: linear-gradient(135deg, var(--slate-50), #fff);
-  border: 1.5px dashed var(--slate-300);
-  border-radius: var(--radius-md);
-  padding: var(--space-lg);
-  min-height: 100px;
+/* ========== DIMENSION CARDS ========== */
+.dim-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem;margin:2rem 0;}
+@media (max-width:760px){.dim-grid{grid-template-columns:1fr;}}
+.dim-card{
+  background:#fff;border:1.5px solid var(--slate-200);
+  border-radius:var(--radius-lg);padding:2rem;cursor:pointer;
+  transition:all .2s ease;box-shadow:var(--shadow-sm);
 }
-.fw-detail .fw-detail-title {
-  font-size: var(--text-lg);
-  font-weight: 800;
-  color: var(--slate-900);
-  margin: 0 0 var(--space-sm);
+.dim-card:hover{
+  border-color:var(--purple-300);box-shadow:var(--shadow-md);
+  transform:translateY(-3px);
 }
-.fw-detail .fw-detail-meta {
-  display: flex; flex-wrap: wrap; gap: 8px;
-  margin-bottom: var(--space-md);
+.dim-card .dim-eyebrow{
+  font-size:11px;font-weight:800;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--purple-700);margin-bottom:.7rem;
 }
-.fw-detail .fw-meta-tag {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 4px 10px;
-  border-radius: 999px;
+.dim-card h4{
+  margin:0 0 .85rem;font-size:var(--text-lg);color:var(--slate-900);font-weight:800;
+  display:flex;align-items:center;gap:10px;line-height:1.3;
 }
-.fw-meta-tag.dim { background: var(--purple-100); color: var(--purple-800); }
-.fw-meta-tag.lvl { background: var(--slate-200); color: var(--slate-800); }
-.fw-detail .fw-perspectives {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-md);
+.dim-card .dim-tagline{
+  margin:0 0 1.25rem;color:var(--slate-700);font-size:var(--text-base);
+  line-height:1.65;
 }
-@media (max-width: 720px) {
-  .fw-detail .fw-perspectives { grid-template-columns: 1fr; }
+.dim-expand{max-height:0;overflow:hidden;transition:max-height .35s ease;}
+.dim-card.open .dim-expand{max-height:340px;}
+.dim-expand-inner{
+  padding-top:1.1rem;margin-top:1.1rem;
+  border-top:1px dashed var(--slate-200);
 }
-.fw-pers-card {
-  border-radius: var(--radius-md);
-  padding: var(--space-md);
+.dim-expand-inner h5{
+  margin:0 0 .4rem;font-size:11px;font-weight:800;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--purple-600);
 }
-.fw-pers-card.t { background: var(--blue-50); border-left: 4px solid var(--blue-500); }
-.fw-pers-card.s { background: var(--gold-50); border-left: 4px solid var(--gold-500); }
-.fw-pers-card .fw-pers-label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  margin-bottom: 6px;
+.dim-expand-inner p{margin:0;color:var(--slate-700);font-size:var(--text-base);line-height:1.7;}
+.dim-expand-toggle{
+  font-size:var(--text-sm);font-weight:700;
+  letter-spacing:.04em;color:var(--purple-700);
+  display:inline-flex;align-items:center;gap:6px;
 }
-.fw-pers-card.t .fw-pers-label { color: var(--blue-700); }
-.fw-pers-card.s .fw-pers-label { color: var(--gold-700); }
-.fw-pers-card p {
-  margin: 0; font-size: var(--text-sm); line-height: 1.5; color: var(--slate-700);
-}
-.fw-detail-empty {
-  text-align: center;
-  color: var(--slate-500);
-  font-size: var(--text-sm);
-  padding: var(--space-md);
-}
+.dim-card.open .dim-expand-toggle .chev{transform:rotate(180deg);}
+.dim-expand-toggle .chev{display:inline-block;transition:transform .25s ease;}
 
-/* ==========================================================
-   4×3×2 EXPLAINER
-   ========================================================== */
-.equation {
-  display: flex; flex-wrap: wrap;
-  align-items: center; justify-content: center;
-  gap: var(--space-md);
-  margin: var(--space-2xl) 0 var(--space-lg);
+/* ========== POP QUIZ ========== */
+.quiz-block{
+  background:#fff;border:1.5px solid var(--slate-200);
+  border-radius:var(--radius-lg);padding:2rem;margin:1.5rem 0;
+  box-shadow:var(--shadow-sm);
 }
-.equation-block {
-  background: #fff;
-  border: 2px solid var(--slate-200);
-  border-radius: var(--radius-md);
-  padding: var(--space-md) var(--space-lg);
-  text-align: center;
-  cursor: pointer;
-  min-width: 110px;
-  transition: all .2s ease;
+@media (max-width:680px){.quiz-block{padding:1.5rem;}}
+.quiz-eyebrow{
+  font-size:11px;font-weight:800;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--purple-700);margin-bottom:.85rem;
 }
-.equation-block:hover {
-  border-color: var(--purple-500);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+.quiz-q{
+  font-weight:700;color:var(--slate-900);margin:0 0 1.5rem;
+  font-size:var(--text-base);line-height:1.55;
 }
-.equation-block.active {
-  border-color: var(--purple-600);
-  background: var(--purple-50);
-  box-shadow: var(--shadow-md);
+.quiz-options{display:grid;gap:.7rem;}
+.quiz-opt{
+  font-family:inherit;font-size:var(--text-base);text-align:left;
+  padding:16px 22px;border-radius:var(--radius-md);cursor:pointer;
+  border:1.5px solid var(--slate-200);background:#fff;color:var(--slate-700);
+  transition:all .15s ease;font-weight:500;line-height:1.55;
 }
-.equation-num {
-  font-size: var(--text-3xl);
-  font-weight: 800;
-  color: var(--purple-700);
-  line-height: 1;
-  margin-bottom: 4px;
+.quiz-opt:hover{border-color:var(--purple-400);background:var(--purple-50);}
+.quiz-opt.correct{background:var(--green-100);border-color:var(--green-500);color:var(--green-700);font-weight:600;}
+.quiz-opt.wrong{background:var(--red-50);border-color:var(--red-500);color:var(--red-700);}
+.quiz-feedback{
+  margin-top:1.1rem;padding:1rem 1.4rem;border-radius:var(--radius-md);
+  font-size:var(--text-base);line-height:1.65;display:none;
 }
-.equation-label {
-  font-size: var(--text-xs);
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--slate-600);
-}
-.equation-op {
-  font-size: var(--text-2xl);
-  font-weight: 800;
-  color: var(--slate-400);
-}
-.equation-block.total {
-  background: linear-gradient(135deg, var(--gold-100), var(--gold-50));
-  border-color: var(--gold-400);
-}
-.equation-block.total .equation-num { color: var(--gold-700); }
+.quiz-feedback.show{display:block;}
+.quiz-feedback.ok{background:var(--green-50);color:var(--green-700);
+  border-left:4px solid var(--green-500);}
+.quiz-feedback.bad{background:var(--red-50);color:var(--red-700);
+  border-left:4px solid var(--red-500);}
 
-.equation-detail {
-  background: #fff;
-  border: 1.5px solid var(--purple-200);
-  border-radius: var(--radius-md);
-  padding: var(--space-lg);
-  margin-top: var(--space-lg);
-  font-size: var(--text-base);
-  color: var(--slate-700);
-  line-height: 1.65;
-  min-height: 70px;
+/* ========== LEARNING PLAN ========== */
+.plan-card{
+  background:linear-gradient(135deg,#fff 0%,var(--purple-50) 100%);
+  border:1.5px solid var(--purple-200);border-radius:var(--radius-xl);
+  padding:2.5rem;box-shadow:var(--shadow-md);margin:2rem 0;
 }
-.equation-detail strong { color: var(--purple-800); }
+@media (max-width:680px){.plan-card{padding:1.75rem;}}
+.plan-eyebrow{
+  font-size:var(--text-xs);font-weight:800;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--purple-700);
+  display:inline-flex;align-items:center;gap:8px;margin-bottom:.85rem;
+}
+.plan-title{margin:0 0 2rem;font-size:var(--text-xl);color:var(--slate-900);font-weight:800;line-height:1.4;}
+.plan-step{margin-bottom:2rem;}
+.plan-step-label{
+  font-size:var(--text-base);font-weight:700;color:var(--slate-800);
+  margin-bottom:.85rem;display:flex;align-items:flex-start;gap:.85rem;line-height:1.5;
+}
+.plan-step-num{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:30px;height:30px;border-radius:50%;flex-shrink:0;
+  background:var(--purple-600);color:#fff;font-size:13px;font-weight:800;
+  margin-top:2px;
+}
+.plan-step-hint{
+  display:block;font-size:var(--text-sm);color:var(--slate-500);
+  font-weight:500;margin-top:4px;font-style:italic;
+}
+.plan-chips{display:flex;flex-wrap:wrap;gap:.7rem;}
+.plan-chip{
+  font-family:inherit;font-size:var(--text-sm);font-weight:600;
+  padding:11px 22px;border-radius:999px;cursor:pointer;
+  border:1.5px solid var(--slate-200);background:#fff;color:var(--slate-700);
+  transition:all .15s ease;
+}
+.plan-chip:hover{border-color:var(--purple-400);}
+.plan-chip.active{
+  background:linear-gradient(135deg,var(--purple-600),var(--blue-600));
+  color:#fff;border-color:transparent;
+}
+.plan-input{
+  width:100%;font-family:inherit;font-size:var(--text-base);
+  padding:14px 18px;border-radius:var(--radius-md);
+  border:1.5px solid var(--slate-200);background:#fff;color:var(--slate-800);
+  transition:border-color .15s ease;line-height:1.6;
+}
+.plan-input:focus{
+  outline:none;border-color:var(--purple-500);
+  box-shadow:0 0 0 4px rgba(168,85,247,.15);
+}
+textarea.plan-input{min-height:120px;resize:vertical;}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:10px;
+  background:linear-gradient(135deg,var(--purple-600),var(--blue-600));
+  color:#fff;border:none;font-family:inherit;font-size:var(--text-base);font-weight:700;
+  padding:15px 28px;border-radius:999px;cursor:pointer;text-decoration:none;
+  box-shadow:var(--shadow-md);transition:all .2s ease;
+}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);}
+.plan-output{
+  margin-top:1.75rem;background:#fff;border-left:5px solid var(--purple-500);
+  border-radius:var(--radius-md);padding:1.5rem 1.85rem;display:none;
+  box-shadow:var(--shadow-sm);
+}
+.plan-output.show{display:block;}
+.plan-output h5{margin:0 0 .85rem;color:var(--purple-800);font-size:var(--text-base);font-weight:800;}
+.plan-output p{margin:0;font-size:var(--text-base);color:var(--slate-700);line-height:1.85;}
 
-.design-rationale {
-  background: linear-gradient(135deg, var(--blue-50), var(--purple-50));
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--purple-200);
-  padding: var(--space-xl);
-  margin-top: var(--space-2xl);
+/* ========== CONTEXT TABS ========== */
+.tabs{
+  display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap;
+  border-bottom:2px solid var(--slate-200);padding-bottom:0;
 }
-.design-rationale h4 {
-  margin: 0 0 var(--space-sm);
-  color: var(--purple-900);
-  font-size: var(--text-lg);
+.tab{
+  font-family:inherit;font-size:var(--text-base);font-weight:700;
+  padding:14px 24px;cursor:pointer;border:none;background:transparent;
+  color:var(--slate-500);border-bottom:3px solid transparent;
+  margin-bottom:-2px;transition:all .15s ease;
+  display:inline-flex;align-items:center;gap:8px;
 }
-.design-rationale p {
-  margin: 0;
-  color: var(--slate-700);
-  line-height: 1.7;
-}
+.tab:hover{color:var(--purple-700);}
+.tab.active{color:var(--purple-700);border-bottom-color:var(--purple-600);}
+.tab-panel{display:none;animation:fadeIn .3s ease;}
+.tab-panel.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
 
-/* ==========================================================
-   DIMENSION CARDS (expandable)
-   ========================================================== */
-.dim-cards {
-  display: grid;
-  gap: var(--space-md);
-  margin-top: var(--space-lg);
+.context-card{
+  background:#fff;border:1.5px solid var(--slate-200);
+  border-radius:var(--radius-lg);padding:2.25rem;box-shadow:var(--shadow-sm);
 }
-.dim-card {
-  background: #fff;
-  border: 1.5px solid var(--slate-200);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  transition: border-color .2s ease, box-shadow .2s ease;
+@media (max-width:680px){.context-card{padding:1.5rem;}}
+.context-card > p{margin:0 0 1.5rem;color:var(--slate-700);line-height:1.75;font-size:var(--text-base);}
+.context-prompt{
+  background:linear-gradient(135deg,var(--blue-50),var(--purple-50));
+  border-left:5px solid var(--purple-500);border-radius:var(--radius-md);
+  padding:1.25rem 1.6rem;margin:1.5rem 0;
 }
-.dim-card.open {
-  border-color: var(--purple-400);
-  box-shadow: var(--shadow-md);
+.context-prompt-label{
+  font-size:11px;font-weight:800;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--purple-700);margin-bottom:.5rem;
 }
-.dim-card-head {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: var(--space-md);
-  padding: var(--space-lg) var(--space-xl);
-  cursor: pointer;
-  border: none;
-  background: transparent;
-  width: 100%;
-  text-align: left;
-  font-family: inherit;
+.context-prompt-q{font-style:italic;color:var(--slate-800);font-weight:600;margin:0;font-size:var(--text-base);line-height:1.55;}
+.context-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-top:.75rem;}
+@media (max-width:680px){.context-grid{grid-template-columns:1fr;}}
+.context-item{
+  background:var(--slate-50);border-radius:var(--radius-md);
+  padding:1.15rem 1.35rem;border:1px solid var(--slate-200);
 }
-.dim-card-icon {
-  font-size: 32px;
-  width: 60px; height: 60px;
-  background: linear-gradient(135deg, var(--purple-100), var(--blue-100));
-  border-radius: 14px;
-  display: flex; align-items: center; justify-content: center;
+.context-item h6{
+  margin:0 0 .5rem;color:var(--slate-900);font-size:var(--text-base);
+  font-weight:800;display:flex;align-items:center;gap:8px;line-height:1.4;
 }
-.dim-card-meta {
-  font-size: var(--text-xs);
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: var(--purple-700);
-  text-transform: uppercase;
-  margin-bottom: 2px;
-}
-.dim-card-title {
-  font-size: var(--text-lg);
-  font-weight: 800;
-  color: var(--slate-900);
-  margin: 0 0 4px;
-}
-.dim-card-sub {
-  font-size: var(--text-sm);
-  color: var(--slate-600);
-  margin: 0;
-}
-.dim-card-toggle {
-  font-size: 24px;
-  color: var(--slate-400);
-  transition: transform .25s ease;
-  width: 36px; height: 36px;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 50%;
-  background: var(--slate-100);
-}
-.dim-card.open .dim-card-toggle {
-  transform: rotate(180deg);
-  background: var(--purple-100);
-  color: var(--purple-700);
-}
+.context-item p{margin:0;color:var(--slate-600);font-size:var(--text-sm);line-height:1.65;}
 
-.dim-card-body {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height .35s ease;
+/* Evidence card */
+.evidence-card{
+  background:#fff;border:1.5px solid var(--slate-200);
+  border-radius:var(--radius-lg);padding:2.25rem;margin-top:2rem;
+  box-shadow:var(--shadow-sm);
 }
-.dim-card.open .dim-card-body {
-  max-height: 600px;
+@media (max-width:680px){.evidence-card{padding:1.5rem;}}
+.evidence-card h4{
+  margin:0 0 1rem;font-size:var(--text-lg);color:var(--slate-900);
+  font-weight:800;display:flex;align-items:center;gap:10px;
 }
-.dim-card-body-inner {
-  padding: 0 var(--space-xl) var(--space-xl) var(--space-xl);
-  border-top: 1px dashed var(--slate-200);
-  margin-top: 0;
+.evidence-list{
+  margin:0;padding-left:1.5rem;color:var(--slate-700);
+  font-size:var(--text-base);line-height:2;
 }
-.dim-card-body-inner h5 {
-  margin: var(--space-md) 0 var(--space-xs);
-  font-size: var(--text-sm);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--purple-700);
+.evidence-list li{margin-bottom:.4rem;}
+.evidence-why{
+  margin-top:1.5rem;padding:1.1rem 1.4rem;background:var(--gold-50);
+  border:1px solid var(--gold-200);border-radius:var(--radius-md);
+  font-size:var(--text-base);color:var(--slate-700);line-height:1.75;
 }
-.dim-card-body-inner p {
-  margin: 0 0 var(--space-sm);
-  color: var(--slate-700);
-  line-height: 1.7;
-}
+.evidence-why strong{color:var(--gold-700);}
 
-/* ==========================================================
-   QUIZ CARDS
-   ========================================================== */
-.quiz-wrap {
-  display: grid;
-  gap: var(--space-lg);
-  margin-top: var(--space-lg);
+/* ========== MECHANICS GRID ========== */
+.mech-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin:2rem 0;}
+@media (max-width:880px){.mech-grid{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:560px){.mech-grid{grid-template-columns:1fr;}}
+.mech-card{
+  background:#fff;border:1.5px solid var(--slate-200);
+  border-radius:var(--radius-lg);padding:1.85rem;box-shadow:var(--shadow-sm);
+  transition:transform .2s ease,box-shadow .2s ease;
 }
-.quiz-card {
-  background: #fff;
-  border: 1.5px solid var(--slate-200);
-  border-radius: var(--radius-lg);
-  padding: var(--space-xl);
-  box-shadow: var(--shadow-sm);
-}
-.quiz-meta {
-  font-size: var(--text-xs);
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--purple-700);
-  margin-bottom: var(--space-sm);
-}
-.quiz-question {
-  font-size: var(--text-lg);
-  font-weight: 700;
-  color: var(--slate-900);
-  margin: 0 0 var(--space-lg);
-  line-height: 1.4;
-}
-.quiz-options {
-  display: grid;
-  gap: var(--space-sm);
-}
-.quiz-option {
-  background: var(--slate-50);
-  border: 2px solid var(--slate-200);
-  border-radius: var(--radius-md);
-  padding: var(--space-md) var(--space-lg);
-  cursor: pointer;
-  font-family: inherit;
-  font-size: var(--text-base);
-  text-align: left;
-  color: var(--slate-700);
-  transition: all .15s ease;
-  line-height: 1.5;
-}
-.quiz-option:hover {
-  border-color: var(--purple-300);
-  background: var(--purple-50);
-}
-.quiz-option.correct {
-  background: var(--green-100);
-  border-color: var(--green-600);
-  color: var(--green-700);
-  font-weight: 600;
-}
-.quiz-option.incorrect {
-  background: #fee2e2;
-  border-color: #dc2626;
-  color: #b91c1c;
-}
-.quiz-feedback {
-  margin-top: var(--space-md);
-  padding: var(--space-md);
-  border-radius: var(--radius-md);
-  font-size: var(--text-sm);
-  display: none;
-}
-.quiz-feedback.show { display: block; }
-.quiz-feedback.right { background: var(--green-100); color: var(--green-700); }
-.quiz-feedback.wrong { background: #fee2e2; color: #b91c1c; }
+.mech-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);}
+.mech-icon{font-size:32px;margin-bottom:.85rem;display:block;}
+.mech-card h5{margin:0 0 .65rem;font-size:var(--text-base);color:var(--slate-900);font-weight:800;line-height:1.35;}
+.mech-card p{margin:0;font-size:var(--text-sm);color:var(--slate-600);line-height:1.7;}
 
-/* ==========================================================
-   RECALL BOX
-   ========================================================== */
-.recall {
-  background: linear-gradient(135deg, var(--gold-50), #fffef0);
-  border: 1.5px solid var(--gold-200);
-  border-radius: var(--radius-lg);
-  padding: var(--space-xl);
-  margin: var(--space-2xl) 0;
+/* ========== CHECKLIST ========== */
+.checklist-card{
+  background:linear-gradient(135deg,var(--green-50),#f0fdf4);
+  border:1.5px solid var(--green-200);border-radius:var(--radius-xl);
+  padding:2.5rem;margin:2rem 0;box-shadow:var(--shadow-sm);
 }
-.recall-eyebrow {
-  font-size: var(--text-xs);
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--gold-700);
-  margin-bottom: var(--space-xs);
+@media (max-width:680px){.checklist-card{padding:1.75rem;}}
+.checklist-card h4{
+  margin:0 0 1.5rem;color:var(--green-700);font-size:var(--text-lg);
+  font-weight:800;display:flex;align-items:center;gap:10px;letter-spacing:.04em;
 }
-.recall-q {
-  font-size: var(--text-base);
-  font-weight: 600;
-  color: var(--slate-800);
-  margin: 0 0 var(--space-md);
+.check-item{
+  display:flex;align-items:flex-start;gap:1rem;padding:1.1rem 0;
+  border-bottom:1px dashed rgba(34,197,94,.25);cursor:pointer;
+  transition:padding .15s ease;
 }
-.recall-options {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: var(--space-sm);
+.check-item:last-child{border-bottom:none;}
+.check-item:hover{padding-left:.4rem;}
+.check-box{
+  width:28px;height:28px;border-radius:8px;
+  border:2px solid var(--green-500);background:#fff;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  margin-top:2px;transition:all .15s ease;
 }
-.recall-options button {
-  font-family: inherit;
-  font-size: var(--text-sm);
-  font-weight: 600;
-  padding: 10px 14px;
-  border-radius: var(--radius-sm);
-  background: #fff;
-  border: 1.5px solid var(--gold-200);
-  color: var(--slate-700);
-  cursor: pointer;
-  transition: all .15s ease;
-}
-.recall-options button:hover { border-color: var(--gold-500); }
-.recall-options button.correct { background: var(--green-100); border-color: var(--green-600); color: var(--green-700); }
-.recall-options button.wrong { background: #fee2e2; border-color: #dc2626; color: #b91c1c; }
+.check-item.checked .check-box{background:var(--green-500);}
+.check-item.checked .check-box::after{content:"✓";color:#fff;font-weight:800;font-size:18px;}
+.check-text{font-size:var(--text-base);color:var(--slate-700);line-height:1.6;}
+.check-item.checked .check-text{color:var(--slate-500);text-decoration:line-through;}
 
-/* ==========================================================
-   LEARNING PLAN BUILDER
-   ========================================================== */
-.plan-builder {
-  background: linear-gradient(135deg, #fff, var(--purple-50));
-  border: 1.5px solid var(--purple-200);
-  border-radius: var(--radius-xl);
-  padding: var(--space-2xl);
-  box-shadow: var(--shadow-md);
+/* ========== BRIDGE ========== */
+.bridge-card{
+  background:linear-gradient(135deg,var(--purple-700),var(--blue-700));
+  color:#fff;border-radius:var(--radius-xl);padding:2.75rem;margin:2rem 0;
+  box-shadow:var(--shadow-lg);position:relative;overflow:hidden;
 }
-.plan-builder h4 {
-  margin: 0 0 var(--space-md);
-  font-size: var(--text-lg);
-  color: var(--purple-900);
+@media (max-width:680px){.bridge-card{padding:1.85rem;}}
+.bridge-card::before{
+  content:"";position:absolute;top:-100px;right:-100px;width:300px;height:300px;
+  background:radial-gradient(closest-side,rgba(250,204,21,.18),transparent);border-radius:50%;
 }
-.plan-step {
-  margin-bottom: var(--space-lg);
+.bridge-eyebrow{
+  font-size:var(--text-xs);font-weight:800;letter-spacing:.22em;
+  text-transform:uppercase;opacity:.85;margin-bottom:.85rem;
+  display:inline-flex;align-items:center;gap:8px;
 }
-.plan-step-label {
-  font-size: var(--text-sm);
-  font-weight: 700;
-  color: var(--slate-700);
-  margin-bottom: var(--space-xs);
+.bridge-title{font-size:var(--text-2xl);font-weight:800;margin:0 0 .65rem;line-height:1.2;}
+.bridge-meta{
+  font-size:var(--text-sm);opacity:.85;margin-bottom:1.5rem;
+  letter-spacing:.08em;font-weight:600;
 }
-.plan-step-hint {
-  font-size: var(--text-xs);
-  color: var(--slate-500);
-  margin-bottom: var(--space-sm);
+.bridge-text{
+  margin:0 0 1.75rem;line-height:1.8;font-size:var(--text-base);opacity:.95;
+  position:relative;z-index:1;
 }
-.plan-dim-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: var(--space-sm);
+.bridge-text strong{color:var(--gold-300);}
+.bridge-companion{
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.2);border-radius:var(--radius-md);
+  padding:1.1rem 1.4rem;margin-bottom:1.75rem;font-size:var(--text-base);
+  display:flex;align-items:flex-start;gap:.85rem;position:relative;z-index:1;
+  line-height:1.7;
 }
-.plan-dim {
-  background: #fff;
-  border: 2px solid var(--slate-200);
-  padding: var(--space-md);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  font-family: inherit;
-  font-size: var(--text-sm);
-  color: var(--slate-700);
-  text-align: left;
-  font-weight: 600;
-  transition: all .15s ease;
-  display: flex; align-items: center; gap: 10px;
+.bridge-actions{display:flex;flex-wrap:wrap;gap:1rem;position:relative;z-index:1;}
+.btn-bridge{
+  display:inline-flex;align-items:center;gap:10px;
+  background:#fff;color:var(--purple-700);border:none;font-family:inherit;
+  font-size:var(--text-base);font-weight:800;padding:15px 28px;border-radius:999px;
+  cursor:pointer;text-decoration:none;transition:transform .2s ease;
 }
-.plan-dim:hover { border-color: var(--purple-400); }
-.plan-dim.selected {
-  border-color: var(--purple-600);
-  background: var(--purple-50);
-  color: var(--purple-900);
-}
-.plan-dim .dim-icon { font-size: 18px; }
-.plan-dim .check {
-  margin-left: auto;
-  width: 22px; height: 22px;
-  border-radius: 50%;
-  background: var(--slate-100);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; color: transparent;
-}
-.plan-dim.selected .check {
-  background: var(--purple-600); color: #fff;
-}
+.btn-bridge:hover{transform:translateY(-3px);}
+.btn-bridge-ghost{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.4);}
+.btn-bridge-ghost:hover{background:rgba(255,255,255,.1);}
 
-.plan-input, .plan-textarea {
-  width: 100%;
-  font-family: inherit;
-  font-size: var(--text-base);
-  padding: 12px 14px;
-  border: 1.5px solid var(--slate-200);
-  border-radius: var(--radius-md);
-  background: #fff;
-  color: var(--slate-800);
-  resize: vertical;
+/* ========== MARK COMPLETE ========== */
+.mark-complete-row{
+  margin:3rem 0 0;padding:1.75rem 2rem;
+  background:#fff;border:1.5px solid var(--slate-200);border-radius:var(--radius-lg);
+  display:flex;justify-content:space-between;align-items:center;gap:1.25rem;
+  flex-wrap:wrap;box-shadow:var(--shadow-sm);transition:all .25s ease;
 }
-.plan-input:focus, .plan-textarea:focus {
-  outline: none; border-color: var(--purple-500);
-  box-shadow: 0 0 0 3px var(--purple-100);
+.mark-complete-row.done{
+  background:linear-gradient(135deg,var(--green-50),#f0fdf4);
+  border-color:var(--green-200);
 }
-.plan-textarea { min-height: 80px; }
-.plan-generate {
-  background: linear-gradient(135deg, var(--purple-600), var(--blue-600));
-  color: #fff;
-  border: none;
-  font-family: inherit;
-  font-size: var(--text-base);
-  font-weight: 700;
-  padding: 12px 28px;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  margin-top: var(--space-md);
-  box-shadow: var(--shadow-md);
-  transition: transform .15s ease;
+.mark-complete-text{
+  font-size:var(--text-base);color:var(--slate-600);
+  display:flex;align-items:center;gap:10px;flex:1;min-width:220px;line-height:1.55;
 }
-.plan-generate:hover { transform: translateY(-2px); }
+.mark-complete-row.done .mark-complete-text{color:var(--green-700);font-weight:600;}
+.btn-mark{
+  font-family:inherit;font-size:var(--text-base);font-weight:700;
+  padding:14px 26px;border-radius:999px;cursor:pointer;border:none;
+  background:linear-gradient(135deg,var(--purple-600),var(--blue-600));
+  color:#fff;box-shadow:var(--shadow-sm);transition:all .2s ease;
+  display:inline-flex;align-items:center;gap:10px;letter-spacing:.02em;
+}
+.btn-mark:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);}
+.mark-complete-row.done .btn-mark{
+  background:#fff;color:var(--green-700);
+  border:1.5px solid var(--green-300);box-shadow:none;
+}
+.mark-complete-row.done .btn-mark:hover{background:var(--green-50);}
 
-.plan-output {
-  display: none;
-  margin-top: var(--space-lg);
-  background: #fff;
-  border-left: 4px solid var(--purple-500);
-  padding: var(--space-lg);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
+/* ========== AI COMPANION ========== */
+.companion-fab{
+  position:fixed;bottom:30px;right:30px;z-index:60;
+  background:linear-gradient(135deg,var(--purple-600),var(--blue-600));
+  color:#fff;border:none;border-radius:999px;padding:16px 26px;
+  font-family:inherit;font-size:var(--text-base);font-weight:700;
+  cursor:pointer;box-shadow:var(--shadow-lg);
+  display:flex;align-items:center;gap:10px;transition:transform .2s ease;
 }
-.plan-output.show { display: block; }
-.plan-output h5 {
-  margin: 0 0 var(--space-xs);
-  color: var(--purple-800);
-  font-size: var(--text-base);
-}
-.plan-output p { margin: 0; color: var(--slate-700); }
+.companion-fab:hover{transform:translateY(-4px);}
 
-/* ==========================================================
-   CONTEXT TABS
-   ========================================================== */
-.ctx-tabs {
-  display: flex; gap: 4px;
-  background: var(--slate-100);
-  padding: 6px;
-  border-radius: var(--radius-md);
-  margin-top: var(--space-lg);
-  flex-wrap: wrap;
+/* ========== FOOTER ========== */
+.module-footer{
+  margin-top:5rem;padding:2.5rem 0;border-top:1px solid var(--slate-200);
+  font-size:var(--text-base);color:var(--slate-500);text-align:center;line-height:1.8;
 }
-.ctx-tab {
-  flex: 1;
-  min-width: 140px;
-  padding: 12px 16px;
-  border-radius: var(--radius-sm);
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--slate-600);
-  transition: all .15s ease;
-}
-.ctx-tab.active {
-  background: #fff;
-  color: var(--purple-800);
-  box-shadow: var(--shadow-sm);
-}
-
-.ctx-panel { display: none; }
-.ctx-panel.active { display: block; }
-
-.ctx-content {
-  background: #fff;
-  border: 1px solid var(--slate-200);
-  border-radius: var(--radius-lg);
-  padding: var(--space-xl);
-  margin-top: var(--space-md);
-  box-shadow: var(--shadow-sm);
-}
-.ctx-content > p {
-  font-size: var(--text-base);
-  color: var(--slate-700);
-  margin: 0 0 var(--space-lg);
-  line-height: 1.7;
-}
-.ctx-example {
-  background: var(--slate-50);
-  border-radius: var(--radius-md);
-  padding: var(--space-lg);
-  border-left: 4px solid var(--purple-500);
-}
-.ctx-example-q {
-  font-size: var(--text-sm);
-  font-weight: 700;
-  color: var(--purple-800);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: var(--space-md);
-}
-.ctx-example-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: var(--space-md);
-}
-.ctx-example-card {
-  background: #fff;
-  border: 1px solid var(--slate-200);
-  padding: var(--space-md);
-  border-radius: var(--radius-sm);
-}
-.ctx-example-card strong {
-  display: block;
-  font-size: var(--text-sm);
-  color: var(--purple-800);
-  margin-bottom: 4px;
-}
-.ctx-example-card span {
-  font-size: var(--text-sm);
-  color: var(--slate-600);
-  line-height: 1.55;
-}
-
-.evidence-tip {
-  background: linear-gradient(135deg, var(--blue-50), #fff);
-  border: 1.5px solid var(--blue-200);
-  border-radius: var(--radius-lg);
-  padding: var(--space-xl);
-  margin-top: var(--space-2xl);
-}
-.evidence-tip h4 {
-  margin: 0 0 var(--space-sm);
-  color: var(--blue-700);
-  font-size: var(--text-lg);
-  display: flex; align-items: center; gap: 8px;
-}
-.evidence-tip ul {
-  margin: var(--space-sm) 0;
-  padding-left: 24px;
-  color: var(--slate-700);
-}
-.evidence-tip li { margin-bottom: 6px; line-height: 1.6; }
-.evidence-tip .tip-why {
-  margin-top: var(--space-md);
-  padding-top: var(--space-md);
-  border-top: 1px dashed var(--blue-200);
-  color: var(--slate-600);
-  font-size: var(--text-sm);
-  line-height: 1.6;
-}
-
-/* ==========================================================
-   MECHANIC GRID
-   ========================================================== */
-.mech-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: var(--space-lg);
-  margin-top: var(--space-lg);
-}
-.mech-item {
-  background: #fff;
-  border: 1px solid var(--slate-200);
-  border-radius: var(--radius-lg);
-  padding: var(--space-lg);
-  box-shadow: var(--shadow-sm);
-  transition: transform .15s ease, box-shadow .15s ease;
-}
-.mech-item:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
-}
-.mech-icon {
-  width: 52px; height: 52px;
-  background: linear-gradient(135deg, var(--purple-100), var(--blue-100));
-  border-radius: 14px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 24px;
-  margin-bottom: var(--space-sm);
-}
-.mech-item h5 {
-  margin: 0 0 var(--space-xs);
-  font-size: var(--text-base);
-  color: var(--slate-900);
-  font-weight: 700;
-}
-.mech-item p {
-  margin: 0;
-  font-size: var(--text-sm);
-  color: var(--slate-600);
-  line-height: 1.6;
-}
-
-/* ==========================================================
-   CHECKLIST
-   ========================================================== */
-.checklist {
-  background: linear-gradient(135deg, #fff, var(--green-100));
-  border: 1.5px solid #86efac;
-  border-radius: var(--radius-xl);
-  padding: var(--space-2xl);
-  margin-top: var(--space-xl);
-}
-.checklist h4 {
-  margin: 0 0 var(--space-md);
-  color: var(--green-700);
-  font-size: var(--text-lg);
-}
-.checklist-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: var(--space-sm) 0;
-  border-bottom: 1px dashed #bbf7d0;
-  cursor: pointer;
-}
-.checklist-item:last-child { border-bottom: none; }
-.checklist-check {
-  width: 24px; height: 24px;
-  border-radius: 6px;
-  border: 2px solid #86efac;
-  background: #fff;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px; color: transparent;
-  flex-shrink: 0; margin-top: 2px;
-  transition: all .15s ease;
-}
-.checklist-item.checked .checklist-check {
-  background: var(--green-600);
-  border-color: var(--green-600);
-  color: #fff;
-}
-.checklist-item.checked .checklist-text {
-  color: var(--slate-500);
-  text-decoration: line-through;
-}
-.checklist-text {
-  font-size: var(--text-base);
-  color: var(--slate-700);
-  line-height: 1.6;
-}
-
-/* ==========================================================
-   MARK COMPLETE BUTTON (toggleable)
-   ========================================================== */
-.mark-complete {
-  margin-top: var(--space-2xl);
-  text-align: center;
-}
-.mark-complete-btn {
-  font-family: inherit;
-  font-size: var(--text-base);
-  font-weight: 700;
-  padding: 14px 32px;
-  border-radius: 999px;
-  border: 2px solid var(--purple-600);
-  background: #fff;
-  color: var(--purple-700);
-  cursor: pointer;
-  transition: all .2s ease;
-  display: inline-flex; align-items: center; gap: 10px;
-  box-shadow: var(--shadow-sm);
-}
-.mark-complete-btn:hover {
-  background: var(--purple-50);
-  transform: translateY(-2px);
-}
-.mark-complete-btn.completed {
-  background: linear-gradient(135deg, var(--green-600), #22c55e);
-  border-color: var(--green-700);
-  color: #fff;
-}
-.mark-complete-btn.completed:hover {
-  background: linear-gradient(135deg, var(--green-700), var(--green-600));
-}
-.mark-complete-btn .check-icon { font-size: 18px; }
-
-/* ==========================================================
-   NEXT MODULE CARD
-   ========================================================== */
-.next-module {
-  background: linear-gradient(135deg, var(--purple-700), var(--blue-700));
-  color: #fff;
-  border-radius: var(--radius-xl);
-  padding: var(--space-2xl);
-  margin-top: var(--space-2xl);
-  position: relative;
-  overflow: hidden;
-}
-.next-module::before {
-  content: '';
-  position: absolute;
-  top: -50px; right: -50px;
-  width: 250px; height: 250px;
-  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-}
-.next-module-eyebrow {
-  font-size: var(--text-xs);
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  opacity: 0.9;
-  margin-bottom: var(--space-sm);
-}
-.next-module h3 {
-  margin: 0 0 var(--space-xs);
-  font-size: var(--text-2xl);
-}
-.next-module .next-meta {
-  font-size: var(--text-sm);
-  opacity: 0.85;
-  margin-bottom: var(--space-md);
-}
-.next-module p {
-  margin: 0 0 var(--space-lg);
-  line-height: 1.7;
-  max-width: 65ch;
-  position: relative;
-}
-.next-module-cta {
-  display: inline-flex; align-items: center; gap: 10px;
-  background: #fff;
-  color: var(--purple-700);
-  padding: 12px 28px;
-  border-radius: 999px;
-  font-weight: 700;
-  text-decoration: none;
-  font-size: var(--text-base);
-  transition: transform .2s ease;
-  box-shadow: var(--shadow-md);
-}
-.next-module-cta:hover { transform: translateY(-2px); }
-
-.companion-callout {
-  background: rgba(255,255,255,0.15);
-  border: 1px dashed rgba(255,255,255,0.3);
-  border-radius: var(--radius-md);
-  padding: var(--space-md) var(--space-lg);
-  margin: var(--space-lg) 0;
-  font-size: var(--text-sm);
-  line-height: 1.6;
-  position: relative;
-}
-
-.take-break {
-  text-align: center;
-  margin-top: var(--space-md);
-  font-size: var(--text-sm);
-  color: rgba(255,255,255,0.85);
-}
-
-/* ==========================================================
-   CHAT BUTTON
-   ========================================================== */
-.chat-fab {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  background: linear-gradient(135deg, var(--purple-600), var(--blue-600));
-  color: #fff;
-  width: 60px; height: 60px;
-  border-radius: 50%;
-  border: none;
-  font-size: 26px;
-  cursor: pointer;
-  box-shadow: var(--shadow-xl);
-  z-index: 100;
-  transition: transform .2s ease;
-}
-.chat-fab:hover { transform: scale(1.1); }
+.module-footer a{color:var(--purple-700);text-decoration:none;font-weight:600;}
+.module-footer a:hover{text-decoration:underline;}
 </style>
 </head>
-
 <body>
 
 <!-- ========== TOP RIBBON ========== -->
 <div class="ribbon">
   <div class="container ribbon-inner">
     <div class="ribbon-left">
-      <span class="ribbon-badge">GENAI COMPETENCY WORKSHOP</span>
-      <span style="opacity:0.8;">Module 1 of 6 · v1.0</span>
+      <a href="dashboard.html" class="ribbon-back">← Dashboard</a>
+      <div class="ribbon-crumb">
+        GenAI Competency Workshop <span class="sep">·</span> Module 1 of 6 <span class="sep">·</span> v1.0
+      </div>
     </div>
     <div class="ribbon-progress">
       <span>Progress</span>
-      <div class="ribbon-bar"><div class="ribbon-bar-fill" id="progressBar"></div></div>
+      <div class="ribbon-bar"><div class="ribbon-bar-fill" id="progressFill"></div></div>
       <span id="progressLabel">0%</span>
     </div>
   </div>
@@ -1368,929 +731,822 @@ body {
 
 <!-- ========== HERO ========== -->
 <header class="hero">
-  <div class="container">
-    <div class="hero-grid">
-      <div>
-        <span class="hero-eyebrow">🧭 Orientation · Before the Four Dimensions</span>
-        <h1 class="hero-title">Understanding the framework <span class="accent">as a whole.</span></h1>
-        <p class="hero-subtitle">
-          Before diving into any single dimension, take 25 minutes to see the bigger picture:
-          <strong>why</strong> the framework is structured the way it is, how it connects to your own
-          teaching practice, and how to use this workshop most effectively.
-        </p>
-        <div class="hero-meta">
-          <span class="hero-chip"><span class="chip-icon">⏱</span> 25 min</span>
-          <span class="hero-chip"><span class="chip-icon">📚</span> 3 sections</span>
-          <span class="hero-chip"><span class="chip-icon">🌱</span> Sets up Modules 2–5</span>
-        </div>
-      </div>
+  <div class="container hero-inner">
+    <span class="hero-eyebrow">🧭 Orientation · Before the four dimensions</span>
+    <h1 class="hero-title">
+      <span class="title-icon">🧭</span>
+      <span class="accent">Understanding the Framework</span> as a Whole
+    </h1>
+    <p class="hero-sub">
+      Before diving into any single dimension, take 25 minutes to see the bigger picture:
+      <strong>why</strong> the framework is structured the way it is, how it connects to your own
+      teaching practice, and how to use this workshop most effectively.
+    </p>
+    <div class="hero-meta">
+      <span class="meta-pill">⏱ 25 min</span>
+      <span class="meta-pill">📚 3 sections</span>
+      <span class="meta-pill">🌱 Sets up Modules 2–5</span>
+    </div>
 
-      <!-- Hero illustration: a stylized compass/map (copyright-free, original SVG) -->
-      <svg class="hero-illustration" viewBox="0 0 480 420" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <defs>
-          <linearGradient id="heroGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#a855f7"></stop>
-            <stop offset="100%" stop-color="#3b82f6"></stop>
-          </linearGradient>
-          <linearGradient id="heroGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#fbbf24"></stop>
-            <stop offset="100%" stop-color="#f59e0b"></stop>
-          </linearGradient>
-          <radialGradient id="heroBg" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#ede9fe"></stop>
-            <stop offset="100%" stop-color="#dbeafe"></stop>
-          </radialGradient>
-        </defs>
-        <!-- Background blob -->
-        <circle cx="240" cy="210" r="200" fill="url(#heroBg)"></circle>
-        <!-- Decorative dots -->
-        <circle cx="80" cy="120" r="4" fill="#a78bfa" opacity="0.6"></circle>
-        <circle cx="420" cy="100" r="6" fill="#fbbf24" opacity="0.5"></circle>
-        <circle cx="100" cy="320" r="5" fill="#60a5fa" opacity="0.5"></circle>
-        <circle cx="410" cy="340" r="4" fill="#c084fc" opacity="0.6"></circle>
-        <!-- Outer compass ring -->
-        <circle cx="240" cy="210" r="140" fill="none" stroke="#7c3aed" stroke-width="3" stroke-dasharray="3,8" opacity="0.5"></circle>
-        <!-- Inner compass body -->
-        <circle cx="240" cy="210" r="115" fill="#fff" stroke="url(#heroGrad1)" stroke-width="4"></circle>
-        <circle cx="240" cy="210" r="95" fill="#faf5ff" stroke="#e9d5ff" stroke-width="1"></circle>
-        <!-- Compass needle -->
-        <polygon points="240,120 255,210 240,225 225,210" fill="url(#heroGrad1)"></polygon>
-        <polygon points="240,300 225,210 240,195 255,210" fill="url(#heroGrad2)"></polygon>
-        <!-- Center pin -->
-        <circle cx="240" cy="210" r="12" fill="#1e293b"></circle>
-        <circle cx="240" cy="210" r="6" fill="#fff"></circle>
-        <!-- Cardinal letters -->
-        <text x="240" y="148" text-anchor="middle" font-family="system-ui" font-size="14" font-weight="700" fill="#7c3aed">N</text>
-        <text x="332" y="216" text-anchor="middle" font-family="system-ui" font-size="14" font-weight="700" fill="#64748b">E</text>
-        <text x="240" y="284" text-anchor="middle" font-family="system-ui" font-size="14" font-weight="700" fill="#64748b">S</text>
-        <text x="148" y="216" text-anchor="middle" font-family="system-ui" font-size="14" font-weight="700" fill="#64748b">W</text>
-        <!-- Floating tags -->
-        <g transform="translate(60,200)">
-          <rect width="80" height="32" rx="16" fill="#fff" stroke="#a855f7" stroke-width="2"></rect>
-          <text x="40" y="20" text-anchor="middle" font-family="system-ui" font-size="11" font-weight="700" fill="#7c3aed">4 DIMENSIONS</text>
-        </g>
-        <g transform="translate(340,200)">
-          <rect width="80" height="32" rx="16" fill="#fff" stroke="#3b82f6" stroke-width="2"></rect>
-          <text x="40" y="20" text-anchor="middle" font-family="system-ui" font-size="11" font-weight="700" fill="#1d4ed8">3 LEVELS</text>
-        </g>
-        <g transform="translate(200,360)">
-          <rect width="80" height="32" rx="16" fill="#fff" stroke="#eab308" stroke-width="2"></rect>
-          <text x="40" y="20" text-anchor="middle" font-family="system-ui" font-size="11" font-weight="700" fill="#a16207">2 PERSPECTIVES</text>
-        </g>
-      </svg>
+    <div class="protagonist-card">
+      <div class="protagonist-avatar">YOU</div>
+      <div>
+        <div class="protagonist-meta">👋 Welcome — start here</div>
+        <h3>You are the protagonist of this module</h3>
+        <p>
+          Modules 2–5 will introduce specific educators (different disciplines, different contexts)
+          so you can see the framework in action across realities very different from your own.
+          But this module is about <strong>you</strong> — where you're starting from, what you want
+          to learn, and how to navigate the workshop in a way that fits your own context.
+        </p>
+        <span class="protagonist-tag">📍 By the end: a personal learning plan + workshop know-how</span>
+      </div>
     </div>
   </div>
 </header>
 
-<!-- ========== WELCOME CARD ========== -->
-<section class="container">
-  <div class="welcome-card">
-    <h3>👋 Welcome — start here</h3>
-    <p><strong>You'll be the protagonist of this module.</strong></p>
-    <p>
-      Modules 2–5 will introduce specific educators (different disciplines, different contexts) so you
-      can see the framework in action across realities very different from your own. But this module
-      is about <em>you</em> — where you're starting from, what you want to learn, and how to navigate
-      the workshop in a way that fits your own context.
-    </p>
-    <p class="welcome-end">📍 By the end: you'll have a personal learning plan and know exactly how to use the workshop.</p>
-  </div>
-</section>
+<main class="container">
 
-<!-- ===================================================================
-     SECTION 1.1 — THE BIG PICTURE
-     =================================================================== -->
-<section class="section" id="section-1-1">
-  <div class="container">
-    <div class="section-head">
-      <div class="section-num">1.1</div>
-      <div>
-        <div class="section-eyebrow">Section 1.1</div>
-        <h2 class="section-title">The Big Picture</h2>
-      </div>
-      <div class="section-status" id="status-1-1">○ NOT YET COMPLETE</div>
-    </div>
-    <p class="section-intro">
-      This framework was designed to be <strong>structured but not rigid</strong>. Three dimensions of
-      choice — what to teach, how progressively, and for whom — are deliberately built in.
-      📖 If you have time, you can also skim the <a href="#">published journal paper</a> for a fuller
-      picture — but that's optional.
+<!-- ============================================================ -->
+<!-- SECTION 1.1                                                   -->
+<!-- ============================================================ -->
+<section class="section-block" id="section-1-1">
+  <div class="section-header">
+    <span class="section-eyebrow">Section 1.1</span>
+    <span class="section-status" id="status-1-1">○ Not yet complete</span>
+  </div>
+  <h2 class="section-title">The Big Picture</h2>
+  <p class="section-intro">
+    This framework was designed to be <strong>structured but not rigid</strong>.
+    Three dimensions of choice — what to teach, how progressively, and for whom —
+    are deliberately built in.
+  </p>
+  <p class="section-intro small">
+    📖 Before we head to the framework itself, if you have time, you can skim the published
+    <a href="GenAI-Responsive Competency Framework for University Teachers.pdf" target="_blank"
+       style="color:var(--purple-700);font-weight:600;">journal paper</a>
+    for a fuller picture — but that's not required. It's only a plus for your understanding.
+  </p>
+
+  <!-- ----- 1.1.1 FRAMEWORK MAP ----- -->
+  <div class="subsection">
+    <div class="sub-num">1.1.1 · The Framework Structure</div>
+    <h3 class="sub-title">Interactive Framework Map — All 24 Competencies at a Glance</h3>
+    <p class="sub-lede">
+      4 Dimensions × 3 Levels × 2 Perspectives. This is your sandbox — switch perspectives
+      and click any cell to read the full competency descriptor for that dimension/level pair.
     </p>
 
-    <!-- ====== 1.1.1 — INTERACTIVE FRAMEWORK MAP ====== -->
-    <div class="subsection">
-      <div class="subsection-label">1.1.1 · Interactive Framework Map</div>
-      <h3 class="subsection-title">All 24 Competencies at a Glance</h3>
-      <p class="subsection-intro">
-        4 Dimensions × 3 Levels × 2 Perspectives. Click any cell to read the full competency descriptor.
+    <div class="fw-sandbox" id="fwSandbox">
+      <div class="fw-sandbox-eyebrow">🧪 Sandbox · Explore freely</div>
+      <div class="fw-sandbox-title">Click any cell to inspect a competency</div>
+      <div class="fw-sandbox-sub">
+        Toggle which perspective you'd like to see. Shade deepens with level: Basic → Intermediate → Advanced.
+      </div>
+
+      <div class="fw-toggles">
+        <button class="fw-toggle active" data-mode="both">Both perspectives</button>
+        <button class="fw-toggle" data-mode="blue"><span class="swatch blue"></span> Teacher's Own</button>
+        <button class="fw-toggle" data-mode="gold"><span class="swatch gold"></span> Empowering Students</button>
+      </div>
+
+      <div class="fw-grid" id="fwGrid">
+        <div class="fw-grid-corner">Level ↓ / Dim →</div>
+        <div class="fw-grid-col-head">🧠 GenAI Literacy</div>
+        <div class="fw-grid-col-head">🎯 Curriculum &amp; Design</div>
+        <div class="fw-grid-col-head">💡 Teaching &amp; Learning</div>
+        <div class="fw-grid-col-head">📊 Assessment</div>
+      </div>
+
+      <div class="fw-readout empty" id="fwReadout">
+        👆 Click any cell above to see the full competency descriptor for both perspectives.
+      </div>
+    </div>
+  </div>
+
+  <!-- ----- WHY 4×3×2 ----- -->
+  <div class="subsection">
+    <h3 class="sub-title" style="font-size:var(--text-xl);">Why 4 × 3 × 2?</h3>
+    <p class="sub-lede">Click each number below to see what it represents — and why each layer matters.</p>
+
+    <div class="formula-row">
+      <div class="formula-num" data-formula="4"><span class="n">4</span><span class="lbl">Dimensions</span></div>
+      <span class="formula-op">×</span>
+      <div class="formula-num" data-formula="3"><span class="n">3</span><span class="lbl">Levels</span></div>
+      <span class="formula-op">×</span>
+      <div class="formula-num" data-formula="2"><span class="n">2</span><span class="lbl">Perspectives</span></div>
+      <span class="formula-op">=</span>
+      <div class="formula-num" data-formula="24"><span class="n">24</span><span class="lbl">Competencies</span></div>
+    </div>
+
+    <div class="formula-explainer" id="formulaExplainer">
+      <h5>👆 Tap any number above</h5>
+      <p>Each layer of the framework was added for a specific reason. Tap to learn more.</p>
+    </div>
+
+    <div class="why-design">
+      <h4>💡 Why this design?</h4>
+      <p>
+        A flat checklist would have implied competencies are binary — "you have it or you don't."
+        The 4×3×2 structure recognises three things educators actually experience:
+        <strong>different domains</strong> require different skills,
+        <strong>growth happens progressively</strong>, and
+        <strong>your own use ≠ teaching others to use</strong>.
       </p>
+    </div>
+  </div>
 
-      <div class="fw-map">
-        <div class="fw-map-head">
-          <span class="fw-map-eyebrow">🎛 Interactive · Click to explore</span>
-          <h4 class="fw-map-title">The 4 × 3 × 2 Framework</h4>
-          <p class="fw-map-sub">Toggle perspectives, then click any cell to read its full descriptor.</p>
-        </div>
+  <!-- ----- 1.1.2 DIMENSIONS ----- -->
+  <div class="subsection">
+    <div class="sub-num">1.1.2 · The Four Dimensions in Brief</div>
+    <h3 class="sub-title">A Quick Tour</h3>
+    <p class="sub-lede">Click each dimension card to expand and see what it covers and which module addresses it.</p>
 
-        <div class="fw-toggle" role="tablist">
-          <button class="active" data-pview="both">Both perspectives</button>
-          <button data-pview="t">🔵 Teacher's Own</button>
-          <button data-pview="s">🟡 Empowering Students</button>
-        </div>
-
-        <div class="fw-grid-wrap">
-          <div class="fw-grid" id="fwGrid">
-            <!-- Header row -->
-            <div class="fw-corner">LEVEL ↓ &nbsp;/&nbsp; DIMENSION →</div>
-            <div class="fw-dim-head"><span class="icon">🧠</span> GenAI Literacy</div>
-            <div class="fw-dim-head"><span class="icon">🎯</span> Curriculum &amp; Learning Design</div>
-            <div class="fw-dim-head"><span class="icon">💡</span> Teaching &amp; Learning</div>
-            <div class="fw-dim-head"><span class="icon">📊</span> Assessment</div>
-
-            <!-- Row generation handled by JS -->
-          </div>
-        </div>
-
-        <div class="fw-detail" id="fwDetail">
-          <div class="fw-detail-empty">👆 Click any cell above to see the full competency descriptor for both perspectives.</div>
-        </div>
+    <div class="dim-grid">
+      <div class="dim-card" data-dim="1">
+        <div class="dim-eyebrow">Dimension 1 · Module 2</div>
+        <h4>🧠 GenAI Literacy</h4>
+        <p class="dim-tagline">The foundation. Understanding, using, and critically engaging with GenAI.</p>
+        <div class="dim-expand-toggle">Click to expand <span class="chev">▾</span></div>
+        <div class="dim-expand"><div class="dim-expand-inner">
+          <h5>Why first?</h5>
+          <p>Without this, all other choices lose their grounding. You can't redesign a syllabus or rethink an assessment if you can't critically evaluate GenAI yourself.</p>
+        </div></div>
       </div>
 
-      <!-- Why 4×3×2 -->
-      <div style="margin-top:var(--space-2xl);">
-        <h4 style="font-size:var(--text-lg);color:var(--slate-900);margin:0 0 var(--space-sm);">Why 4 × 3 × 2?</h4>
-        <p style="color:var(--slate-600);margin:0 0 var(--space-lg);">Click each number below to see what it represents — and why each layer matters.</p>
-
-        <div class="equation">
-          <button class="equation-block" data-eq="dim">
-            <div class="equation-num">4</div>
-            <div class="equation-label">Dimensions</div>
-          </button>
-          <span class="equation-op">×</span>
-          <button class="equation-block" data-eq="lvl">
-            <div class="equation-num">3</div>
-            <div class="equation-label">Levels</div>
-          </button>
-          <span class="equation-op">×</span>
-          <button class="equation-block" data-eq="per">
-            <div class="equation-num">2</div>
-            <div class="equation-label">Perspectives</div>
-          </button>
-          <span class="equation-op">=</span>
-          <button class="equation-block total" data-eq="total">
-            <div class="equation-num">24</div>
-            <div class="equation-label">Competencies</div>
-          </button>
-        </div>
-        <div class="equation-detail" id="equationDetail">
-          👆 Tap any number to see what it represents.
-        </div>
+      <div class="dim-card" data-dim="2">
+        <div class="dim-eyebrow">Dimension 2 · Module 3</div>
+        <h4>🎯 Curriculum &amp; Learning Design</h4>
+        <p class="dim-tagline">Rethinking what you teach when GenAI changes what students can produce.</p>
+        <div class="dim-expand-toggle">Click to expand <span class="chev">▾</span></div>
+        <div class="dim-expand"><div class="dim-expand-inner">
+          <h5>The key question</h5>
+          <p>Which learning objectives are <em>strengthened</em> by GenAI, and which are quietly undermined? How should your syllabus respond?</p>
+        </div></div>
       </div>
 
-      <div class="design-rationale">
-        <h4>💡 Why this design?</h4>
-        <p>
-          A flat checklist would have implied competencies are binary — "you have it or you don't."
-          The 4×3×2 structure recognises three things educators actually experience:
-          <strong>different domains require different skills</strong>,
-          <strong>growth happens progressively</strong>, and
-          <strong>your own use ≠ teaching others to use</strong>.
-        </p>
+      <div class="dim-card" data-dim="3">
+        <div class="dim-eyebrow">Dimension 3 · Module 4</div>
+        <h4>💡 Teaching &amp; Learning</h4>
+        <p class="dim-tagline">How GenAI shows up in daily classroom practice — as scaffold, simulation, or partner.</p>
+        <div class="dim-expand-toggle">Click to expand <span class="chev">▾</span></div>
+        <div class="dim-expand"><div class="dim-expand-inner">
+          <h5>The key question</h5>
+          <p>What does a Tuesday-morning lecture, a small-group activity, or a tutorial actually look like when GenAI is in the room?</p>
+        </div></div>
+      </div>
+
+      <div class="dim-card" data-dim="4">
+        <div class="dim-eyebrow">Dimension 4 · Module 5</div>
+        <h4>📊 Assessment</h4>
+        <p class="dim-tagline">Designing valid, AI-aware assessments that measure what you actually want to measure.</p>
+        <div class="dim-expand-toggle">Click to expand <span class="chev">▾</span></div>
+        <div class="dim-expand"><div class="dim-expand-inner">
+          <h5>The key question</h5>
+          <p>What are students demonstrating when GenAI is freely available — and how do you design tasks that capture genuine learning?</p>
+        </div></div>
       </div>
     </div>
+  </div>
 
-    <!-- ====== 1.1.2 — FOUR DIMENSIONS IN BRIEF ====== -->
-    <div class="subsection">
-      <div class="subsection-label">1.1.2 · A Quick Tour</div>
-      <h3 class="subsection-title">The Four Dimensions in Brief</h3>
-      <p class="subsection-intro">Click each dimension card to expand and see what it covers and which module addresses it.</p>
+  <!-- ----- 1.1.3 KNOWLEDGE RECAP ----- -->
+  <div class="subsection">
+    <div class="sub-num">1.1.3 · Knowledge Recap</div>
+    <h3 class="sub-title">Quick Check Before Moving On</h3>
 
-      <div class="illustration-row">
-        <!-- Dimensions illustration -->
-        <svg viewBox="0 0 320 280" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <defs>
-            <linearGradient id="dimGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#c4b5fd"></stop>
-              <stop offset="100%" stop-color="#93c5fd"></stop>
-            </linearGradient>
-          </defs>
-          <circle cx="160" cy="140" r="120" fill="#f3e8ff" opacity="0.6"></circle>
-          <!-- 4 connected hexagons representing dimensions -->
-          <g transform="translate(160,140)">
-            <polygon points="0,-70 60,-35 60,35 0,70 -60,35 -60,-35" fill="url(#dimGrad)" opacity="0.3"></polygon>
-            <!-- Top: Literacy -->
-            <circle cx="0" cy="-70" r="32" fill="#a78bfa"></circle>
-            <text x="0" y="-65" text-anchor="middle" font-size="22" fill="#fff">🧠</text>
-            <text x="0" y="-105" text-anchor="middle" font-size="11" font-weight="700" fill="#581c87">LITERACY</text>
-            <!-- Right: Curriculum -->
-            <circle cx="62" cy="0" r="32" fill="#60a5fa"></circle>
-            <text x="62" y="6" text-anchor="middle" font-size="22" fill="#fff">🎯</text>
-            <text x="105" y="4" text-anchor="middle" font-size="11" font-weight="700" fill="#1e3a8a">CURRICULUM</text>
-            <!-- Bottom: Teaching -->
-            <circle cx="0" cy="70" r="32" fill="#fbbf24"></circle>
-            <text x="0" y="76" text-anchor="middle" font-size="22" fill="#fff">💡</text>
-            <text x="0" y="120" text-anchor="middle" font-size="11" font-weight="700" fill="#92400e">TEACHING</text>
-            <!-- Left: Assessment -->
-            <circle cx="-62" cy="0" r="32" fill="#34d399"></circle>
-            <text x="-62" y="6" text-anchor="middle" font-size="22" fill="#fff">📊</text>
-            <text x="-110" y="4" text-anchor="middle" font-size="11" font-weight="700" fill="#065f46">ASSESSMENT</text>
-            <!-- Connecting lines -->
-            <line x1="0" y1="-38" x2="32" y2="-18" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="3,3"></line>
-            <line x1="32" y1="18" x2="0" y2="38" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="3,3"></line>
-            <line x1="-32" y1="18" x2="0" y2="38" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="3,3"></line>
-            <line x1="-32" y1="-18" x2="0" y2="-38" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="3,3"></line>
-            <line x1="-32" y1="0" x2="32" y2="0" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="3,3"></line>
-          </g>
-        </svg>
-        <div>
-          <p style="font-size:var(--text-base);color:var(--slate-700);line-height:1.7;margin:0;">
-            Four dimensions, each addressing a distinct competency domain — but tightly interconnected.
-            Together they form a complete picture of what it takes to teach effectively in a GenAI-rich context.
-          </p>
-        </div>
+    <div class="quiz-block">
+      <div class="quiz-eyebrow">Pop Quiz 1 of 2</div>
+      <p class="quiz-q">A colleague says: "The framework is overcomplicated — why not just give me a checklist of things to do?" What's the strongest response based on the design rationale?</p>
+      <div class="quiz-options" data-correct="b">
+        <button class="quiz-opt" data-opt="a">A) The framework is longer because GenAI is a complicated topic</button>
+        <button class="quiz-opt" data-opt="b">B) A flat checklist would imply competencies are binary, but real growth happens by domain, by level, and across two distinct perspectives</button>
+        <button class="quiz-opt" data-opt="c">C) The framework was generated by an AI, so it has more layers</button>
       </div>
-
-      <div class="dim-cards">
-        <!-- Dim 1 -->
-        <div class="dim-card" data-dim="1">
-          <button class="dim-card-head">
-            <div class="dim-card-icon">🧠</div>
-            <div>
-              <div class="dim-card-meta">Dimension 1 · Module 2</div>
-              <h4 class="dim-card-title">GenAI Literacy</h4>
-              <p class="dim-card-sub">The foundation. Understanding, using, and critically engaging with GenAI.</p>
-            </div>
-            <div class="dim-card-toggle">⌄</div>
-          </button>
-          <div class="dim-card-body">
-            <div class="dim-card-body-inner">
-              <h5>Why first?</h5>
-              <p>Without this, all other choices lose their grounding. You can't redesign a syllabus or rethink an assessment if you can't critically evaluate GenAI yourself.</p>
-              <h5>What you'll learn</h5>
-              <p>How to interact safely and ethically, identify common biases and hallucinations, and shape effective prompts that produce useful output for your discipline.</p>
-            </div>
-          </div>
-        </div>
-        <!-- Dim 2 -->
-        <div class="dim-card" data-dim="2">
-          <button class="dim-card-head">
-            <div class="dim-card-icon">🎯</div>
-            <div>
-              <div class="dim-card-meta">Dimension 2 · Module 3</div>
-              <h4 class="dim-card-title">Curriculum &amp; Learning Design</h4>
-              <p class="dim-card-sub">Rethinking what you teach when GenAI changes what students can produce.</p>
-            </div>
-            <div class="dim-card-toggle">⌄</div>
-          </button>
-          <div class="dim-card-body">
-            <div class="dim-card-body-inner">
-              <h5>The key question</h5>
-              <p>Which learning objectives are <em>strengthened</em> by GenAI, and which are quietly undermined? How should your syllabus respond?</p>
-              <h5>What you'll learn</h5>
-              <p>How to audit course objectives, identify GenAI-vulnerable tasks, and redesign curricula so students still build the cognitive skills your discipline values.</p>
-            </div>
-          </div>
-        </div>
-        <!-- Dim 3 -->
-        <div class="dim-card" data-dim="3">
-          <button class="dim-card-head">
-            <div class="dim-card-icon">💡</div>
-            <div>
-              <div class="dim-card-meta">Dimension 3 · Module 4</div>
-              <h4 class="dim-card-title">Teaching &amp; Learning</h4>
-              <p class="dim-card-sub">How GenAI shows up in daily classroom practice — as scaffold, simulation, or partner.</p>
-            </div>
-            <div class="dim-card-toggle">⌄</div>
-          </button>
-          <div class="dim-card-body">
-            <div class="dim-card-body-inner">
-              <h5>The key question</h5>
-              <p>What does a Tuesday-morning lecture, a small-group activity, or a tutorial actually look like when GenAI is in the room?</p>
-              <h5>What you'll learn</h5>
-              <p>Concrete pedagogical moves: scaffolding student-AI dialogue, designing AI-augmented activities, modelling expert critique, and orchestrating triadic discussions.</p>
-            </div>
-          </div>
-        </div>
-        <!-- Dim 4 -->
-        <div class="dim-card" data-dim="4">
-          <button class="dim-card-head">
-            <div class="dim-card-icon">📊</div>
-            <div>
-              <div class="dim-card-meta">Dimension 4 · Module 5</div>
-              <h4 class="dim-card-title">Assessment</h4>
-              <p class="dim-card-sub">Designing valid, AI-aware assessments that measure what you actually want to measure.</p>
-            </div>
-            <div class="dim-card-toggle">⌄</div>
-          </button>
-          <div class="dim-card-body">
-            <div class="dim-card-body-inner">
-              <h5>The key question</h5>
-              <p>What are students demonstrating when GenAI is freely available — and how do you design tasks that capture genuine learning?</p>
-              <h5>What you'll learn</h5>
-              <p>Authentic assessment design, AI-attribution rubrics, in-process evaluation, and how to talk with students about academic integrity in a GenAI era.</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <div class="quiz-feedback"></div>
     </div>
 
-    <!-- ====== 1.1.3 — KNOWLEDGE RECAP ====== -->
-    <div class="subsection">
-      <div class="subsection-label">1.1.3 · Knowledge Recap</div>
-      <h3 class="subsection-title">Quick Check Before Moving On</h3>
-
-      <div class="quiz-wrap">
-        <div class="quiz-card" data-quiz="1" data-correct="b">
-          <div class="quiz-meta">Pop Quiz 1 of 2</div>
-          <p class="quiz-question">A colleague says: "The framework is overcomplicated — why not just give me a checklist of things to do?" What's the strongest response based on the design rationale?</p>
-          <div class="quiz-options">
-            <button class="quiz-option" data-opt="a">A) The framework is longer because GenAI is a complicated topic</button>
-            <button class="quiz-option" data-opt="b">B) A flat checklist would imply competencies are binary, but real growth happens by domain, by level, and across two distinct perspectives</button>
-            <button class="quiz-option" data-opt="c">C) The framework was generated by an AI, so it has more layers</button>
-          </div>
-          <div class="quiz-feedback right">✓ Exactly. The 4×3×2 design captures three things a checklist cannot: domain-specificity, progression, and the gap between using AI yourself and teaching others to use it.</div>
-        </div>
-
-        <div class="quiz-card" data-quiz="2" data-correct="c">
-          <div class="quiz-meta">Pop Quiz 2 of 2</div>
-          <p class="quiz-question">Which statement BEST captures the relationship between the four dimensions?</p>
-          <div class="quiz-options">
-            <button class="quiz-option" data-opt="a">A) They're four independent topics — you can do them in any order</button>
-            <button class="quiz-option" data-opt="b">B) They must be completed in strict order, with no overlap</button>
-            <button class="quiz-option" data-opt="c">C) GenAI Literacy is the foundation; the other three build on it and inform each other</button>
-          </div>
-          <div class="quiz-feedback right">✓ Right. Literacy underpins everything else — but Curriculum, Teaching, and Assessment continually feed back into one another.</div>
-        </div>
+    <div class="quiz-block">
+      <div class="quiz-eyebrow">Pop Quiz 2 of 2</div>
+      <p class="quiz-q">Which statement BEST captures the relationship between the four dimensions?</p>
+      <div class="quiz-options" data-correct="c">
+        <button class="quiz-opt" data-opt="a">A) They're four independent topics — you can do them in any order</button>
+        <button class="quiz-opt" data-opt="b">B) They must be completed in strict order, with no overlap</button>
+        <button class="quiz-opt" data-opt="c">C) GenAI Literacy is the foundation; the other three build on it and inform each other</button>
       </div>
+      <div class="quiz-feedback"></div>
     </div>
+  </div>
 
-    <div class="mark-complete">
-      <button class="mark-complete-btn" data-section="1-1">
-        <span class="check-icon">○</span>
-        <span class="btn-label">Mark Section 1.1 as Complete</span>
-      </button>
-    </div>
+  <div class="mark-complete-row" data-section="1-1">
+    <div class="mark-complete-text"><span>✅</span><span>Got the big picture? Mark this section complete.</span></div>
+    <button class="btn-mark">Mark Section 1.1 as Complete</button>
   </div>
 </section>
 
-<!-- ===================================================================
-     SECTION 1.2 — CONNECT TO YOUR PRACTICE
-     =================================================================== -->
-<section class="section" id="section-1-2">
-  <div class="container">
-    <div class="section-head">
-      <div class="section-num">1.2</div>
-      <div>
-        <div class="section-eyebrow">Section 1.2</div>
-        <h2 class="section-title">How the Framework Connects to Your Practice</h2>
-      </div>
-      <div class="section-status" id="status-1-2">○ NOT YET COMPLETE</div>
+<!-- ============================================================ -->
+<!-- SECTION 1.2                                                   -->
+<!-- ============================================================ -->
+<section class="section-block" id="section-1-2">
+  <div class="section-header">
+    <span class="section-eyebrow">Section 1.2</span>
+    <span class="section-status" id="status-1-2">○ Not yet complete</span>
+  </div>
+  <h2 class="section-title">How the Framework Connects to Your Practice</h2>
+  <p class="section-intro">
+    The framework is a <strong>shared language</strong>, not a one-size-fits-all path.
+    This section helps you bend it to your own teaching reality.
+  </p>
+
+  <div class="recall-bar">
+    <div class="recall-eyebrow">🧠 30-Second Recall · From §1.1</div>
+    <p class="recall-q">Which dimension is the foundation that the other three depend on?</p>
+    <div class="recall-options" data-correct="0">
+      <button class="recall-opt">GenAI Literacy</button>
+      <button class="recall-opt">Curriculum &amp; Learning Design</button>
+      <button class="recall-opt">Teaching &amp; Learning</button>
+      <button class="recall-opt">Assessment</button>
     </div>
-    <p class="section-intro">
-      The framework is a <strong>shared language</strong>, not a one-size-fits-all path. This section
-      helps you bend it to your own teaching reality.
+    <div class="recall-feedback"></div>
+  </div>
+
+  <!-- 1.2.1 LEARNING PLAN -->
+  <div class="subsection">
+    <div class="sub-num">1.2.1 · Set Your Own Learning Goals</div>
+    <h3 class="sub-title">What Do You Want to Walk Away With?</h3>
+    <p class="sub-lede">
+      You don't need to master all four dimensions in one workshop sitting. Pick what's most relevant to your context right now —
+      your AI companion will use this to tailor the recommendations as you progress.
     </p>
 
-    <!-- 30-second recall -->
-    <div class="recall">
-      <div class="recall-eyebrow">🧠 30-second recall · From §1.1</div>
-      <p class="recall-q">Which dimension is the foundation that the other three depend on?</p>
-      <div class="recall-options" id="recallOpts">
-        <button data-correct="true">GenAI Literacy</button>
-        <button>Curriculum &amp; Learning Design</button>
-        <button>Teaching &amp; Learning</button>
-        <button>Assessment</button>
+    <div class="plan-card">
+      <div class="plan-eyebrow">🎯 Build your personal learning plan</div>
+      <h4 class="plan-title">Three quick steps and you're set.</h4>
+
+      <div class="plan-step">
+        <div class="plan-step-label">
+          <span class="plan-step-num">1</span>
+          <span>Which dimensions feel most urgent for you?
+            <span class="plan-step-hint">Tap as many as apply — there are no wrong answers.</span>
+          </span>
+        </div>
+        <div class="plan-chips" id="planChips">
+          <button class="plan-chip" data-d="D1">D1 🧠 GenAI Literacy</button>
+          <button class="plan-chip" data-d="D2">D2 🎯 Curriculum &amp; Design</button>
+          <button class="plan-chip" data-d="D3">D3 💡 Teaching &amp; Learning</button>
+          <button class="plan-chip" data-d="D4">D4 📊 Assessment</button>
+        </div>
+      </div>
+
+      <div class="plan-step">
+        <div class="plan-step-label">
+          <span class="plan-step-num">2</span>
+          <span>Your discipline / subject area
+            <span class="plan-step-hint">(short — e.g., "Public Health", "Engineering Mechanics")</span>
+          </span>
+        </div>
+        <input type="text" id="planDiscipline" class="plan-input" placeholder="e.g., Public Health">
+      </div>
+
+      <div class="plan-step">
+        <div class="plan-step-label">
+          <span class="plan-step-num">3</span>
+          <span>One concrete thing you'd like to be able to do by the end of this workshop
+            <span class="plan-step-hint">(1–2 sentences)</span>
+          </span>
+        </div>
+        <textarea id="planGoal" class="plan-input" placeholder="e.g., Redesign my final-year capstone rubric so it remains valid in an era where students can use GenAI freely."></textarea>
+      </div>
+
+      <button class="btn-primary" id="generatePlan">✨ Generate my learning plan</button>
+
+      <div class="plan-output" id="planOutput">
+        <h5>Your personalised plan</h5>
+        <p id="planOutputBody"></p>
       </div>
     </div>
+  </div>
 
-    <!-- 1.2.1 Learning Plan -->
-    <div class="subsection">
-      <div class="subsection-label">1.2.1 · Set Your Own Learning Goals</div>
-      <h3 class="subsection-title">What Do You Want to Walk Away With?</h3>
-      <p class="subsection-intro">
-        You don't need to master all four dimensions in one workshop sitting. Pick what's most relevant
-        to your context right now — your AI companion will use this to tailor recommendations as you progress.
-      </p>
+  <!-- 1.2.2 CONTEXT -->
+  <div class="subsection">
+    <div class="sub-num">1.2.2 · Tips for Contextualizing the Questions</div>
+    <h3 class="sub-title">The Same Question Looks Different in Different Settings</h3>
+    <p class="sub-lede">
+      A competency statement like "guide students to critically engage with GenAI" plays out very differently in a 12-person clinical seminar
+      versus a 300-person engineering lecture, and differently again across cultures. Here are three context layers to keep in mind.
+    </p>
 
-      <div class="plan-builder">
-        <h4>🎯 Build Your Personal Learning Plan</h4>
-
-        <div class="plan-step">
-          <div class="plan-step-label">Step 1 · Which dimensions feel most urgent for you?</div>
-          <div class="plan-step-hint">Tap as many as apply — there are no wrong answers.</div>
-          <div class="plan-dim-grid" id="planDims">
-            <button class="plan-dim" data-d="1"><span class="dim-icon">🧠</span> D1 · GenAI Literacy <span class="check">✓</span></button>
-            <button class="plan-dim" data-d="2"><span class="dim-icon">🎯</span> D2 · Curriculum &amp; Learning Design <span class="check">✓</span></button>
-            <button class="plan-dim" data-d="3"><span class="dim-icon">💡</span> D3 · Teaching &amp; Learning <span class="check">✓</span></button>
-            <button class="plan-dim" data-d="4"><span class="dim-icon">📊</span> D4 · Assessment <span class="check">✓</span></button>
-          </div>
-        </div>
-
-        <div class="plan-step">
-          <div class="plan-step-label">Step 2 · Your discipline / subject area</div>
-          <input type="text" class="plan-input" id="planDiscipline" placeholder="e.g., Public Health, Engineering, History, Creative Writing…">
-        </div>
-
-        <div class="plan-step">
-          <div class="plan-step-label">Step 3 · One concrete thing you'd like to be able to do by the end of this workshop</div>
-          <textarea class="plan-textarea" id="planGoal" placeholder="e.g., Redesign my final assessment so AI use becomes part of the task, not a threat to it."></textarea>
-        </div>
-
-        <button class="plan-generate" id="planGenerate">Generate my learning plan →</button>
-
-        <div class="plan-output" id="planOutput">
-          <h5>✨ Your personalised plan is ready</h5>
-          <p id="planOutputText"></p>
-        </div>
-      </div>
+    <div class="tabs" id="contextTabs">
+      <button class="tab active" data-tab="discipline">🎓 Discipline</button>
+      <button class="tab" data-tab="learner">👥 Learner Profile</button>
+      <button class="tab" data-tab="culture">🌏 Cultural Context</button>
     </div>
 
-    <!-- 1.2.2 Context Layers -->
-    <div class="subsection">
-      <div class="subsection-label">1.2.2 · Tips for Contextualizing the Questions</div>
-      <h3 class="subsection-title">The Same Question Looks Different in Different Settings</h3>
-      <p class="subsection-intro">
-        A competency statement like "guide students to critically engage with GenAI" plays out very
-        differently in a 12-person clinical seminar versus a 300-person engineering lecture, and
-        differently again across cultures. Here are three context layers to keep in mind.
-      </p>
-
-      <!-- Cultural diversity illustration -->
-      <div class="illustration-row reverse">
-        <div>
-          <p style="font-size:var(--text-base);color:var(--slate-700);line-height:1.7;margin:0;">
-            Three layers shape how the same competency translates into your specific classroom:
-            your <strong>discipline's epistemology</strong>, your <strong>learners' profile</strong>,
-            and the <strong>cultural conventions</strong> of your institution and region.
-            None of these is a "barrier" — each is a translation key.
-          </p>
+    <div class="tab-panel active" data-panel="discipline">
+      <div class="context-card">
+        <p>Disciplines have different epistemologies, different relationships with authoritative texts, and very different conventions for "what counts as student work." A philosophy essay and an engineering lab report face GenAI in fundamentally different ways.</p>
+        <div class="context-prompt">
+          <div class="context-prompt-label">📌 Same question, different disciplines</div>
+          <p class="context-prompt-q">"How should students cite GenAI use in their final project?"</p>
         </div>
-        <!-- Globe with diverse silhouettes -->
-        <svg viewBox="0 0 360 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <defs>
-            <linearGradient id="globeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#a78bfa"></stop>
-              <stop offset="100%" stop-color="#60a5fa"></stop>
-            </linearGradient>
-          </defs>
-          <!-- Globe -->
-          <circle cx="180" cy="160" r="130" fill="url(#globeGrad)" opacity="0.15"></circle>
-          <circle cx="180" cy="160" r="100" fill="#fff" stroke="url(#globeGrad)" stroke-width="3"></circle>
-          <!-- Continents (abstract) -->
-          <path d="M120 120 Q140 110 160 130 T200 140 Q220 155 215 175 Q200 185 180 180 Q150 175 130 160 Q115 145 120 120 Z" fill="#a78bfa" opacity="0.7"></path>
-          <path d="M195 195 Q220 200 235 215 Q230 235 215 240 Q195 235 185 220 Z" fill="#60a5fa" opacity="0.7"></path>
-          <path d="M105 175 Q120 175 130 195 Q125 215 110 220 Q95 210 100 190 Z" fill="#fbbf24" opacity="0.7"></path>
-          <!-- Latitude lines -->
-          <ellipse cx="180" cy="160" rx="100" ry="30" fill="none" stroke="#cbd5e1" stroke-width="1"></ellipse>
-          <ellipse cx="180" cy="160" rx="100" ry="60" fill="none" stroke="#cbd5e1" stroke-width="1"></ellipse>
-          <line x1="180" y1="60" x2="180" y2="260" stroke="#cbd5e1" stroke-width="1"></line>
-          <!-- Diverse silhouettes around globe -->
-          <g transform="translate(40,80)">
-            <circle cx="0" cy="0" r="14" fill="#fbbf24"></circle>
-            <path d="M-12,12 Q0,4 12,12 L12,32 L-12,32 Z" fill="#fbbf24"></path>
-          </g>
-          <g transform="translate(320,80)">
-            <circle cx="0" cy="0" r="14" fill="#a78bfa"></circle>
-            <path d="M-12,12 Q0,4 12,12 L12,32 L-12,32 Z" fill="#a78bfa"></path>
-          </g>
-          <g transform="translate(40,260)">
-            <circle cx="0" cy="0" r="14" fill="#60a5fa"></circle>
-            <path d="M-12,12 Q0,4 12,12 L12,32 L-12,32 Z" fill="#60a5fa"></path>
-          </g>
-          <g transform="translate(320,260)">
-            <circle cx="0" cy="0" r="14" fill="#34d399"></circle>
-            <path d="M-12,12 Q0,4 12,12 L12,32 L-12,32 Z" fill="#34d399"></path>
-          </g>
-          <!-- Connecting dashed lines -->
-          <line x1="56" y1="100" x2="120" y2="140" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="3,3"></line>
-          <line x1="304" y1="100" x2="240" y2="140" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="3,3"></line>
-          <line x1="56" y1="260" x2="120" y2="200" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="3,3"></line>
-          <line x1="304" y1="260" x2="240" y2="200" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="3,3"></line>
-        </svg>
-      </div>
-
-      <!-- Tabs -->
-      <div class="ctx-tabs" role="tablist">
-        <button class="ctx-tab active" data-ctx="disc">🎓 Discipline</button>
-        <button class="ctx-tab" data-ctx="lp">👥 Learner Profile</button>
-        <button class="ctx-tab" data-ctx="cc">🌏 Cultural Context</button>
-      </div>
-
-      <div class="ctx-panel active" data-ctx-panel="disc">
-        <div class="ctx-content">
-          <p>
-            Disciplines have different epistemologies, different relationships with authoritative texts,
-            and very different conventions for "what counts as student work." A philosophy essay and an
-            engineering lab report face GenAI in fundamentally different ways.
-          </p>
-          <div class="ctx-example">
-            <div class="ctx-example-q">📌 Same question, different disciplines — "How should students cite GenAI use in their final project?"</div>
-            <div class="ctx-example-grid">
-              <div class="ctx-example-card"><strong>History</strong><span>Detailed transparency about prompts &amp; outputs; emphasis on source verification.</span></div>
-              <div class="ctx-example-card"><strong>Engineering</strong><span>Code-comment-style attribution; reproducibility takes precedence over narrative.</span></div>
-              <div class="ctx-example-card"><strong>Creative Writing</strong><span>Distinction between AI-generated drafts vs. human-revised text matters most.</span></div>
-              <div class="ctx-example-card"><strong>Clinical Health</strong><span>Patient-safety context shapes everything; some uses may be inappropriate at any level.</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="ctx-panel" data-ctx-panel="lp">
-        <div class="ctx-content">
-          <p>
-            Class size, year level, prior preparation, and language background all reshape what's
-            pedagogically possible. A Year 1 cohort of 250 needs different scaffolds than a
-            Master's seminar of 8.
-          </p>
-          <div class="ctx-example">
-            <div class="ctx-example-q">📌 Same goal, different learners — "Help students critically evaluate GenAI outputs."</div>
-            <div class="ctx-example-grid">
-              <div class="ctx-example-card"><strong>Year 1, n=250</strong><span>Worked-example videos + low-stakes weekly quizzes; structured handouts.</span></div>
-              <div class="ctx-example-card"><strong>Year 3, n=80</strong><span>Peer "fact-check the chatbot" tasks; co-designed evaluation rubrics.</span></div>
-              <div class="ctx-example-card"><strong>Master's, n=12</strong><span>Open seminar critique; students design their own GenAI workflows.</span></div>
-              <div class="ctx-example-card"><strong>EAL-rich cohort</strong><span>Explicit modelling of evaluative language; bilingual prompt examples.</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="ctx-panel" data-ctx-panel="cc">
-        <div class="ctx-content">
-          <p>
-            Norms around authority, originality, citation, and what counts as "knowledge work" differ
-            across institutional and cultural contexts. The framework's competency statements need
-            translation, not just transfer.
-          </p>
-          <div class="ctx-example">
-            <div class="ctx-example-q">📌 One competency, different cultural readings — "Encourage students to question the reliability of outputs."</div>
-            <div class="ctx-example-grid">
-              <div class="ctx-example-card"><strong>Context A</strong><span>May map naturally to existing classroom norms of open critique.</span></div>
-              <div class="ctx-example-card"><strong>Context B</strong><span>May require explicit framing to legitimise critique of authoritative-sounding text.</span></div>
-              <div class="ctx-example-card"><strong>Multilingual setting</strong><span>Output quality &amp; bias differ across languages — requires localised examples.</span></div>
-              <div class="ctx-example-card"><strong>Mixed cohort</strong><span>Make assumptions visible; invite students to surface their own conventions.</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="evidence-tip">
-        <h4>📎 Second tip — learn with specific evidence</h4>
-        <p style="margin:0 0 var(--space-sm);color:var(--slate-700);">Don't generalise. Anchor every reflection in concrete evidence:</p>
-        <ul>
-          <li>A specific lesson plan, syllabus, or rubric you've used.</li>
-          <li>A concrete student artefact (with appropriate ethics &amp; privacy).</li>
-          <li>A real prompt &amp; output exchange — not a hypothetical.</li>
-          <li>A specific incident: a question a student asked, a moment that surprised you.</li>
-        </ul>
-        <div class="tip-why">
-          <strong>Why this matters:</strong> When you bring real evidence into the modules ahead, your
-          AI companion can give you grounded feedback rather than generic advice — and you'll leave
-          with insights that fit <em>your</em> classroom, not someone else's.
+        <div class="context-grid">
+          <div class="context-item"><h6>📜 History</h6><p>Detailed transparency about prompts &amp; outputs; emphasis on source verification.</p></div>
+          <div class="context-item"><h6>⚙ Engineering</h6><p>Code-comment-style attribution; reproducibility takes precedence over narrative.</p></div>
+          <div class="context-item"><h6>✍ Creative writing</h6><p>Distinction between AI-generated drafts vs. human-revised text matters most.</p></div>
+          <div class="context-item"><h6>🩺 Clinical health</h6><p>Patient-safety context shapes everything; some uses may be inappropriate at any level.</p></div>
         </div>
       </div>
     </div>
 
-    <div class="mark-complete">
-      <button class="mark-complete-btn" data-section="1-2">
-        <span class="check-icon">○</span>
-        <span class="btn-label">Mark Section 1.2 as Complete</span>
-      </button>
+    <div class="tab-panel" data-panel="learner">
+      <div class="context-card">
+        <p>Class size, year level, prior preparation, and language background all reshape what's pedagogically possible. A Year 1 cohort of 250 needs different scaffolds than a Master's seminar of 8.</p>
+        <div class="context-prompt">
+          <div class="context-prompt-label">📌 Same goal, different learners</div>
+          <p class="context-prompt-q">"Help students critically evaluate GenAI outputs."</p>
+        </div>
+        <div class="context-grid">
+          <div class="context-item"><h6>👥 Year 1, n=250</h6><p>Worked-example videos + low-stakes weekly quizzes; structured handouts.</p></div>
+          <div class="context-item"><h6>👥 Year 3, n=80</h6><p>Peer "fact-check the chatbot" tasks; co-designed evaluation rubrics.</p></div>
+          <div class="context-item"><h6>👥 Master's, n=12</h6><p>Open seminar critique; students design their own GenAI workflows.</p></div>
+          <div class="context-item"><h6>🌐 EAL-rich cohort</h6><p>Explicit modelling of evaluative language; bilingual prompt examples.</p></div>
+        </div>
+      </div>
     </div>
+
+    <div class="tab-panel" data-panel="culture">
+      <div class="context-card">
+        <p>Norms around authority, originality, citation, and what counts as "knowledge work" differ across institutional and cultural contexts. The framework's competency statements need translation, not just transfer.</p>
+        <div class="context-prompt">
+          <div class="context-prompt-label">📌 One competency, different cultural readings</div>
+          <p class="context-prompt-q">"Encourage students to question the reliability of outputs."</p>
+        </div>
+        <div class="context-grid">
+          <div class="context-item"><h6>🏛 Context A</h6><p>May map naturally to existing classroom norms of open critique.</p></div>
+          <div class="context-item"><h6>🏛 Context B</h6><p>May require explicit framing to legitimise critique of authoritative-sounding text.</p></div>
+          <div class="context-item"><h6>🌐 Multilingual setting</h6><p>Output quality &amp; bias differ across languages — requires localised examples.</p></div>
+          <div class="context-item"><h6>🤝 Mixed cohort</h6><p>Make assumptions visible; invite students to surface their own conventions.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="evidence-card">
+      <h4>📎 Second tip — Learn with specific evidence</h4>
+      <p style="margin:0 0 1rem;color:var(--slate-700);font-size:var(--text-base);line-height:1.7;">Don't generalise. Anchor every reflection in concrete evidence.</p>
+      <ul class="evidence-list">
+        <li>A specific lesson plan, syllabus, or rubric you've used.</li>
+        <li>A concrete student artefact (with appropriate ethics &amp; privacy).</li>
+        <li>A real prompt &amp; output exchange — not a hypothetical.</li>
+        <li>A specific incident: a question a student asked, a moment that surprised you.</li>
+      </ul>
+      <div class="evidence-why">
+        <strong>Why this matters:</strong> When you bring real evidence into the modules ahead, your AI companion can give you grounded feedback rather than generic advice — and you'll leave with insights that fit <em>your</em> classroom, not someone else's.
+      </div>
+    </div>
+  </div>
+
+  <div class="mark-complete-row" data-section="1-2">
+    <div class="mark-complete-text"><span>✅</span><span>Set goals + understood how to contextualize? Mark complete.</span></div>
+    <button class="btn-mark">Mark Section 1.2 as Complete</button>
   </div>
 </section>
 
-<!-- ===================================================================
-     SECTION 1.3 — RECAP OF MODULE 0 INSTRUCTIONS
-     =================================================================== -->
-<section class="section" id="section-1-3">
-  <div class="container">
-    <div class="section-head">
-      <div class="section-num">1.3</div>
-      <div>
-        <div class="section-eyebrow">Section 1.3</div>
-        <h2 class="section-title">Recap of User Instructions in Module 0</h2>
-      </div>
-      <div class="section-status" id="status-1-3">○ NOT YET COMPLETE</div>
+<!-- ============================================================ -->
+<!-- SECTION 1.3                                                   -->
+<!-- ============================================================ -->
+<section class="section-block" id="section-1-3">
+  <div class="section-header">
+    <span class="section-eyebrow">Section 1.3</span>
+    <span class="section-status" id="status-1-3">○ Not yet complete</span>
+  </div>
+  <h2 class="section-title">Recap of User Instructions in Module 0</h2>
+  <p class="section-intro">A quick refresher on how this workshop works — so you can navigate Modules 2–6 with confidence.</p>
+
+  <div class="subsection">
+    <div class="sub-num">1.3.1 · Workshop Mechanics at a Glance</div>
+    <h3 class="sub-title">Six Things to Remember</h3>
+
+    <div class="mech-grid">
+      <div class="mech-card"><span class="mech-icon">📚</span><h5>Sequential modules, free pacing</h5><p>Modules 1–6 are designed to flow in order, but you choose when to engage and how long to spend on each.</p></div>
+      <div class="mech-card"><span class="mech-icon">✓</span><h5>Mark sections complete</h5><p>Use the "Mark Complete" button at the end of each section to track your progress in the navigation bar.</p></div>
+      <div class="mech-card"><span class="mech-icon">💬</span><h5>AI companion is a thinking partner</h5><p>The chatbot won't grade you or give "the right answer" — it asks questions to help you reflect more clearly.</p></div>
+      <div class="mech-card"><span class="mech-icon">🎯</span><h5>Pop quizzes &amp; recalls — not graded</h5><p>Interactive checks help you self-assess. Change your answer anytime; nothing is recorded as a "score".</p></div>
+      <div class="mech-card"><span class="mech-icon">📝</span><h5>Reflections &amp; practice tasks</h5><p>Open-ended prompts where you describe your own context. Honest answers produce better AI feedback.</p></div>
+      <div class="mech-card"><span class="mech-icon">🌏</span><h5>Different educators in each module</h5><p>Modules 2–5 introduce educators from varied disciplines so you see the framework across contexts.</p></div>
     </div>
-    <p class="section-intro">A quick refresher on how this workshop works — so you can navigate Modules 2–6 with confidence.</p>
+  </div>
 
-    <div class="subsection">
-      <div class="subsection-label">1.3.1 · Workshop Mechanics at a Glance</div>
-      <h3 class="subsection-title">Six Things to Remember</h3>
+  <div class="subsection">
+    <div class="sub-num">1.3.2 · Pre-Flight Checklist</div>
+    <h3 class="sub-title">Make Sure You're Ready for Module 2</h3>
+    <p class="sub-lede">Tick each item once you've done it (or you're ready to do it).</p>
 
-      <div class="mech-grid">
-        <div class="mech-item">
-          <div class="mech-icon">📚</div>
-          <h5>Sequential modules, free pacing</h5>
-          <p>Modules 1–6 are designed to flow in order, but you choose when to engage and how long to spend on each.</p>
-        </div>
-        <div class="mech-item">
-          <div class="mech-icon">✓</div>
-          <h5>Mark sections complete</h5>
-          <p>Use the "Mark Complete" button at the end of each section to track your progress in the navigation bar.</p>
-        </div>
-        <div class="mech-item">
-          <div class="mech-icon">💬</div>
-          <h5>AI companion is a thinking partner</h5>
-          <p>The chatbot won't grade you or give "the right answer" — it asks questions to help you reflect more clearly.</p>
-        </div>
-        <div class="mech-item">
-          <div class="mech-icon">🎯</div>
-          <h5>Pop quizzes &amp; recalls — not graded</h5>
-          <p>Interactive checks help you self-assess. Change your answer anytime; nothing is recorded as a "score".</p>
-        </div>
-        <div class="mech-item">
-          <div class="mech-icon">📝</div>
-          <h5>Reflections &amp; practice tasks</h5>
-          <p>Open-ended prompts where you describe your own context. Honest answers produce better AI feedback.</p>
-        </div>
-        <div class="mech-item">
-          <div class="mech-icon">🌏</div>
-          <h5>Different educators in each module</h5>
-          <p>Modules 2–5 introduce educators from varied disciplines so you see the framework across contexts.</p>
-        </div>
-      </div>
+    <div class="checklist-card">
+      <h4>✅ Readiness checklist · Before continuing to Module 2</h4>
+      <div class="check-item"><div class="check-box"></div><span class="check-text">I've set at least one personal learning goal in §1.2.1.</span></div>
+      <div class="check-item"><div class="check-box"></div><span class="check-text">I have a concrete teaching example in mind (a course, a lesson, a rubric, a student artefact) that I can bring into the modules ahead.</span></div>
+      <div class="check-item"><div class="check-box"></div><span class="check-text">I understand the 4×3×2 structure and why the framework is built this way.</span></div>
+      <div class="check-item"><div class="check-box"></div><span class="check-text">I know I can return to this module's chatbot anytime if I get stuck.</span></div>
+      <div class="check-item"><div class="check-box"></div><span class="check-text">I've identified my discipline, learner profile, and any cultural specifics that will shape how I read the framework.</span></div>
     </div>
+  </div>
 
-    <div class="subsection">
-      <div class="subsection-label">1.3.2 · Pre-Flight Checklist</div>
-      <h3 class="subsection-title">Make Sure You're Ready for Module 2</h3>
-      <p class="subsection-intro">Tick each item once you've done it (or you're ready to do it).</p>
+  <div class="subsection">
+    <div class="sub-num">1.3.3 · Bridging to the Next Module</div>
+    <h3 class="sub-title">Coming Up Next</h3>
 
-      <div class="checklist">
-        <h4>✅ Readiness checklist · Before continuing to Module 2:</h4>
-        <div class="checklist-item"><div class="checklist-check">✓</div><div class="checklist-text">I've set at least one personal learning goal in §1.2.1.</div></div>
-        <div class="checklist-item"><div class="checklist-check">✓</div><div class="checklist-text">I have a concrete teaching example in mind (a course, a lesson, a rubric, a student artefact) that I can bring into the modules ahead.</div></div>
-        <div class="checklist-item"><div class="checklist-check">✓</div><div class="checklist-text">I understand the 4×3×2 structure and why the framework is built this way.</div></div>
-        <div class="checklist-item"><div class="checklist-check">✓</div><div class="checklist-text">I know I can return to this module's chatbot anytime if I get stuck.</div></div>
-        <div class="checklist-item"><div class="checklist-check">✓</div><div class="checklist-text">I've identified my discipline, learner profile, and any cultural specifics that will shape how I read the framework.</div></div>
+    <div class="bridge-card">
+      <div class="bridge-eyebrow">→ Next</div>
+      <h4 class="bridge-title">Module 2 · GenAI Literacy</h4>
+      <div class="bridge-meta">Dimension 1 · ~30–40 min · 4 sections</div>
+      <p class="bridge-text">
+        Module 1 gave you the map. Module 2 starts the journey at the foundation:
+        <strong>your own ability to engage critically with GenAI, and your capacity to empower students' literacy</strong> —
+        the two perspectives that recur throughout this framework.
+      </p>
+      <div class="bridge-companion">
+        <span style="font-size:22px;">👋</span>
+        <span>You'll meet your first companion in Module 2 — <strong style="color:var(--gold-300);">Dr. Maya Chen</strong>, an Associate Professor of Public Health navigating the same questions you are. You'll watch her grow across all three levels.</span>
+      </div>
+      <div class="bridge-actions">
+        <a class="btn-bridge" href="module_2_pic.html">Continue to Module 2 →</a>
+        <a class="btn-bridge btn-bridge-ghost" href="dashboard.html">Take a break · remind me tomorrow</a>
       </div>
     </div>
+  </div>
 
-    <div class="subsection">
-      <div class="subsection-label">1.3.3 · Bridging to the Next Module</div>
-      <h3 class="subsection-title">Coming Up Next</h3>
-
-      <div class="next-module">
-        <div style="position:relative;">
-          <div class="next-module-eyebrow">→ Next Up</div>
-          <h3>Module 2 · GenAI Literacy</h3>
-          <div class="next-meta">Dimension 1 · ~30–40 min · 4 sections</div>
-          <p>
-            Module 1 gave you the map. Module 2 starts the journey at the foundation:
-            <strong>your own ability to engage critically with GenAI, and your capacity to empower
-            students' literacy</strong> — the two perspectives that recur throughout this framework.
-          </p>
-          <div class="companion-callout">
-            👋 <strong>You'll meet your first companion in Module 2</strong> — an Associate Professor
-            of Public Health navigating the same questions you are. You'll watch this educator grow
-            across all three levels.
-          </div>
-          <a href="#" class="next-module-cta">Continue to Module 2 →</a>
-          <div class="take-break">☕ Or — take a break · remind me tomorrow</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="mark-complete">
-      <button class="mark-complete-btn" data-section="1-3">
-        <span class="check-icon">○</span>
-        <span class="btn-label">Mark Section 1.3 as Complete</span>
-      </button>
-    </div>
+  <div class="mark-complete-row" data-section="1-3">
+    <div class="mark-complete-text"><span>🎉</span><span>Ready for the four dimensions? Mark Section 1.3 complete.</span></div>
+    <button class="btn-mark">Mark Section 1.3 as Complete</button>
   </div>
 </section>
 
-<div style="height:80px;"></div>
+<footer class="module-footer">
+  GenAI Competency Workshop · Module 1 · v1.0 ·
+  <a href="dashboard.html">Back to dashboard</a> ·
+  <a href="module_2_pic.html">Next: Module 2 →</a>
+</footer>
 
-<!-- Chat FAB -->
-<button class="chat-fab" aria-label="Open AI companion">💬</button>
+</main>
 
-<!-- ==================================================================
-     JAVASCRIPT — all interactivity
-     ================================================================== -->
+<button class="companion-fab" id="companionFab" title="AI Learning Companion">
+  💬 <span>AI Companion</span>
+</button>
+
+<!-- Shared progress layer -->
 <script>
-/* ============== FRAMEWORK MAP DATA ============== */
-const competencies = {
-  '1-basic':   {dim:'GenAI Literacy', icon:'🧠', level:'Basic', t:'Demonstrate foundational understanding of safe, ethical, and effective interaction with GenAI systems in your work.', s:'Introduce students to basic GenAI use; explain core concepts and ground rules for responsible engagement.'},
-  '1-inter':   {dim:'GenAI Literacy', icon:'🧠', level:'Intermediate', t:'Critically engage with GenAI outputs — identify potential issues, biases, and opportunities for refinement.', s:'Guide students to evaluate outputs critically, surface biases, and improve queries through iteration.'},
-  '1-adv':     {dim:'GenAI Literacy', icon:'🧠', level:'Advanced', t:'Innovate professional practice through GenAI, contributing to scholarship and mentoring colleagues.', s:'Empower students to become co-creators with GenAI, designing original workflows for novel problems.'},
-  '2-basic':   {dim:'Curriculum & Learning Design', icon:'🎯', level:'Basic', t:'Identify where GenAI fits within existing curricula and learning objectives without disrupting core goals.', s:'Make GenAI part of the visible curriculum; explain how it relates to discipline-specific outcomes.'},
-  '2-inter':   {dim:'Curriculum & Learning Design', icon:'🎯', level:'Intermediate', t:'Redesign learning objectives so GenAI strengthens — rather than substitutes for — target cognitive skills.', s:'Help students see how GenAI reshapes their discipline; co-explore objectives that account for AI tools.'},
-  '2-adv':     {dim:'Curriculum & Learning Design', icon:'🎯', level:'Advanced', t:'Co-design interdisciplinary, project-based curricula that integrate GenAI as a co-learner and creative partner.', s:'Empower students to co-design their own learning paths and curricular projects with GenAI partners.'},
-  '3-basic':   {dim:'Teaching & Learning', icon:'💡', level:'Basic', t:'Use GenAI to prepare materials, generate examples, and support lesson planning effectively.', s:'Show students simple, ethical ways GenAI can support their study and revision.'},
-  '3-inter':   {dim:'Teaching & Learning', icon:'💡', level:'Intermediate', t:'Integrate GenAI into active classroom strategies — Socratic dialogue, scaffolded inquiry, simulation.', s:'Scaffold students\' use of GenAI for complex tasks; model expert critique of AI outputs in real time.'},
-  '3-adv':     {dim:'Teaching & Learning', icon:'💡', level:'Advanced', t:'Orchestrate triadic teacher-AI-student learning environments where each agent contributes meaningfully.', s:'Empower students to lead AI-augmented learning, including self-directed inquiry and peer teaching.'},
-  '4-basic':   {dim:'Assessment', icon:'📊', level:'Basic', t:'Recognise how GenAI affects existing assessments and adjust simple components for integrity.', s:'Inform students clearly about AI policies and what is — and isn\'t — permitted in assessment.'},
-  '4-inter':   {dim:'Assessment', icon:'📊', level:'Intermediate', t:'Design AI-aware assessments — process portfolios, oral defenses, in-class authentic tasks.', s:'Help students understand authentic assessment criteria and self-assess their AI use transparently.'},
-  '4-adv':     {dim:'Assessment', icon:'📊', level:'Advanced', t:'Innovate assessment frameworks where GenAI is part of the task; publish or share emerging models.', s:'Co-design assessment criteria with students; invite them to evaluate the validity of their own measures.'}
-};
+(function () {
+  const MODULE_ID = 1;
+  const TOTAL_SECTIONS = 3;
+  const KEY = 'genai_workshop_progress_v1';
 
-/* ============== BUILD FRAMEWORK GRID ============== */
-const fwGrid = document.getElementById('fwGrid');
-const levels = [
-  {id:'adv',   label:'Advanced',     row:'fw-row-advanced'},
-  {id:'inter', label:'Intermediate', row:'fw-row-intermediate'},
-  {id:'basic', label:'Basic',        row:'fw-row-basic'}
-];
-levels.forEach(lvl => {
-  const labelDiv = document.createElement('div');
-  labelDiv.className = 'fw-level-label ' + lvl.row;
-  labelDiv.textContent = lvl.label;
-  fwGrid.appendChild(labelDiv);
-  for (let d = 1; d <= 4; d++) {
-    const key = `${d}-${lvl.id}`;
-    const c = competencies[key];
-    const cell = document.createElement('button');
-    cell.className = 'fw-cell ' + lvl.row;
-    cell.dataset.key = key;
-    cell.innerHTML = `
-      <div class="fw-cell-perspective">
-        <div class="fw-pill t">T</div>
-        <div class="fw-pill s">S</div>
-      </div>
-      <div class="fw-cell-text">${c.t.substring(0,55)}…</div>
-    `;
-    fwGrid.appendChild(cell);
+  function read() {
+    try { return JSON.parse(localStorage.getItem(KEY)) || { modules:{} }; }
+    catch { return { modules:{} }; }
   }
-});
+  function write(s) { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch(e) {} }
+  function getMod() {
+    const all = read();
+    all.modules = all.modules || {};
+    all.modules[MODULE_ID] = all.modules[MODULE_ID] || {
+      sectionsCompleted:0, completedSections:[], totalSections:TOTAL_SECTIONS
+    };
+    return { all, m: all.modules[MODULE_ID] };
+  }
 
-/* ============== FRAMEWORK CELL CLICK ============== */
-const fwDetail = document.getElementById('fwDetail');
-fwGrid.addEventListener('click', e => {
-  const cell = e.target.closest('.fw-cell');
-  if (!cell) return;
-  document.querySelectorAll('.fw-cell.active').forEach(c => c.classList.remove('active'));
-  cell.classList.add('active');
-  const c = competencies[cell.dataset.key];
-  const view = document.querySelector('.fw-toggle button.active').dataset.pview;
-  let html = `
-    <h4 class="fw-detail-title">${c.icon} ${c.dim}</h4>
-    <div class="fw-detail-meta">
-      <span class="fw-meta-tag dim">Dimension</span>
-      <span class="fw-meta-tag lvl">Level: ${c.level}</span>
-    </div>
-    <div class="fw-perspectives">`;
-  if (view === 'both' || view === 't') html += `
-      <div class="fw-pers-card t">
-        <div class="fw-pers-label">🔵 Teacher's Own Literacy</div>
-        <p>${c.t}</p>
-      </div>`;
-  if (view === 'both' || view === 's') html += `
-      <div class="fw-pers-card s">
-        <div class="fw-pers-label">🟡 Empowering Students</div>
-        <p>${c.s}</p>
-      </div>`;
-  html += `</div>`;
-  fwDetail.innerHTML = html;
-});
+  window.toggleSection = function (sectionIndex) {
+    const { all, m } = getMod();
+    m.completedSections = m.completedSections || [];
+    const idx = m.completedSections.indexOf(sectionIndex);
+    if (idx === -1) m.completedSections.push(sectionIndex);
+    else m.completedSections.splice(idx, 1);
+    m.sectionsCompleted = m.completedSections.length;
+    m.totalSections = TOTAL_SECTIONS;
+    if (m.sectionsCompleted >= TOTAL_SECTIONS) {
+      m.status = 'complete';
+      m.completedAt = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    } else if (m.sectionsCompleted > 0) {
+      m.status = 'in-progress';
+      delete m.completedAt;
+    } else {
+      delete m.status;
+      delete m.completedAt;
+    }
+    write(all);
+    return m.completedSections.includes(sectionIndex);
+  };
+  window.isSectionComplete = function (sectionIndex) {
+    const { m } = getMod();
+    return (m.completedSections || []).includes(sectionIndex);
+  };
+})();
+</script>
 
-/* ============== PERSPECTIVE TOGGLE ============== */
-document.querySelectorAll('.fw-toggle button').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.fw-toggle button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const view = btn.dataset.pview;
-    document.querySelectorAll('.fw-pill').forEach(p => {
-      const isT = p.classList.contains('t');
-      p.style.display = (view === 'both') || (view === 't' && isT) || (view === 's' && !isT) ? '' : 'none';
-    });
-    // refresh detail if open
-    const active = document.querySelector('.fw-cell.active');
-    if (active) active.click();
-  });
-});
+<script>
+/* ---------- FRAMEWORK MAP DATA ---------- */
+const DIMENSIONS = [
+  { key:'literacy',   icon:'🧠', name:'GenAI Literacy' },
+  { key:'curriculum', icon:'🎯', name:'Curriculum & Design' },
+  { key:'teaching',   icon:'💡', name:'Teaching & Learning' },
+  { key:'assessment', icon:'📊', name:'Assessment' }
+];
+const LEVELS = ['advanced','intermediate','basic'];
 
-/* ============== EQUATION EXPLAINER ============== */
-const eqDetails = {
-  dim:   '<strong>4 dimensions</strong> = the four content domains educators must navigate: GenAI Literacy, Curriculum & Learning Design, Teaching & Learning, and Assessment. Each requires distinct competencies.',
-  lvl:   '<strong>3 levels</strong> = a developmental ladder — Basic (foundational understanding), Intermediate (critical engagement), and Advanced (innovative collaboration). Growth is progressive, not binary.',
-  per:   '<strong>2 perspectives</strong> = your <em>own</em> literacy/usage AND your capacity to <em>empower students</em>\' literacy/usage. Strength in one does not guarantee strength in the other.',
-  total: '<strong>24 competencies total</strong> = the full picture of GenAI educator competencies. Each cell represents one specific, observable skill at a specific level for a specific perspective in a specific dimension.'
+const COMPETENCIES = {
+  literacy: {
+    basic: {
+      blue: "Demonstrate foundational understanding of safe, ethical, and effective interaction with GenAI systems.",
+      gold: "Introduce students to responsible, ethical, and basic methods for interacting with GenAI systems."
+    },
+    intermediate: {
+      blue: "Critically engage with GenAI outputs, identifying potential issues, biases, and opportunities for improvement.",
+      gold: "Guide students to critically engage in iterative dialogues with GenAI tools."
+    },
+    advanced: {
+      blue: "Explore innovative ways of collaborating with GenAI, reflecting on its evolving role as a cognitive partner.",
+      gold: "Support students in co-creating knowledge and artefacts through advanced human-AI collaboration."
+    }
+  },
+  curriculum: {
+    basic: {
+      blue: "Identify where GenAI affects existing learning objectives in your courses.",
+      gold: "Help students understand how GenAI changes what they're being asked to learn."
+    },
+    intermediate: {
+      blue: "Redesign syllabi and unit plans to leverage GenAI productively while preserving core learning.",
+      gold: "Co-design learning pathways with students that integrate GenAI as a learning resource."
+    },
+    advanced: {
+      blue: "Lead curriculum innovation that treats GenAI as a structural feature of the discipline's future.",
+      gold: "Mentor students to shape future curricula and contribute to disciplinary discourse on GenAI integration."
+    }
+  },
+  teaching: {
+    basic: {
+      blue: "Use GenAI as a basic scaffold in teaching preparation and delivery.",
+      gold: "Demonstrate to students how GenAI can support — not replace — their thinking in class activities."
+    },
+    intermediate: {
+      blue: "Design classroom activities where GenAI plays a deliberate pedagogical role (simulation, partner, foil).",
+      gold: "Facilitate students' reflective use of GenAI during lessons, including managing pitfalls in real time."
+    },
+    advanced: {
+      blue: "Innovate new pedagogical patterns with GenAI as an integral classroom collaborator.",
+      gold: "Coach students to design and lead their own GenAI-integrated learning experiences for peers."
+    }
+  },
+  assessment: {
+    basic: {
+      blue: "Recognise where existing assessments are vulnerable to GenAI and adjust task framing accordingly.",
+      gold: "Communicate clearly to students what GenAI use is and isn't permitted in each assessment."
+    },
+    intermediate: {
+      blue: "Design AI-aware assessment tasks and rubrics that capture genuine learning, not just artefact polish.",
+      gold: "Engage students in co-designing assessment criteria that account for GenAI's role."
+    },
+    advanced: {
+      blue: "Build assessment ecosystems that validly measure human-AI collaborative competence over time.",
+      gold: "Empower students to assess their own and peers' AI-collaborative work with disciplinary judgement."
+    }
+  }
 };
-document.querySelectorAll('.equation-block').forEach(b => {
-  b.addEventListener('click', () => {
-    document.querySelectorAll('.equation-block').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    document.getElementById('equationDetail').innerHTML = eqDetails[b.dataset.eq];
+
+/* ---------- BUILD GRID ---------- */
+const grid = document.getElementById('fwGrid');
+const sandbox = document.getElementById('fwSandbox');
+const readout = document.getElementById('fwReadout');
+
+LEVELS.forEach(level => {
+  const rh = document.createElement('div');
+  rh.className = 'fw-grid-row-head';
+  rh.textContent = level.charAt(0).toUpperCase() + level.slice(1);
+  grid.appendChild(rh);
+
+  DIMENSIONS.forEach(dim => {
+    const cell = document.createElement('div');
+    cell.className = 'fw-cell';
+    cell.dataset.dim = dim.key;
+    cell.dataset.level = level;
+    const tints = {
+      basic:        'linear-gradient(135deg,#f8fafc,#eef2f7)',
+      intermediate: 'linear-gradient(135deg,#ede9fe,#dbeafe)',
+      advanced:     'linear-gradient(135deg,#c7d2fe,#a5b4fc)'
+    };
+    cell.style.background = tints[level];
+
+    cell.innerHTML = `
+      <div class="perspectives">
+        <span class="pdot blue ${level.charAt(0)}"></span>
+        <span class="pdot gold ${level.charAt(0)}"></span>
+      </div>
+      <div class="fw-cell-label">${dim.icon} ${dim.name.split(' ')[0]}</div>
+    `;
+    cell.addEventListener('click', () => selectCell(dim.key, level, cell));
+    grid.appendChild(cell);
   });
 });
 
-/* ============== DIMENSION CARDS (expand/collapse) ============== */
-document.querySelectorAll('.dim-card-head').forEach(head => {
-  head.addEventListener('click', () => {
-    const card = head.closest('.dim-card');
-    card.classList.toggle('open');
+function selectCell(dimKey, level, cellEl) {
+  document.querySelectorAll('.fw-cell.selected').forEach(c => c.classList.remove('selected'));
+  cellEl.classList.add('selected');
+  const dim = DIMENSIONS.find(d => d.key === dimKey);
+  const c = COMPETENCIES[dimKey][level];
+  const mode = sandbox.dataset.mode || 'both';
+  let blockHTML = '';
+  if (mode === 'both' || mode === 'blue') {
+    blockHTML += `
+      <div class="fw-perspective-block">
+        <div class="fw-perspective-label">🔵 Teacher's Own</div>
+        <div>${c.blue}</div>
+      </div>`;
+  }
+  if (mode === 'both' || mode === 'gold') {
+    blockHTML += `
+      <div class="fw-perspective-block gold">
+        <div class="fw-perspective-label">🟡 Empowering Students</div>
+        <div>${c.gold}</div>
+      </div>`;
+  }
+  readout.classList.remove('empty');
+  readout.innerHTML = `
+    <div class="fw-readout-head">
+      <span class="fw-readout-pill level">${level.toUpperCase()}</span>
+      <h4 class="fw-readout-title">${dim.icon} ${dim.name}</h4>
+    </div>
+    <div class="fw-readout-row">${blockHTML}</div>
+  `;
+}
+
+document.querySelectorAll('.fw-toggle').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.fw-toggle').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const mode = btn.dataset.mode;
+    sandbox.dataset.mode = mode;
+    grid.classList.remove('fw-mode-blue','fw-mode-gold');
+    if (mode === 'blue') grid.classList.add('fw-mode-blue');
+    if (mode === 'gold') grid.classList.add('fw-mode-gold');
+    const sel = document.querySelector('.fw-cell.selected');
+    if (sel) selectCell(sel.dataset.dim, sel.dataset.level, sel);
   });
 });
 
-/* ============== QUIZ ============== */
-document.querySelectorAll('.quiz-card').forEach(card => {
-  const correct = card.dataset.correct;
-  const feedback = card.querySelector('.quiz-feedback');
-  card.querySelectorAll('.quiz-option').forEach(opt => {
+/* ---------- 4×3×2 ---------- */
+const FORMULA_TEXT = {
+  '4': { title:'Four dimensions',
+    body:'GenAI Literacy, Curriculum & Learning Design, Teaching & Learning, and Assessment — chosen because they map onto the actual decisions teachers make in different parts of their work.' },
+  '3': { title:'Three levels',
+    body:'Basic → Intermediate → Advanced. Growth is progressive, not binary. You can be at different levels in different dimensions, and that\'s expected.' },
+  '2': { title:'Two perspectives',
+    body:'Teacher\'s Own (your personal capacity) and Empowering Students (your capacity to guide them). They\'re related but distinct — strength in one does not guarantee strength in the other.' },
+  '24':{ title:'24 distinct competencies',
+    body:'4 × 3 × 2 yields 24 specific descriptors. Together they form a map you can use to locate yourself, identify next steps, and build your own learning plan.' }
+};
+document.querySelectorAll('.formula-num').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.formula-num').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const t = FORMULA_TEXT[btn.dataset.formula];
+    document.getElementById('formulaExplainer').innerHTML = `<h5>${t.title}</h5><p>${t.body}</p>`;
+  });
+});
+
+/* ---------- DIM CARDS ---------- */
+document.querySelectorAll('.dim-card').forEach(card => {
+  card.addEventListener('click', () => card.classList.toggle('open'));
+});
+
+/* ---------- POP QUIZZES ---------- */
+const QUIZ_FEEDBACK = {
+  ok:  '✓ Exactly. The structure encodes assumptions about how teacher growth actually works.',
+  bad: 'Not quite — re-read the design rationale and try again.',
+  ok2: '✓ Right. GenAI Literacy is the foundation; the other three build on it and inform each other.',
+  bad2:'Not quite — recall the dimension diagram in §1.1.3.'
+};
+document.querySelectorAll('.quiz-block').forEach((block, blockIdx) => {
+  const opts = block.querySelectorAll('.quiz-opt');
+  const correct = block.querySelector('.quiz-options').dataset.correct;
+  const feedback = block.querySelector('.quiz-feedback');
+  opts.forEach(opt => {
     opt.addEventListener('click', () => {
-      // reset prior selections
-      card.querySelectorAll('.quiz-option').forEach(o => o.classList.remove('correct','incorrect'));
-      feedback.classList.remove('show','right','wrong');
+      opts.forEach(o => o.classList.remove('correct','wrong'));
       const isRight = opt.dataset.opt === correct;
-      opt.classList.add(isRight ? 'correct' : 'incorrect');
-      if (!isRight) {
-        const correctOpt = card.querySelector(`.quiz-option[data-opt="${correct}"]`);
-        correctOpt.classList.add('correct');
-      }
-      feedback.classList.add('show', isRight ? 'right' : 'wrong');
-      if (!isRight) feedback.textContent = 'Not quite — the highlighted option captures the design rationale better. Try again?';
-      else feedback.innerHTML = card.querySelector('[data-correct-msg]')?.dataset.correctMsg || feedback.dataset.origMsg || feedback.innerHTML;
+      opt.classList.add(isRight ? 'correct' : 'wrong');
+      feedback.classList.add('show', isRight ? 'ok' : 'bad');
+      feedback.classList.remove(isRight ? 'bad' : 'ok');
+      const okKey  = blockIdx === 0 ? 'ok'  : 'ok2';
+      const badKey = blockIdx === 0 ? 'bad' : 'bad2';
+      feedback.textContent = isRight ? QUIZ_FEEDBACK[okKey] : QUIZ_FEEDBACK[badKey];
     });
   });
-  // store original right msg
-  feedback.dataset.origMsg = feedback.innerHTML;
 });
 
-/* ============== RECALL (single-question) ============== */
-document.querySelectorAll('#recallOpts button').forEach(b => {
-  b.addEventListener('click', () => {
-    document.querySelectorAll('#recallOpts button').forEach(x => x.classList.remove('correct','wrong'));
-    if (b.dataset.correct) b.classList.add('correct');
-    else b.classList.add('wrong');
+/* ---------- RECALL ---------- */
+document.querySelectorAll('.recall-bar').forEach(bar => {
+  const opts = bar.querySelectorAll('.recall-opt');
+  const correct = parseInt(bar.querySelector('.recall-options').dataset.correct, 10);
+  const fb = bar.querySelector('.recall-feedback');
+  opts.forEach((opt, i) => {
+    opt.addEventListener('click', () => {
+      opts.forEach(o => o.classList.remove('correct','wrong'));
+      if (i === correct) {
+        opt.classList.add('correct');
+        fb.textContent = '✓ Correct — GenAI Literacy underpins every other choice you make.';
+        fb.style.color = 'var(--green-700)';
+      } else {
+        opt.classList.add('wrong');
+        fb.textContent = 'Not quite — recall the dimension diagram. Try again.';
+        fb.style.color = 'var(--red-700)';
+      }
+    });
   });
 });
 
-/* ============== LEARNING PLAN BUILDER ============== */
-const planDimsContainer = document.getElementById('planDims');
-const selectedDims = new Set();
-planDimsContainer.querySelectorAll('.plan-dim').forEach(btn => {
-  btn.addEventListener('click', () => {
-    btn.classList.toggle('selected');
-    if (btn.classList.contains('selected')) selectedDims.add(btn.dataset.d);
-    else selectedDims.delete(btn.dataset.d);
-  });
-});
-
-const dimNames = {1:'GenAI Literacy', 2:'Curriculum & Learning Design', 3:'Teaching & Learning', 4:'Assessment'};
-document.getElementById('planGenerate').addEventListener('click', () => {
+/* ---------- LEARNING PLAN ---------- */
+const planChips = document.querySelectorAll('#planChips .plan-chip');
+planChips.forEach(c => c.addEventListener('click', () => c.classList.toggle('active')));
+document.getElementById('generatePlan').addEventListener('click', () => {
+  const dims = Array.from(planChips).filter(c => c.classList.contains('active')).map(c => c.dataset.d);
   const disc = document.getElementById('planDiscipline').value.trim() || 'your discipline';
-  const goal = document.getElementById('planGoal').value.trim() || 'apply the framework to your own teaching';
-  const dims = [...selectedDims].sort().map(d => dimNames[d]);
-  const dimsText = dims.length === 0
-    ? 'all four dimensions (no priority selected)'
-    : dims.length === 1
-      ? `<strong>${dims[0]}</strong>`
-      : dims.slice(0,-1).map(d=>`<strong>${d}</strong>`).join(', ') + ' and <strong>' + dims.slice(-1)[0] + '</strong>';
-  document.getElementById('planOutputText').innerHTML =
-    `In ${disc}, your priority dimensions are ${dimsText}. ` +
-    `Your concrete goal — <em>"${goal}"</em> — will guide the modules ahead. ` +
-    `Recommendation: pay extra attention to the corresponding modules and bring a real example into each one. ` +
-    `Your AI companion will surface activities relevant to ${disc} as you progress.`;
-  document.getElementById('planOutput').classList.add('show');
+  const goal = document.getElementById('planGoal').value.trim() || 'your stated goal';
+  const out = document.getElementById('planOutput');
+  const body = document.getElementById('planOutputBody');
+  let dimLine;
+  if (dims.length === 0) {
+    dimLine = "You haven't selected a dimension yet — that's fine. Try Module 2 first; it's the foundation.";
+  } else {
+    dimLine = `You've prioritised <strong>${dims.join(', ')}</strong>. Module 2 will set up the Literacy foundation either way; from there, you can pace yourself toward ${dims.includes('D2')?'Module 3':dims.includes('D3')?'Module 4':dims.includes('D4')?'Module 5':'whichever module corresponds to your top dimension'}.`;
+  }
+  body.innerHTML = `
+    <strong>Your discipline:</strong> ${disc}<br>
+    <strong>Your goal:</strong> ${goal}<br>
+    <strong>Your path:</strong> ${dimLine}
+  `;
+  out.classList.add('show');
 });
 
-/* ============== CONTEXT TABS ============== */
-document.querySelectorAll('.ctx-tab').forEach(tab => {
+/* ---------- TABS ---------- */
+document.querySelectorAll('#contextTabs .tab').forEach(tab => {
   tab.addEventListener('click', () => {
-    document.querySelectorAll('.ctx-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.ctx-panel').forEach(p => p.classList.remove('active'));
+    const target = tab.dataset.tab;
+    document.querySelectorAll('#contextTabs .tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
-    document.querySelector(`[data-ctx-panel="${tab.dataset.ctx}"]`).classList.add('active');
+    document.querySelectorAll('.tab-panel').forEach(p => {
+      p.classList.toggle('active', p.dataset.panel === target);
+    });
   });
 });
 
-/* ============== CHECKLIST ============== */
-document.querySelectorAll('.checklist-item').forEach(item => {
+/* ---------- CHECKLIST ---------- */
+document.querySelectorAll('.check-item').forEach(item => {
   item.addEventListener('click', () => item.classList.toggle('checked'));
 });
 
-/* ============== MARK COMPLETE (toggleable) ============== */
-const totalSections = 3;
-function updateProgress() {
-  const done = document.querySelectorAll('.mark-complete-btn.completed').length;
-  const pct = Math.round((done / totalSections) * 100);
-  document.getElementById('progressBar').style.width = pct + '%';
+/* ---------- MARK COMPLETE TOGGLES ---------- */
+const SECTIONS = ['1-1','1-2','1-3'];
+function refreshSectionUI() {
+  let done = 0;
+  SECTIONS.forEach((sid, idx) => {
+    const row = document.querySelector(`.mark-complete-row[data-section="${sid}"]`);
+    const status = document.getElementById(`status-${sid}`);
+    const isDone = window.isSectionComplete(idx);
+    if (isDone) {
+      row.classList.add('done');
+      row.querySelector('.btn-mark').innerHTML = `✓ Section ${sid.replace('-', '.')} Complete · click to undo`;
+      row.querySelector('.mark-complete-text').innerHTML = `<span>✅</span><span>Marked complete. Click the button to revert.</span>`;
+      status.classList.add('complete');
+      status.innerHTML = '✓ Completed';
+      done++;
+    } else {
+      row.classList.remove('done');
+      row.querySelector('.btn-mark').innerHTML = `Mark Section ${sid.replace('-', '.')} as Complete`;
+      const promptText = {
+        '1-1': '<span>✅</span><span>Got the big picture? Mark this section complete.</span>',
+        '1-2': '<span>✅</span><span>Set goals + understood how to contextualize? Mark complete.</span>',
+        '1-3': '<span>🎉</span><span>Ready for the four dimensions? Mark Section 1.3 complete.</span>'
+      };
+      row.querySelector('.mark-complete-text').innerHTML = promptText[sid];
+      status.classList.remove('complete');
+      status.innerHTML = '○ Not yet complete';
+    }
+  });
+  const pct = Math.round(done / SECTIONS.length * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
   document.getElementById('progressLabel').textContent = pct + '%';
 }
-document.querySelectorAll('.mark-complete-btn').forEach(btn => {
+document.querySelectorAll('.mark-complete-row .btn-mark').forEach(btn => {
   btn.addEventListener('click', () => {
-    const isDone = btn.classList.toggle('completed');
-    const id = btn.dataset.section;
-    const status = document.getElementById(`status-${id}`);
-    const label = btn.querySelector('.btn-label');
-    const icon = btn.querySelector('.check-icon');
-    if (isDone) {
-      icon.textContent = '✓';
-      label.textContent = `Section ${id.replace('-','.')} Completed — Click to undo`;
-      status.textContent = '✓ COMPLETED';
-      status.classList.add('done');
-    } else {
-      icon.textContent = '○';
-      label.textContent = `Mark Section ${id.replace('-','.')} as Complete`;
-      status.textContent = '○ NOT YET COMPLETE';
-      status.classList.remove('done');
-    }
-    updateProgress();
+    const row = btn.closest('.mark-complete-row');
+    const sid = row.dataset.section;
+    const idx = SECTIONS.indexOf(sid);
+    window.toggleSection(idx);
+    refreshSectionUI();
   });
 });
+refreshSectionUI();
+
+document.getElementById('companionFab').addEventListener('click', () => {
+  alert("AI Companion: Hi! I'm your reflection partner for Module 1. Ask me to explain the framework differently, or to help you think through your learning goal.");
+});
 </script>
-
-
-</body></html>
+</body>
+</html>
