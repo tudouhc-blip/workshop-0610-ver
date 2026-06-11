@@ -3,27 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 1 — Understanding the Framework as a Whole</title>
+<title>Module 1 — Understanding the Framework | GenAI Competency Workshop</title>
 <style>
 :root {
-  --purple-50:#faf5ff; --purple-100:#f3e8ff; --purple-200:#e9d5ff;
-  --purple-300:#d8b4fe; --purple-400:#c084fc; --purple-500:#a855f7;
-  --purple-600:#9333ea; --purple-700:#7e22ce; --purple-800:#6b21a8; --purple-900:#581c87;
-  --blue-50:#eff6ff; --blue-100:#dbeafe; --blue-200:#bfdbfe;
-  --blue-300:#93c5fd; --blue-400:#60a5fa; --blue-500:#3b82f6;
-  --blue-600:#2563eb; --blue-700:#1d4ed8; --blue-900:#1e3a8a;
-  --gold-50:#fffbeb; --gold-100:#fef3c7; --gold-200:#fde68a;
-  --gold-300:#fcd34d; --gold-400:#facc15; --gold-500:#eab308;
-  --gold-600:#ca8a04; --gold-700:#a16207;
-  --orange-500:#f97316;
-  --slate-50:#f8fafc; --slate-100:#f1f5f9; --slate-200:#e2e8f0;
+  /* Blue palette aligned with Module 2 */
+  --blue-50:#eff4ff; --blue-100:#dbe6ff; --blue-200:#b6c8ff;
+  --blue-300:#8aa6ff; --blue-400:#5b7fff; --blue-500:#4263eb;
+  --blue-600:#3b5bdb; --blue-700:#2f4ac4; --blue-800:#243aa0; --blue-900:#1b2d7f;
+
+  --slate-50:#f7f9fc; --slate-100:#eef2f7; --slate-200:#e2e8f0;
   --slate-300:#cbd5e1; --slate-400:#94a3b8; --slate-500:#64748b;
   --slate-600:#475569; --slate-700:#334155; --slate-800:#1e293b; --slate-900:#0f172a;
+
+  --gold-50:#fffbeb; --gold-100:#fef3c7; --gold-200:#fde68a;
+  --gold-400:#facc15; --gold-500:#eab308; --gold-700:#a16207;
+
   --green-50:#f0fdf4; --green-100:#dcfce7; --green-200:#bbf7d0;
-  --green-500:#22c55e; --green-600:#16a34a; --green-700:#15803d;
+  --green-500:#22c55e; --green-700:#15803d;
   --red-50:#fef2f2; --red-100:#fee2e2; --red-500:#ef4444; --red-700:#b91c1c;
 
-  /* LARGER, MORE GENEROUS TYPE SCALE */
   --text-xs:clamp(.85rem,.78rem + .25vw,.95rem);
   --text-sm:clamp(.98rem,.92rem + .3vw,1.08rem);
   --text-base:clamp(1.18rem,1.08rem + .4vw,1.32rem);
@@ -33,12 +31,11 @@
   --text-3xl:clamp(2.4rem,2rem + 1.8vw,3.2rem);
   --text-4xl:clamp(2.8rem,2.3rem + 2.4vw,4.1rem);
 
-  --content-width:1200px;
-  --radius-sm:10px; --radius-md:16px; --radius-lg:22px; --radius-xl:32px;
+  --content-width:1240px;
+  --radius-sm:10px; --radius-md:16px; --radius-lg:22px; --radius-xl:28px;
   --shadow-sm:0 1px 3px rgba(15,23,42,.06),0 1px 2px rgba(15,23,42,.04);
   --shadow-md:0 6px 16px rgba(15,23,42,.07),0 2px 6px rgba(15,23,42,.04);
-  --shadow-lg:0 16px 36px rgba(91,33,182,.10),0 6px 12px rgba(15,23,42,.05);
-  --shadow-xl:0 28px 60px rgba(91,33,182,.14),0 8px 16px rgba(15,23,42,.06);
+  --shadow-lg:0 18px 42px rgba(66,99,235,.14),0 6px 12px rgba(15,23,42,.05);
 }
 *{box-sizing:border-box;}
 html{scroll-behavior:smooth;}
@@ -46,108 +43,190 @@ body{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
   font-size:var(--text-base);
-  line-height:1.85;
+  line-height:1.75;
   color:var(--slate-800);
-  background:linear-gradient(180deg,#fbfaff 0%,#f7f6fc 100%);
+  background:#f5f7fb;
   -webkit-font-smoothing:antialiased;
   letter-spacing:-.005em;
 }
 .container{max-width:var(--content-width);margin:0 auto;padding:0 2rem;}
 @media (max-width:680px){.container{padding:0 1.25rem;}}
 
-/* ========== TOP RIBBON ========== */
-.ribbon{
-  background:linear-gradient(95deg,var(--purple-800),var(--purple-600),var(--blue-700));
-  color:#fff;padding:1.1rem 0;font-size:var(--text-sm);
+/* ========== TOPBAR (clean, white) ========== */
+.topbar{
+  background:#fff;
+  border-bottom:1px solid var(--slate-200);
+  padding:1rem 0;
   position:sticky;top:0;z-index:50;
 }
-.ribbon-inner{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:1rem;}
-.ribbon-left{display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;}
-.ribbon-back{color:#fff;text-decoration:none;font-weight:600;opacity:.85;
-  display:inline-flex;align-items:center;gap:8px;}
-.ribbon-back:hover{opacity:1;}
-.ribbon-crumb{font-weight:700;}
-.ribbon-crumb .sep{opacity:.5;margin:0 10px;}
-.ribbon-progress{display:flex;align-items:center;gap:14px;font-size:var(--text-xs);}
-.ribbon-bar{width:170px;height:7px;background:rgba(255,255,255,.18);
-  border-radius:999px;overflow:hidden;}
-.ribbon-bar-fill{height:100%;width:0%;
-  background:linear-gradient(90deg,var(--gold-300),var(--gold-500));
-  border-radius:999px;transition:width .6s ease;}
+.topbar-inner{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:1rem;flex-wrap:wrap;
+}
+.topbar-left{display:flex;align-items:center;gap:.65rem;font-size:var(--text-sm);}
+.topbar-left .brand{color:var(--blue-600);font-weight:700;}
+.topbar-left .dot{color:var(--slate-400);}
+.topbar-left .module-num{color:var(--slate-600);font-weight:500;}
+.topbar-right{display:flex;align-items:center;gap:.85rem;font-size:var(--text-sm);color:var(--slate-600);}
+.progress-track{
+  width:180px;height:6px;background:var(--slate-100);
+  border-radius:999px;overflow:hidden;
+}
+.progress-fill{
+  height:100%;width:0%;background:var(--blue-500);
+  border-radius:999px;transition:width .6s ease;
+}
 
-/* ========== HERO ========== */
-.hero{padding:5.5rem 0 3rem;position:relative;overflow:hidden;}
-.hero::before{content:"";position:absolute;top:-120px;right:-100px;width:420px;height:420px;
-  background:radial-gradient(closest-side,rgba(168,85,247,.15),transparent);border-radius:50%;}
-.hero::after{content:"";position:absolute;bottom:-140px;left:-120px;width:380px;height:380px;
-  background:radial-gradient(closest-side,rgba(59,130,246,.12),transparent);border-radius:50%;}
-.hero-inner{position:relative;z-index:1;}
-.hero-eyebrow{
-  display:inline-flex;align-items:center;gap:10px;
-  font-size:var(--text-xs);font-weight:700;letter-spacing:.22em;
-  text-transform:uppercase;color:var(--purple-700);background:var(--purple-100);
-  padding:11px 22px;border-radius:999px;margin-bottom:2rem;
+/* ========== HERO CARD ========== */
+.hero-section{padding:2.5rem 0 1rem;}
+.hero-card{
+  background:var(--blue-500);
+  border-radius:var(--radius-xl);
+  overflow:hidden;
+  display:grid;
+  grid-template-columns:1.05fr .95fr;
+  min-height:440px;
+  box-shadow:var(--shadow-lg);
+  position:relative;
 }
-.hero-title{
-  font-size:var(--text-4xl);font-weight:800;color:var(--slate-900);
-  line-height:1.1;margin:0 0 1.5rem;letter-spacing:-.025em;
-  display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;
+@media (max-width:880px){
+  .hero-card{grid-template-columns:1fr;min-height:0;}
 }
-.hero-title .title-icon{font-size:.85em;}
-.hero-title .accent{
-  background:linear-gradient(95deg,var(--purple-700),var(--blue-700));
-  -webkit-background-clip:text;background-clip:text;color:transparent;
+.hero-text{
+  padding:3.5rem 3rem;
+  color:#fff;
+  display:flex;flex-direction:column;justify-content:center;
 }
-.hero-sub{
-  font-size:var(--text-lg);color:var(--slate-600);
-  line-height:1.65;margin:0 0 2.25rem;max-width:62ch;
+@media (max-width:680px){.hero-text{padding:2.5rem 1.75rem;}}
+.hero-pill{
+  display:inline-flex;align-self:flex-start;
+  background:rgba(255,255,255,.18);
+  border:1px solid rgba(255,255,255,.25);
+  color:#fff;
+  font-size:var(--text-xs);font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;
+  padding:9px 20px;border-radius:999px;
+  margin-bottom:1.75rem;
+  backdrop-filter:blur(8px);
 }
-.hero-meta{display:flex;flex-wrap:wrap;gap:1rem;margin-bottom:1rem;}
+.hero-card h1{
+  font-size:var(--text-4xl);
+  font-weight:800;
+  line-height:1.08;
+  margin:0 0 1.25rem;
+  letter-spacing:-.025em;
+  color:#fff;
+}
+.hero-card .hero-sub{
+  font-size:var(--text-base);
+  color:rgba(255,255,255,.92);
+  margin:0 0 2.25rem;
+  line-height:1.65;
+  max-width:46ch;
+}
+.hero-meta{
+  display:flex;flex-wrap:wrap;gap:1.5rem;
+  margin-top:.5rem;
+}
 .meta-pill{
-  display:inline-flex;align-items:center;gap:10px;background:#fff;
-  border:1.5px solid var(--slate-200);padding:12px 22px;border-radius:999px;
-  font-size:var(--text-sm);font-weight:600;color:var(--slate-700);box-shadow:var(--shadow-sm);
+  display:inline-flex;align-items:center;gap:9px;
+  color:#fff;font-size:var(--text-sm);font-weight:500;
+}
+.meta-pill::before{
+  content:"";width:8px;height:8px;border-radius:50%;
+  background:#fff;display:inline-block;
+}
+.hero-image{
+  position:relative;overflow:hidden;
+  background:var(--blue-600);
+}
+.hero-image img{
+  width:100%;height:100%;object-fit:cover;display:block;
+}
+.hero-image::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(110deg,rgba(66,99,235,.55) 0%,rgba(66,99,235,.18) 60%);
+  mix-blend-mode:multiply;
+}
+@media (max-width:880px){
+  .hero-image{min-height:240px;}
 }
 
-/* ===== Protagonist card ===== */
+/* ========== PROTAGONIST CARD ========== */
+.protagonist-section{padding:1.75rem 0 2rem;}
 .protagonist-card{
-  margin-top:3rem;
-  background:linear-gradient(135deg,#fff 0%,var(--purple-50) 100%);
-  border:1.5px solid var(--purple-200);border-radius:var(--radius-xl);
-  padding:2.5rem;display:grid;grid-template-columns:auto 1fr;gap:2rem;
-  align-items:center;box-shadow:var(--shadow-md);
+  background:#fff;
+  border:1px solid var(--slate-200);
+  border-radius:var(--radius-xl);
+  overflow:hidden;
+  display:grid;
+  grid-template-columns:.32fr .68fr;
+  box-shadow:var(--shadow-sm);
 }
-@media (max-width:680px){.protagonist-card{grid-template-columns:1fr;text-align:center;padding:1.75rem;}}
+@media (max-width:880px){
+  .protagonist-card{grid-template-columns:1fr;}
+}
+.protagonist-image{
+  position:relative;min-height:340px;background:var(--slate-100);
+}
+.protagonist-image img{
+  width:100%;height:100%;object-fit:cover;display:block;
+}
+@media (max-width:880px){
+  .protagonist-image{min-height:220px;}
+}
+.protagonist-content{
+  padding:2.5rem 3rem;
+  display:flex;flex-direction:column;justify-content:center;
+}
+@media (max-width:680px){.protagonist-content{padding:2rem 1.75rem;}}
+.protagonist-header{
+  display:flex;align-items:center;gap:1.1rem;
+  margin-bottom:1.25rem;
+}
 .protagonist-avatar{
-  width:96px;height:96px;border-radius:50%;
-  background:linear-gradient(135deg,var(--gold-400),var(--orange-500));
+  width:60px;height:60px;border-radius:50%;
+  background:var(--blue-500);
+  color:#fff;font-weight:800;font-size:18px;
   display:flex;align-items:center;justify-content:center;
-  color:#fff;font-weight:800;font-size:32px;
-  box-shadow:0 8px 18px rgba(249,115,22,.32);
-  border:5px solid #fff;margin:0 auto;
+  flex-shrink:0;letter-spacing:.04em;
 }
-.protagonist-meta{
-  font-size:var(--text-xs);font-weight:700;letter-spacing:.18em;
-  text-transform:uppercase;color:var(--purple-700);margin-bottom:.65rem;
+.protagonist-eyebrow{
+  font-size:var(--text-xs);font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;
+  color:var(--blue-600);
 }
-.protagonist-card h3{margin:0 0 .85rem;font-size:var(--text-xl);color:var(--slate-900);font-weight:800;line-height:1.3;}
-.protagonist-card p{margin:0 0 1.1rem;color:var(--slate-700);line-height:1.75;font-size:var(--text-base);}
-.protagonist-tag{
-  display:inline-flex;align-items:center;gap:8px;
-  background:#fff;border:1px solid var(--purple-200);
-  padding:8px 18px;border-radius:999px;
-  font-size:var(--text-sm);font-weight:600;color:var(--purple-700);
+.protagonist-content h3{
+  margin:0 0 1.1rem;
+  font-size:var(--text-xl);
+  color:var(--slate-900);
+  font-weight:800;line-height:1.3;
+}
+.protagonist-content p{
+  margin:0 0 1.5rem;
+  color:var(--slate-700);
+  line-height:1.7;
+  font-size:var(--text-base);
+}
+.protagonist-content p em{font-style:italic;color:var(--slate-700);}
+.stage-pill{
+  display:inline-flex;align-self:flex-start;
+  background:var(--blue-50);
+  color:var(--blue-700);
+  padding:11px 22px;border-radius:12px;
+  font-size:var(--text-sm);font-weight:600;
+  border:1px solid var(--blue-100);
 }
 
 /* ========== SECTIONS ========== */
-.section-block{margin:6rem 0;scroll-margin-top:90px;}
+.section-block{margin:5rem 0;scroll-margin-top:90px;}
 .section-header{
   display:flex;justify-content:space-between;align-items:center;
   gap:1.25rem;flex-wrap:wrap;margin-bottom:1rem;
 }
 .section-eyebrow{
   font-size:var(--text-xs);font-weight:800;letter-spacing:.22em;
-  text-transform:uppercase;color:var(--purple-700);
+  text-transform:uppercase;color:var(--blue-600);
 }
 .section-status{
   font-size:var(--text-xs);font-weight:700;letter-spacing:.12em;
@@ -170,7 +249,7 @@ body{
 .subsection{margin:4rem 0;}
 .sub-num{
   font-size:var(--text-xs);font-weight:700;letter-spacing:.2em;
-  text-transform:uppercase;color:var(--purple-600);margin-bottom:.7rem;
+  text-transform:uppercase;color:var(--blue-600);margin-bottom:.7rem;
 }
 .sub-title{
   font-size:var(--text-2xl);font-weight:800;color:var(--slate-900);
@@ -183,8 +262,8 @@ body{
 
 /* ========== RECALL BAR ========== */
 .recall-bar{
-  background:linear-gradient(135deg,var(--blue-50),var(--purple-50));
-  border:1.5px solid var(--blue-200);border-radius:var(--radius-lg);
+  background:var(--blue-50);
+  border:1px solid var(--blue-100);border-radius:var(--radius-lg);
   padding:1.85rem 2.25rem;margin:0 0 2.5rem;
 }
 .recall-eyebrow{
@@ -206,14 +285,14 @@ body{
 
 /* ========== FRAMEWORK SANDBOX ========== */
 .fw-sandbox{
-  background:#fff;border:1.5px solid var(--slate-200);
+  background:#fff;border:1px solid var(--slate-200);
   border-radius:var(--radius-xl);padding:2.5rem;
-  box-shadow:var(--shadow-md);margin:2rem 0;
+  box-shadow:var(--shadow-sm);margin:2rem 0;
 }
 @media (max-width:680px){.fw-sandbox{padding:1.5rem;}}
 .fw-sandbox-eyebrow{
   font-size:var(--text-xs);font-weight:800;letter-spacing:.2em;
-  text-transform:uppercase;color:var(--purple-700);margin-bottom:.5rem;
+  text-transform:uppercase;color:var(--blue-600);margin-bottom:.5rem;
 }
 .fw-sandbox-title{font-size:var(--text-xl);font-weight:800;color:var(--slate-900);margin:0 0 .5rem;}
 .fw-sandbox-sub{font-size:var(--text-base);color:var(--slate-600);margin:0 0 1.75rem;line-height:1.65;}
@@ -229,8 +308,8 @@ body{
   border:1.5px solid transparent;background:#fff;color:var(--slate-700);
   transition:all .15s ease;display:inline-flex;align-items:center;gap:8px;
 }
-.fw-toggle:hover{border-color:var(--purple-300);}
-.fw-toggle.active{background:var(--purple-600);color:#fff;border-color:var(--purple-600);}
+.fw-toggle:hover{border-color:var(--blue-300);}
+.fw-toggle.active{background:var(--blue-500);color:#fff;border-color:var(--blue-500);}
 .fw-toggle .swatch{width:14px;height:14px;border-radius:4px;display:inline-block;}
 .fw-toggle .swatch.blue{background:var(--blue-500);}
 .fw-toggle .swatch.gold{background:var(--gold-500);}
@@ -261,14 +340,14 @@ body{
 }
 .fw-cell:hover{
   transform:translateY(-3px);box-shadow:var(--shadow-md);
-  border-color:var(--purple-400);
+  border-color:var(--blue-400);
 }
-.fw-cell.selected{border-color:var(--purple-700);box-shadow:var(--shadow-lg);}
+.fw-cell.selected{border-color:var(--blue-700);box-shadow:var(--shadow-lg);}
 .fw-cell .perspectives{display:flex;gap:5px;}
 .fw-cell .pdot{flex:1;height:8px;border-radius:4px;}
-.fw-cell .pdot.blue.b{background:#bfdbfe;}
-.fw-cell .pdot.blue.i{background:#60a5fa;}
-.fw-cell .pdot.blue.a{background:#1d4ed8;}
+.fw-cell .pdot.blue.b{background:#b6c8ff;}
+.fw-cell .pdot.blue.i{background:#5b7fff;}
+.fw-cell .pdot.blue.a{background:#243aa0;}
 .fw-cell .pdot.gold.b{background:#fde68a;}
 .fw-cell .pdot.gold.i{background:#facc15;}
 .fw-cell .pdot.gold.a{background:#a16207;}
@@ -295,7 +374,7 @@ body{
 }
 .fw-readout-pill.blue{background:var(--blue-100);color:var(--blue-700);}
 .fw-readout-pill.gold{background:var(--gold-100);color:var(--gold-700);}
-.fw-readout-pill.level{background:var(--purple-100);color:var(--purple-700);}
+.fw-readout-pill.level{background:var(--blue-100);color:var(--blue-700);}
 .fw-readout-title{font-weight:800;color:var(--slate-900);margin:0;font-size:var(--text-lg);}
 .fw-readout-row{display:grid;gap:.85rem;margin-top:.5rem;}
 .fw-perspective-block{
@@ -323,9 +402,9 @@ body{
   box-shadow:var(--shadow-sm);transition:all .2s ease;
 }
 .formula-num:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);
-  border-color:var(--purple-300);}
+  border-color:var(--blue-300);}
 .formula-num.active{
-  background:linear-gradient(135deg,var(--purple-600),var(--blue-600));
+  background:var(--blue-500);
   color:#fff;border-color:transparent;
 }
 .formula-num .n{font-size:var(--text-3xl);line-height:1;}
@@ -336,19 +415,19 @@ body{
 .formula-num.active .lbl{color:rgba(255,255,255,.88);}
 .formula-op{color:var(--slate-400);}
 .formula-explainer{
-  background:linear-gradient(135deg,var(--purple-50),var(--blue-50));
-  border:1.5px solid var(--purple-200);border-radius:var(--radius-lg);
+  background:var(--blue-50);
+  border:1px solid var(--blue-100);border-radius:var(--radius-lg);
   padding:1.75rem 2rem;margin-top:1.5rem;min-height:110px;
 }
 .formula-explainer h5{
-  margin:0 0 .55rem;color:var(--purple-800);
+  margin:0 0 .55rem;color:var(--blue-800);
   font-size:var(--text-base);font-weight:800;letter-spacing:.02em;
 }
 .formula-explainer p{margin:0;color:var(--slate-700);font-size:var(--text-base);line-height:1.7;}
 
 .why-design{
-  background:linear-gradient(135deg,var(--gold-50),#fffbeb);
-  border:1.5px solid var(--gold-200);border-radius:var(--radius-lg);
+  background:var(--gold-50);
+  border:1px solid var(--gold-200);border-radius:var(--radius-lg);
   padding:2rem;margin-top:2rem;
 }
 .why-design h4{
@@ -356,7 +435,7 @@ body{
   font-weight:800;display:flex;align-items:center;gap:10px;
 }
 .why-design p{margin:0;color:var(--slate-700);font-size:var(--text-base);line-height:1.85;}
-.why-design strong{color:var(--purple-800);}
+.why-design strong{color:var(--blue-800);}
 
 /* ========== DIMENSION CARDS ========== */
 .dim-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem;margin:2rem 0;}
@@ -367,12 +446,12 @@ body{
   transition:all .2s ease;box-shadow:var(--shadow-sm);
 }
 .dim-card:hover{
-  border-color:var(--purple-300);box-shadow:var(--shadow-md);
+  border-color:var(--blue-300);box-shadow:var(--shadow-md);
   transform:translateY(-3px);
 }
 .dim-card .dim-eyebrow{
   font-size:11px;font-weight:800;letter-spacing:.16em;
-  text-transform:uppercase;color:var(--purple-700);margin-bottom:.7rem;
+  text-transform:uppercase;color:var(--blue-600);margin-bottom:.7rem;
 }
 .dim-card h4{
   margin:0 0 .85rem;font-size:var(--text-lg);color:var(--slate-900);font-weight:800;
@@ -390,12 +469,12 @@ body{
 }
 .dim-expand-inner h5{
   margin:0 0 .4rem;font-size:11px;font-weight:800;
-  letter-spacing:.14em;text-transform:uppercase;color:var(--purple-600);
+  letter-spacing:.14em;text-transform:uppercase;color:var(--blue-600);
 }
 .dim-expand-inner p{margin:0;color:var(--slate-700);font-size:var(--text-base);line-height:1.7;}
 .dim-expand-toggle{
   font-size:var(--text-sm);font-weight:700;
-  letter-spacing:.04em;color:var(--purple-700);
+  letter-spacing:.04em;color:var(--blue-700);
   display:inline-flex;align-items:center;gap:6px;
 }
 .dim-card.open .dim-expand-toggle .chev{transform:rotate(180deg);}
@@ -403,14 +482,14 @@ body{
 
 /* ========== POP QUIZ ========== */
 .quiz-block{
-  background:#fff;border:1.5px solid var(--slate-200);
+  background:#fff;border:1px solid var(--slate-200);
   border-radius:var(--radius-lg);padding:2rem;margin:1.5rem 0;
   box-shadow:var(--shadow-sm);
 }
 @media (max-width:680px){.quiz-block{padding:1.5rem;}}
 .quiz-eyebrow{
   font-size:11px;font-weight:800;letter-spacing:.2em;
-  text-transform:uppercase;color:var(--purple-700);margin-bottom:.85rem;
+  text-transform:uppercase;color:var(--blue-600);margin-bottom:.85rem;
 }
 .quiz-q{
   font-weight:700;color:var(--slate-900);margin:0 0 1.5rem;
@@ -423,7 +502,7 @@ body{
   border:1.5px solid var(--slate-200);background:#fff;color:var(--slate-700);
   transition:all .15s ease;font-weight:500;line-height:1.55;
 }
-.quiz-opt:hover{border-color:var(--purple-400);background:var(--purple-50);}
+.quiz-opt:hover{border-color:var(--blue-400);background:var(--blue-50);}
 .quiz-opt.correct{background:var(--green-100);border-color:var(--green-500);color:var(--green-700);font-weight:600;}
 .quiz-opt.wrong{background:var(--red-50);border-color:var(--red-500);color:var(--red-700);}
 .quiz-feedback{
@@ -438,14 +517,14 @@ body{
 
 /* ========== LEARNING PLAN ========== */
 .plan-card{
-  background:linear-gradient(135deg,#fff 0%,var(--purple-50) 100%);
-  border:1.5px solid var(--purple-200);border-radius:var(--radius-xl);
-  padding:2.5rem;box-shadow:var(--shadow-md);margin:2rem 0;
+  background:var(--blue-50);
+  border:1px solid var(--blue-100);border-radius:var(--radius-xl);
+  padding:2.5rem;box-shadow:var(--shadow-sm);margin:2rem 0;
 }
 @media (max-width:680px){.plan-card{padding:1.75rem;}}
 .plan-eyebrow{
   font-size:var(--text-xs);font-weight:800;letter-spacing:.2em;
-  text-transform:uppercase;color:var(--purple-700);
+  text-transform:uppercase;color:var(--blue-700);
   display:inline-flex;align-items:center;gap:8px;margin-bottom:.85rem;
 }
 .plan-title{margin:0 0 2rem;font-size:var(--text-xl);color:var(--slate-900);font-weight:800;line-height:1.4;}
@@ -457,7 +536,7 @@ body{
 .plan-step-num{
   display:inline-flex;align-items:center;justify-content:center;
   width:30px;height:30px;border-radius:50%;flex-shrink:0;
-  background:var(--purple-600);color:#fff;font-size:13px;font-weight:800;
+  background:var(--blue-500);color:#fff;font-size:13px;font-weight:800;
   margin-top:2px;
 }
 .plan-step-hint{
@@ -471,9 +550,9 @@ body{
   border:1.5px solid var(--slate-200);background:#fff;color:var(--slate-700);
   transition:all .15s ease;
 }
-.plan-chip:hover{border-color:var(--purple-400);}
+.plan-chip:hover{border-color:var(--blue-400);}
 .plan-chip.active{
-  background:linear-gradient(135deg,var(--purple-600),var(--blue-600));
+  background:var(--blue-500);
   color:#fff;border-color:transparent;
 }
 .plan-input{
@@ -483,25 +562,25 @@ body{
   transition:border-color .15s ease;line-height:1.6;
 }
 .plan-input:focus{
-  outline:none;border-color:var(--purple-500);
-  box-shadow:0 0 0 4px rgba(168,85,247,.15);
+  outline:none;border-color:var(--blue-500);
+  box-shadow:0 0 0 4px rgba(66,99,235,.15);
 }
 textarea.plan-input{min-height:120px;resize:vertical;}
 .btn-primary{
   display:inline-flex;align-items:center;gap:10px;
-  background:linear-gradient(135deg,var(--purple-600),var(--blue-600));
+  background:var(--blue-500);
   color:#fff;border:none;font-family:inherit;font-size:var(--text-base);font-weight:700;
   padding:15px 28px;border-radius:999px;cursor:pointer;text-decoration:none;
   box-shadow:var(--shadow-md);transition:all .2s ease;
 }
-.btn-primary:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);background:var(--blue-600);}
 .plan-output{
-  margin-top:1.75rem;background:#fff;border-left:5px solid var(--purple-500);
+  margin-top:1.75rem;background:#fff;border-left:5px solid var(--blue-500);
   border-radius:var(--radius-md);padding:1.5rem 1.85rem;display:none;
   box-shadow:var(--shadow-sm);
 }
 .plan-output.show{display:block;}
-.plan-output h5{margin:0 0 .85rem;color:var(--purple-800);font-size:var(--text-base);font-weight:800;}
+.plan-output h5{margin:0 0 .85rem;color:var(--blue-700);font-size:var(--text-base);font-weight:800;}
 .plan-output p{margin:0;font-size:var(--text-base);color:var(--slate-700);line-height:1.85;}
 
 /* ========== CONTEXT TABS ========== */
@@ -516,26 +595,26 @@ textarea.plan-input{min-height:120px;resize:vertical;}
   margin-bottom:-2px;transition:all .15s ease;
   display:inline-flex;align-items:center;gap:8px;
 }
-.tab:hover{color:var(--purple-700);}
-.tab.active{color:var(--purple-700);border-bottom-color:var(--purple-600);}
+.tab:hover{color:var(--blue-700);}
+.tab.active{color:var(--blue-700);border-bottom-color:var(--blue-500);}
 .tab-panel{display:none;animation:fadeIn .3s ease;}
 .tab-panel.active{display:block;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
 
 .context-card{
-  background:#fff;border:1.5px solid var(--slate-200);
+  background:#fff;border:1px solid var(--slate-200);
   border-radius:var(--radius-lg);padding:2.25rem;box-shadow:var(--shadow-sm);
 }
 @media (max-width:680px){.context-card{padding:1.5rem;}}
 .context-card > p{margin:0 0 1.5rem;color:var(--slate-700);line-height:1.75;font-size:var(--text-base);}
 .context-prompt{
-  background:linear-gradient(135deg,var(--blue-50),var(--purple-50));
-  border-left:5px solid var(--purple-500);border-radius:var(--radius-md);
+  background:var(--blue-50);
+  border-left:5px solid var(--blue-500);border-radius:var(--radius-md);
   padding:1.25rem 1.6rem;margin:1.5rem 0;
 }
 .context-prompt-label{
   font-size:11px;font-weight:800;letter-spacing:.16em;
-  text-transform:uppercase;color:var(--purple-700);margin-bottom:.5rem;
+  text-transform:uppercase;color:var(--blue-700);margin-bottom:.5rem;
 }
 .context-prompt-q{font-style:italic;color:var(--slate-800);font-weight:600;margin:0;font-size:var(--text-base);line-height:1.55;}
 .context-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-top:.75rem;}
@@ -550,9 +629,8 @@ textarea.plan-input{min-height:120px;resize:vertical;}
 }
 .context-item p{margin:0;color:var(--slate-600);font-size:var(--text-sm);line-height:1.65;}
 
-/* Evidence card */
 .evidence-card{
-  background:#fff;border:1.5px solid var(--slate-200);
+  background:#fff;border:1px solid var(--slate-200);
   border-radius:var(--radius-lg);padding:2.25rem;margin-top:2rem;
   box-shadow:var(--shadow-sm);
 }
@@ -578,7 +656,7 @@ textarea.plan-input{min-height:120px;resize:vertical;}
 @media (max-width:880px){.mech-grid{grid-template-columns:repeat(2,1fr);}}
 @media (max-width:560px){.mech-grid{grid-template-columns:1fr;}}
 .mech-card{
-  background:#fff;border:1.5px solid var(--slate-200);
+  background:#fff;border:1px solid var(--slate-200);
   border-radius:var(--radius-lg);padding:1.85rem;box-shadow:var(--shadow-sm);
   transition:transform .2s ease,box-shadow .2s ease;
 }
@@ -589,8 +667,8 @@ textarea.plan-input{min-height:120px;resize:vertical;}
 
 /* ========== CHECKLIST ========== */
 .checklist-card{
-  background:linear-gradient(135deg,var(--green-50),#f0fdf4);
-  border:1.5px solid var(--green-200);border-radius:var(--radius-xl);
+  background:var(--green-50);
+  border:1px solid var(--green-200);border-radius:var(--radius-xl);
   padding:2.5rem;margin:2rem 0;box-shadow:var(--shadow-sm);
 }
 @media (max-width:680px){.checklist-card{padding:1.75rem;}}
@@ -618,14 +696,14 @@ textarea.plan-input{min-height:120px;resize:vertical;}
 
 /* ========== BRIDGE ========== */
 .bridge-card{
-  background:linear-gradient(135deg,var(--purple-700),var(--blue-700));
+  background:var(--blue-500);
   color:#fff;border-radius:var(--radius-xl);padding:2.75rem;margin:2rem 0;
   box-shadow:var(--shadow-lg);position:relative;overflow:hidden;
 }
 @media (max-width:680px){.bridge-card{padding:1.85rem;}}
 .bridge-card::before{
   content:"";position:absolute;top:-100px;right:-100px;width:300px;height:300px;
-  background:radial-gradient(closest-side,rgba(250,204,21,.18),transparent);border-radius:50%;
+  background:radial-gradient(closest-side,rgba(250,204,21,.22),transparent);border-radius:50%;
 }
 .bridge-eyebrow{
   font-size:var(--text-xs);font-weight:800;letter-spacing:.22em;
@@ -641,7 +719,7 @@ textarea.plan-input{min-height:120px;resize:vertical;}
   margin:0 0 1.75rem;line-height:1.8;font-size:var(--text-base);opacity:.95;
   position:relative;z-index:1;
 }
-.bridge-text strong{color:var(--gold-300);}
+.bridge-text strong{color:var(--gold-200);}
 .bridge-companion{
   background:rgba(255,255,255,.12);
   border:1px solid rgba(255,255,255,.2);border-radius:var(--radius-md);
@@ -652,7 +730,7 @@ textarea.plan-input{min-height:120px;resize:vertical;}
 .bridge-actions{display:flex;flex-wrap:wrap;gap:1rem;position:relative;z-index:1;}
 .btn-bridge{
   display:inline-flex;align-items:center;gap:10px;
-  background:#fff;color:var(--purple-700);border:none;font-family:inherit;
+  background:#fff;color:var(--blue-700);border:none;font-family:inherit;
   font-size:var(--text-base);font-weight:800;padding:15px 28px;border-radius:999px;
   cursor:pointer;text-decoration:none;transition:transform .2s ease;
 }
@@ -663,12 +741,12 @@ textarea.plan-input{min-height:120px;resize:vertical;}
 /* ========== MARK COMPLETE ========== */
 .mark-complete-row{
   margin:3rem 0 0;padding:1.75rem 2rem;
-  background:#fff;border:1.5px solid var(--slate-200);border-radius:var(--radius-lg);
+  background:#fff;border:1px solid var(--slate-200);border-radius:var(--radius-lg);
   display:flex;justify-content:space-between;align-items:center;gap:1.25rem;
   flex-wrap:wrap;box-shadow:var(--shadow-sm);transition:all .25s ease;
 }
 .mark-complete-row.done{
-  background:linear-gradient(135deg,var(--green-50),#f0fdf4);
+  background:var(--green-50);
   border-color:var(--green-200);
 }
 .mark-complete-text{
@@ -679,93 +757,103 @@ textarea.plan-input{min-height:120px;resize:vertical;}
 .btn-mark{
   font-family:inherit;font-size:var(--text-base);font-weight:700;
   padding:14px 26px;border-radius:999px;cursor:pointer;border:none;
-  background:linear-gradient(135deg,var(--purple-600),var(--blue-600));
+  background:var(--blue-500);
   color:#fff;box-shadow:var(--shadow-sm);transition:all .2s ease;
   display:inline-flex;align-items:center;gap:10px;letter-spacing:.02em;
 }
-.btn-mark:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);}
+.btn-mark:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);background:var(--blue-600);}
 .mark-complete-row.done .btn-mark{
   background:#fff;color:var(--green-700);
-  border:1.5px solid var(--green-300);box-shadow:none;
+  border:1.5px solid var(--green-200);box-shadow:none;
 }
 .mark-complete-row.done .btn-mark:hover{background:var(--green-50);}
 
 /* ========== AI COMPANION ========== */
 .companion-fab{
   position:fixed;bottom:30px;right:30px;z-index:60;
-  background:linear-gradient(135deg,var(--purple-600),var(--blue-600));
-  color:#fff;border:none;border-radius:999px;padding:16px 26px;
-  font-family:inherit;font-size:var(--text-base);font-weight:700;
+  background:var(--blue-500);
+  color:#fff;border:none;border-radius:50%;width:60px;height:60px;
+  font-family:inherit;font-size:24px;
   cursor:pointer;box-shadow:var(--shadow-lg);
-  display:flex;align-items:center;gap:10px;transition:transform .2s ease;
+  display:flex;align-items:center;justify-content:center;transition:transform .2s ease;
 }
-.companion-fab:hover{transform:translateY(-4px);}
+.companion-fab:hover{transform:translateY(-4px);background:var(--blue-600);}
 
 /* ========== FOOTER ========== */
 .module-footer{
   margin-top:5rem;padding:2.5rem 0;border-top:1px solid var(--slate-200);
   font-size:var(--text-base);color:var(--slate-500);text-align:center;line-height:1.8;
 }
-.module-footer a{color:var(--purple-700);text-decoration:none;font-weight:600;}
+.module-footer a{color:var(--blue-600);text-decoration:none;font-weight:600;}
 .module-footer a:hover{text-decoration:underline;}
 </style>
 </head>
 <body>
 
-<!-- ========== TOP RIBBON ========== -->
-<div class="ribbon">
-  <div class="container ribbon-inner">
-    <div class="ribbon-left">
-      <a href="dashboard.html" class="ribbon-back">← Dashboard</a>
-      <div class="ribbon-crumb">
-        GenAI Competency Workshop <span class="sep">·</span> Module 1 of 6 <span class="sep">·</span> v1.0
-      </div>
+<!-- ========== TOPBAR ========== -->
+<header class="topbar">
+  <div class="container topbar-inner">
+    <div class="topbar-left">
+      <span class="brand">GenAI Competency Workshop</span>
+      <span class="dot">·</span>
+      <span class="module-num">Module 1 of 6</span>
     </div>
-    <div class="ribbon-progress">
+    <div class="topbar-right">
       <span>Progress</span>
-      <div class="ribbon-bar"><div class="ribbon-bar-fill" id="progressFill"></div></div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
       <span id="progressLabel">0%</span>
-    </div>
-  </div>
-</div>
-
-<!-- ========== HERO ========== -->
-<header class="hero">
-  <div class="container hero-inner">
-    <span class="hero-eyebrow">🧭 Orientation · Before the four dimensions</span>
-    <h1 class="hero-title">
-      <span class="title-icon">🧭</span>
-      <span class="accent">Understanding the Framework</span> as a Whole
-    </h1>
-    <p class="hero-sub">
-      Before diving into any single dimension, take 25 minutes to see the bigger picture:
-      <strong>why</strong> the framework is structured the way it is, how it connects to your own
-      teaching practice, and how to use this workshop most effectively.
-    </p>
-    <div class="hero-meta">
-      <span class="meta-pill">⏱ 25 min</span>
-      <span class="meta-pill">📚 3 sections</span>
-      <span class="meta-pill">🌱 Sets up Modules 2–5</span>
-    </div>
-
-    <div class="protagonist-card">
-      <div class="protagonist-avatar">YOU</div>
-      <div>
-        <div class="protagonist-meta">👋 Welcome — start here</div>
-        <h3>You are the protagonist of this module</h3>
-        <p>
-          Modules 2–5 will introduce specific educators (different disciplines, different contexts)
-          so you can see the framework in action across realities very different from your own.
-          But this module is about <strong>you</strong> — where you're starting from, what you want
-          to learn, and how to navigate the workshop in a way that fits your own context.
-        </p>
-        <span class="protagonist-tag">📍 By the end: a personal learning plan + workshop know-how</span>
-      </div>
     </div>
   </div>
 </header>
 
 <main class="container">
+
+  <!-- ========== HERO ========== -->
+  <section class="hero-section">
+    <div class="hero-card">
+      <div class="hero-text">
+        <span class="hero-pill">Orientation · Module 1 of 6</span>
+        <h1>Understanding the Framework</h1>
+        <p class="hero-sub">
+          Before diving into any single dimension, take 25 minutes to see the bigger picture:
+          why the framework is structured the way it is, how it connects to your own teaching
+          practice, and how to use this workshop most effectively.
+        </p>
+        <div class="hero-meta">
+          <span class="meta-pill">25 min</span>
+          <span class="meta-pill">3 sections</span>
+          <span class="meta-pill">Sets up Modules 2–5</span>
+        </div>
+      </div>
+      <div class="hero-image">
+        <img src="https://images.unsplash.com/photo-1531545514256-b1400bc00f31?auto=format&fit=crop&w=1200&q=80" alt="Educators planning together">
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PROTAGONIST CARD ========== -->
+  <section class="protagonist-section">
+    <div class="protagonist-card">
+      <div class="protagonist-image">
+        <img src="https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=800&q=80" alt="Personal reflection workspace">
+      </div>
+      <div class="protagonist-content">
+        <div class="protagonist-header">
+          <div class="protagonist-avatar">YOU</div>
+          <span class="protagonist-eyebrow">👋 Welcome — start here</span>
+        </div>
+        <h3>You are the protagonist of this module</h3>
+        <p>
+          Modules 2–5 will introduce specific educators (different disciplines, different
+          contexts) so you can see the framework in action across realities very different
+          from your own. But this module is about <strong>you</strong> — where you're
+          starting from, what you want to learn, and how to navigate the workshop in a way
+          that fits your own context.
+        </p>
+        <span class="stage-pill">📍 By the end: a personal learning plan + workshop know-how</span>
+      </div>
+    </div>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SECTION 1.1                                                   -->
@@ -784,11 +872,11 @@ textarea.plan-input{min-height:120px;resize:vertical;}
   <p class="section-intro small">
     📖 Before we head to the framework itself, if you have time, you can skim the published
     <a href="GenAI-Responsive Competency Framework for University Teachers.pdf" target="_blank"
-       style="color:var(--purple-700);font-weight:600;">journal paper</a>
+       style="color:var(--blue-600);font-weight:600;">journal paper</a>
     for a fuller picture — but that's not required. It's only a plus for your understanding.
   </p>
 
-  <!-- ----- 1.1.1 FRAMEWORK MAP ----- -->
+  <!-- 1.1.1 FRAMEWORK MAP -->
   <div class="subsection">
     <div class="sub-num">1.1.1 · The Framework Structure</div>
     <h3 class="sub-title">Interactive Framework Map — All 24 Competencies at a Glance</h3>
@@ -824,7 +912,7 @@ textarea.plan-input{min-height:120px;resize:vertical;}
     </div>
   </div>
 
-  <!-- ----- WHY 4×3×2 ----- -->
+  <!-- WHY 4×3×2 -->
   <div class="subsection">
     <h3 class="sub-title" style="font-size:var(--text-xl);">Why 4 × 3 × 2?</h3>
     <p class="sub-lede">Click each number below to see what it represents — and why each layer matters.</p>
@@ -856,7 +944,7 @@ textarea.plan-input{min-height:120px;resize:vertical;}
     </div>
   </div>
 
-  <!-- ----- 1.1.2 DIMENSIONS ----- -->
+  <!-- 1.1.2 DIMENSIONS -->
   <div class="subsection">
     <div class="sub-num">1.1.2 · The Four Dimensions in Brief</div>
     <h3 class="sub-title">A Quick Tour</h3>
@@ -909,7 +997,7 @@ textarea.plan-input{min-height:120px;resize:vertical;}
     </div>
   </div>
 
-  <!-- ----- 1.1.3 KNOWLEDGE RECAP ----- -->
+  <!-- 1.1.3 KNOWLEDGE RECAP -->
   <div class="subsection">
     <div class="sub-num">1.1.3 · Knowledge Recap</div>
     <h3 class="sub-title">Quick Check Before Moving On</h3>
@@ -1165,7 +1253,7 @@ textarea.plan-input{min-height:120px;resize:vertical;}
       </p>
       <div class="bridge-companion">
         <span style="font-size:22px;">👋</span>
-        <span>You'll meet your first companion in Module 2 — <strong style="color:var(--gold-300);">Dr. Maya Chen</strong>, an Associate Professor of Public Health navigating the same questions you are. You'll watch her grow across all three levels.</span>
+        <span>You'll meet your first companion in Module 2 — <strong>Dr. Maya Chen</strong>, an Associate Professor of Public Health navigating the same questions you are. You'll watch her grow across all three levels.</span>
       </div>
       <div class="bridge-actions">
         <a class="btn-bridge" href="module_2_pic.html">Continue to Module 2 →</a>
@@ -1188,9 +1276,7 @@ textarea.plan-input{min-height:120px;resize:vertical;}
 
 </main>
 
-<button class="companion-fab" id="companionFab" title="AI Learning Companion">
-  💬 <span>AI Companion</span>
-</button>
+<button class="companion-fab" id="companionFab" title="AI Learning Companion">💬</button>
 
 <!-- Shared progress layer -->
 <script>
@@ -1242,7 +1328,7 @@ textarea.plan-input{min-height:120px;resize:vertical;}
 </script>
 
 <script>
-/* ---------- FRAMEWORK MAP DATA ---------- */
+/* FRAMEWORK MAP DATA */
 const DIMENSIONS = [
   { key:'literacy',   icon:'🧠', name:'GenAI Literacy' },
   { key:'curriculum', icon:'🎯', name:'Curriculum & Design' },
@@ -1253,64 +1339,39 @@ const LEVELS = ['advanced','intermediate','basic'];
 
 const COMPETENCIES = {
   literacy: {
-    basic: {
-      blue: "Demonstrate foundational understanding of safe, ethical, and effective interaction with GenAI systems.",
-      gold: "Introduce students to responsible, ethical, and basic methods for interacting with GenAI systems."
-    },
-    intermediate: {
-      blue: "Critically engage with GenAI outputs, identifying potential issues, biases, and opportunities for improvement.",
-      gold: "Guide students to critically engage in iterative dialogues with GenAI tools."
-    },
-    advanced: {
-      blue: "Explore innovative ways of collaborating with GenAI, reflecting on its evolving role as a cognitive partner.",
-      gold: "Support students in co-creating knowledge and artefacts through advanced human-AI collaboration."
-    }
+    basic: { blue: "Demonstrate foundational understanding of safe, ethical, and effective interaction with GenAI systems.",
+             gold: "Introduce students to responsible, ethical, and basic methods for interacting with GenAI systems." },
+    intermediate: { blue: "Critically engage with GenAI outputs, identifying potential issues, biases, and opportunities for improvement.",
+             gold: "Guide students to critically engage in iterative dialogues with GenAI tools." },
+    advanced: { blue: "Explore innovative ways of collaborating with GenAI, reflecting on its evolving role as a cognitive partner.",
+             gold: "Support students in co-creating knowledge and artefacts through advanced human-AI collaboration." }
   },
   curriculum: {
-    basic: {
-      blue: "Identify where GenAI affects existing learning objectives in your courses.",
-      gold: "Help students understand how GenAI changes what they're being asked to learn."
-    },
-    intermediate: {
-      blue: "Redesign syllabi and unit plans to leverage GenAI productively while preserving core learning.",
-      gold: "Co-design learning pathways with students that integrate GenAI as a learning resource."
-    },
-    advanced: {
-      blue: "Lead curriculum innovation that treats GenAI as a structural feature of the discipline's future.",
-      gold: "Mentor students to shape future curricula and contribute to disciplinary discourse on GenAI integration."
-    }
+    basic: { blue: "Identify where GenAI affects existing learning objectives in your courses.",
+             gold: "Help students understand how GenAI changes what they're being asked to learn." },
+    intermediate: { blue: "Redesign syllabi and unit plans to leverage GenAI productively while preserving core learning.",
+             gold: "Co-design learning pathways with students that integrate GenAI as a learning resource." },
+    advanced: { blue: "Lead curriculum innovation that treats GenAI as a structural feature of the discipline's future.",
+             gold: "Mentor students to shape future curricula and contribute to disciplinary discourse on GenAI integration." }
   },
   teaching: {
-    basic: {
-      blue: "Use GenAI as a basic scaffold in teaching preparation and delivery.",
-      gold: "Demonstrate to students how GenAI can support — not replace — their thinking in class activities."
-    },
-    intermediate: {
-      blue: "Design classroom activities where GenAI plays a deliberate pedagogical role (simulation, partner, foil).",
-      gold: "Facilitate students' reflective use of GenAI during lessons, including managing pitfalls in real time."
-    },
-    advanced: {
-      blue: "Innovate new pedagogical patterns with GenAI as an integral classroom collaborator.",
-      gold: "Coach students to design and lead their own GenAI-integrated learning experiences for peers."
-    }
+    basic: { blue: "Use GenAI as a basic scaffold in teaching preparation and delivery.",
+             gold: "Demonstrate to students how GenAI can support — not replace — their thinking in class activities." },
+    intermediate: { blue: "Design classroom activities where GenAI plays a deliberate pedagogical role (simulation, partner, foil).",
+             gold: "Facilitate students' reflective use of GenAI during lessons, including managing pitfalls in real time." },
+    advanced: { blue: "Innovate new pedagogical patterns with GenAI as an integral classroom collaborator.",
+             gold: "Coach students to design and lead their own GenAI-integrated learning experiences for peers." }
   },
   assessment: {
-    basic: {
-      blue: "Recognise where existing assessments are vulnerable to GenAI and adjust task framing accordingly.",
-      gold: "Communicate clearly to students what GenAI use is and isn't permitted in each assessment."
-    },
-    intermediate: {
-      blue: "Design AI-aware assessment tasks and rubrics that capture genuine learning, not just artefact polish.",
-      gold: "Engage students in co-designing assessment criteria that account for GenAI's role."
-    },
-    advanced: {
-      blue: "Build assessment ecosystems that validly measure human-AI collaborative competence over time.",
-      gold: "Empower students to assess their own and peers' AI-collaborative work with disciplinary judgement."
-    }
+    basic: { blue: "Recognise where existing assessments are vulnerable to GenAI and adjust task framing accordingly.",
+             gold: "Communicate clearly to students what GenAI use is and isn't permitted in each assessment." },
+    intermediate: { blue: "Design AI-aware assessment tasks and rubrics that capture genuine learning, not just artefact polish.",
+             gold: "Engage students in co-designing assessment criteria that account for GenAI's role." },
+    advanced: { blue: "Build assessment ecosystems that validly measure human-AI collaborative competence over time.",
+             gold: "Empower students to assess their own and peers' AI-collaborative work with disciplinary judgement." }
   }
 };
 
-/* ---------- BUILD GRID ---------- */
 const grid = document.getElementById('fwGrid');
 const sandbox = document.getElementById('fwSandbox');
 const readout = document.getElementById('fwReadout');
@@ -1327,12 +1388,11 @@ LEVELS.forEach(level => {
     cell.dataset.dim = dim.key;
     cell.dataset.level = level;
     const tints = {
-      basic:        'linear-gradient(135deg,#f8fafc,#eef2f7)',
-      intermediate: 'linear-gradient(135deg,#ede9fe,#dbeafe)',
-      advanced:     'linear-gradient(135deg,#c7d2fe,#a5b4fc)'
+      basic:        'linear-gradient(135deg,#f7f9fc,#eef2f7)',
+      intermediate: 'linear-gradient(135deg,#dbe6ff,#b6c8ff)',
+      advanced:     'linear-gradient(135deg,#8aa6ff,#5b7fff)'
     };
     cell.style.background = tints[level];
-
     cell.innerHTML = `
       <div class="perspectives">
         <span class="pdot blue ${level.charAt(0)}"></span>
@@ -1353,18 +1413,12 @@ function selectCell(dimKey, level, cellEl) {
   const mode = sandbox.dataset.mode || 'both';
   let blockHTML = '';
   if (mode === 'both' || mode === 'blue') {
-    blockHTML += `
-      <div class="fw-perspective-block">
-        <div class="fw-perspective-label">🔵 Teacher's Own</div>
-        <div>${c.blue}</div>
-      </div>`;
+    blockHTML += `<div class="fw-perspective-block">
+        <div class="fw-perspective-label">🔵 Teacher's Own</div><div>${c.blue}</div></div>`;
   }
   if (mode === 'both' || mode === 'gold') {
-    blockHTML += `
-      <div class="fw-perspective-block gold">
-        <div class="fw-perspective-label">🟡 Empowering Students</div>
-        <div>${c.gold}</div>
-      </div>`;
+    blockHTML += `<div class="fw-perspective-block gold">
+        <div class="fw-perspective-label">🟡 Empowering Students</div><div>${c.gold}</div></div>`;
   }
   readout.classList.remove('empty');
   readout.innerHTML = `
@@ -1372,8 +1426,7 @@ function selectCell(dimKey, level, cellEl) {
       <span class="fw-readout-pill level">${level.toUpperCase()}</span>
       <h4 class="fw-readout-title">${dim.icon} ${dim.name}</h4>
     </div>
-    <div class="fw-readout-row">${blockHTML}</div>
-  `;
+    <div class="fw-readout-row">${blockHTML}</div>`;
 }
 
 document.querySelectorAll('.fw-toggle').forEach(btn => {
@@ -1390,7 +1443,6 @@ document.querySelectorAll('.fw-toggle').forEach(btn => {
   });
 });
 
-/* ---------- 4×3×2 ---------- */
 const FORMULA_TEXT = {
   '4': { title:'Four dimensions',
     body:'GenAI Literacy, Curriculum & Learning Design, Teaching & Learning, and Assessment — chosen because they map onto the actual decisions teachers make in different parts of their work.' },
@@ -1410,12 +1462,10 @@ document.querySelectorAll('.formula-num').forEach(btn => {
   });
 });
 
-/* ---------- DIM CARDS ---------- */
 document.querySelectorAll('.dim-card').forEach(card => {
   card.addEventListener('click', () => card.classList.toggle('open'));
 });
 
-/* ---------- POP QUIZZES ---------- */
 const QUIZ_FEEDBACK = {
   ok:  '✓ Exactly. The structure encodes assumptions about how teacher growth actually works.',
   bad: 'Not quite — re-read the design rationale and try again.',
@@ -1440,7 +1490,6 @@ document.querySelectorAll('.quiz-block').forEach((block, blockIdx) => {
   });
 });
 
-/* ---------- RECALL ---------- */
 document.querySelectorAll('.recall-bar').forEach(bar => {
   const opts = bar.querySelectorAll('.recall-opt');
   const correct = parseInt(bar.querySelector('.recall-options').dataset.correct, 10);
@@ -1461,7 +1510,6 @@ document.querySelectorAll('.recall-bar').forEach(bar => {
   });
 });
 
-/* ---------- LEARNING PLAN ---------- */
 const planChips = document.querySelectorAll('#planChips .plan-chip');
 planChips.forEach(c => c.addEventListener('click', () => c.classList.toggle('active')));
 document.getElementById('generatePlan').addEventListener('click', () => {
@@ -1479,12 +1527,10 @@ document.getElementById('generatePlan').addEventListener('click', () => {
   body.innerHTML = `
     <strong>Your discipline:</strong> ${disc}<br>
     <strong>Your goal:</strong> ${goal}<br>
-    <strong>Your path:</strong> ${dimLine}
-  `;
+    <strong>Your path:</strong> ${dimLine}`;
   out.classList.add('show');
 });
 
-/* ---------- TABS ---------- */
 document.querySelectorAll('#contextTabs .tab').forEach(tab => {
   tab.addEventListener('click', () => {
     const target = tab.dataset.tab;
@@ -1496,12 +1542,10 @@ document.querySelectorAll('#contextTabs .tab').forEach(tab => {
   });
 });
 
-/* ---------- CHECKLIST ---------- */
 document.querySelectorAll('.check-item').forEach(item => {
   item.addEventListener('click', () => item.classList.toggle('checked'));
 });
 
-/* ---------- MARK COMPLETE TOGGLES ---------- */
 const SECTIONS = ['1-1','1-2','1-3'];
 function refreshSectionUI() {
   let done = 0;
