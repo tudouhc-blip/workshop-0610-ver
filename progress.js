@@ -143,6 +143,36 @@
     return saveProgress(moduleId, { completed_sections: p.completed_sections });
   }
 
+  // ----- Profile (Module 0 — section 0.3.1) ------------------------------
+  // Stored under store.profile; syncs to POST /profile (see ARCHITECTURE_NOTES.md)
+  function readProfile() {
+    return readStore().profile || null;
+  }
+  function isProfileSaved() {
+    const p = readProfile();
+    return !!(p && p.updated_at);
+  }
+  async function saveProfile(profileData) {
+    const s = readStore();
+    const enriched = Object.assign({}, s.profile || {}, profileData || {}, {
+      updated_at: new Date().toISOString(),
+      version: 1
+    });
+    s.profile = enriched;
+    // Mirror key display fields onto __user for dashboard / host shell
+    s.__user = s.__user || getUser();
+    if (enriched.institution) s.__user.institution = enriched.institution;
+    if (enriched.discipline)  s.__user.discipline  = enriched.discipline;
+    if (enriched.country)     s.__user.country     = enriched.country;
+    writeStore(s);
+    const apiPayload = { user_id: getUser().id, profile: enriched };
+    if (config.apiBase) {
+      try { await postToAPI('/profile', apiPayload); }
+      catch { enqueue('/profile', apiPayload); }
+    }
+    return enriched;
+  }
+
   // ----- Self-assessments ------------------------------------------------
   // Keys: 'pre' | 'post' | 'gate_d1' … 'gate_d4'
   // Item bank & subset rules: assessment-items.js + ARCHITECTURE_NOTES.md
@@ -207,6 +237,7 @@
     markActivity, isActivityDone,
     markSection,
     saveReflection, readReflections,
+    saveProfile, readProfile, isProfileSaved,
     saveAssessment, readAssessment, readAllAssessments, isAssessmentSubmitted,
     sync: flushQueue
   };
