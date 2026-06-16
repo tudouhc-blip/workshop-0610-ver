@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Self-Assessment — GenAI Competency Workshop</title>
+<script src="progress.js"></script>
+<script src="assessment-items.js"></script>
+<style>
+:root {
+  --ink-1: #0f172a; --ink-2: #475569;
+  --blue: #2563eb; --blue-dark: #1d4ed8;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+  color: var(--ink-1); line-height: 1.6;
+}
+.top-bar {
+  background: white; border-bottom: 1px solid #e2e8f0;
+  padding: 14px 24px; display: flex; justify-content: space-between; align-items: center;
+  position: sticky; top: 0; z-index: 50;
+}
+.top-bar a { color: var(--blue); text-decoration: none; font-weight: 600; font-size: 14px; }
+.wrap { max-width: 820px; margin: 0 auto; padding: 32px 20px 80px; }
+.hero-tag {
+  display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--blue-dark); background: #dbeafe;
+  padding: 6px 12px; border-radius: 999px; margin-bottom: 12px;
+}
+h1 { margin: 0 0 10px; font-size: clamp(1.5rem, 2vw, 2rem); }
+.lead { color: var(--ink-2); margin-bottom: 20px; }
+.meta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 28px; }
+.meta-pill {
+  padding: 7px 14px; border-radius: 999px; background: white;
+  border: 1px solid #e2e8f0; font-size: 13px;
+}
+.meta-pill.required { background: #fef3c7; border-color: #fde68a; color: #92400e; }
+
+.assess-form {
+  background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px 20px;
+}
+.assess-items { display: flex; flex-direction: column; gap: 14px; margin-bottom: 22px; }
+.assess-item {
+  border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; background: #fafbff;
+}
+.assess-item.answered { border-color: #bfdbfe; background: #f8faff; }
+.assess-item-head { display: flex; gap: 12px; margin-bottom: 12px; }
+.assess-item-num {
+  flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%;
+  background: #e2e8f0; color: #475569; font-weight: 700; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+}
+.assess-item.answered .assess-item-num { background: var(--blue); color: white; }
+.assess-item-stem { flex: 1; font-size: 15px; line-height: 1.55; }
+.assess-item-id { font-size: 11px; color: #94a3b8; margin-top: 4px; font-family: ui-monospace, monospace; }
+.assess-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.tag { font-size: 10px; padding: 3px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: .04em; }
+.tag.T { background: #ecfdf5; color: #047857; }
+.tag.S { background: #eff6ff; color: #1d4ed8; }
+.tag.L1 { background: #fef9c3; color: #854d0e; }
+.tag.L2 { background: #fed7aa; color: #9a3412; }
+.tag.L3 { background: #fce7f3; color: #9d174d; }
+
+.likert { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.likert label {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 10px 4px; border: 1px solid #e2e8f0; border-radius: 10px;
+  cursor: pointer; text-align: center; font-size: 11px; color: #475569; background: white;
+}
+.likert label:hover { border-color: #93c5fd; background: #f0f7ff; }
+.likert label:has(input:checked) { border-color: var(--blue); background: #dbeafe; }
+.likert input { accent-color: var(--blue); margin: 0; }
+.likert .num { font-weight: 700; font-size: 14px; }
+
+.assess-actions {
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+  gap: 14px; border-top: 1px solid #e2e8f0; padding-top: 16px;
+}
+.submit-btn {
+  background: var(--blue); color: white; border: none; padding: 12px 28px;
+  border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer;
+}
+.submit-btn:hover:not(:disabled) { background: var(--blue-dark); }
+.submit-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+.hint { font-size: 13px; color: var(--ink-2); font-style: italic; margin-top: 12px; }
+
+.success {
+  margin-top: 24px; border: 1px solid #bbf7d0; background: #f0fdf4;
+  border-radius: 16px; padding: 22px;
+}
+.success h2 { margin: 0 0 8px; font-size: 1.2rem; color: #065f46; }
+.success p { margin: 0 0 16px; color: var(--ink-2); }
+.success a {
+  display: inline-block; background: var(--blue); color: white;
+  padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: 600;
+}
+.error-box {
+  background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;
+  padding: 16px 20px; border-radius: 12px; margin-bottom: 20px;
+}
+@media (max-width: 640px) {
+  .likert { gap: 4px; }
+  .likert label { font-size: 9px; padding: 8px 2px; }
+}
+</style>
+</head>
+<body>
+
+<header class="top-bar">
+  <a href="index.html">← Dashboard</a>
+  <span id="topBarLabel">Self-Assessment</span>
+</header>
+
+<main class="wrap">
+  <div id="errorBox" class="error-box" hidden></div>
+
+  <div id="introBlock">
+    <span class="hero-tag" id="heroTag">SELF-ASSESSMENT</span>
+    <h1 id="pageTitle">Loading…</h1>
+    <p class="lead" id="pageLead"></p>
+    <div class="meta-row" id="metaRow"></div>
+  </div>
+
+  <form id="assessForm" class="assess-form" onsubmit="return submitAssessment(event)">
+    <div id="assessItems" class="assess-items"></div>
+    <div class="assess-actions">
+      <div><strong id="answeredCount">0</strong> of <span id="totalCount">0</span> answered</div>
+      <button type="submit" id="submitBtn" class="submit-btn" disabled>Submit</button>
+    </div>
+    <p class="hint" id="formHint">Answer every item to enable submission. Your responses are developmental data — not a grade.</p>
+  </form>
+
+  <div class="success" id="successBlock" hidden>
+    <h2>✓ Submitted &amp; saved</h2>
+    <p id="successText"></p>
+    <a id="successLink" href="index.html">Return to dashboard →</a>
+  </div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  const LIKERT = [
+    { v: 1, l: 'Strongly Disagree' },
+    { v: 2, l: 'Disagree' },
+    { v: 3, l: 'Neutral' },
+    { v: 4, l: 'Agree' },
+    { v: 5, l: 'Strongly Agree' }
+  ];
+
+  const params = new URLSearchParams(location.search);
+  const kind = params.get('kind') || 'gate';
+  const dimension = params.get('dimension') ? Number(params.get('dimension')) : (kind === 'gate' ? 1 : null);
+  const afterModule = params.get('after') || '';
+
+  const COPY = {
+    pre: {
+      tag: 'PRE-TEST · MODULE 0',
+      title: 'Baseline Self-Assessment',
+      lead: 'Rate how much each statement describes your current practice. This establishes your baseline before the four dimension modules.',
+      meta: ['20 or 32 items (config TBD)', '5-point Likert', '~8–12 min', 'Required after Module 0']
+    },
+    gate: {
+      tag: 'GATE · AFTER MODULE ' + (dimension + 1),
+      title: '',
+      lead: 'A short snapshot for this dimension only. Required before the next module unlocks on your dashboard.',
+      meta: ['10 items', '5-point Likert', '~3 min', 'Required to continue']
+    },
+    post: {
+      tag: 'POST-TEST · MODULE 6',
+      title: 'Final Self-Assessment',
+      lead: 'Same item set as your Module 0 pre-test. Compare your responses to see how your self-perception has shifted.',
+      meta: ['20 or 32 items (identical to pre-test)', '5-point Likert', '~8–12 min', 'Required to complete workshop']
+    }
+  };
+
+  function showError(msg) {
+    const box = document.getElementById('errorBox');
+    box.hidden = false;
+    box.textContent = msg;
+    document.getElementById('assessForm').hidden = true;
+  }
+
+  if (kind === 'gate' && (!dimension || dimension < 1 || dimension > 4)) {
+    showError('Invalid assessment URL. Use ?kind=gate&dimension=1 (through 4).');
+    return;
+  }
+
+  const storageKey = assessmentStorageKey(kind, dimension);
+  const meta = ASSESSMENT_META[dimension] || {};
+  const copy = COPY[kind] || COPY.gate;
+
+  document.getElementById('heroTag').textContent = copy.tag;
+  document.getElementById('pageTitle').textContent = kind === 'gate'
+    ? 'Dimension ' + dimension + ' · ' + (meta.title || '')
+    : copy.title;
+  document.getElementById('pageLead').textContent = copy.lead;
+  document.getElementById('metaRow').innerHTML = copy.meta.map(t =>
+    `<span class="meta-pill${t.includes('Required') ? ' required' : ''}">${t}</span>`
+  ).join('');
+  document.getElementById('topBarLabel').textContent = kind === 'gate'
+    ? 'Gate · D' + dimension : (kind === 'pre' ? 'Pre-test' : 'Post-test');
+
+  const items = getAssessmentItems(kind, dimension);
+  if (!items.length) {
+    showError('No items found for this assessment configuration.');
+    return;
+  }
+
+  let alreadySubmitted = false;
+  if (window.PlatformAdapter?.isAssessmentSubmitted) {
+    try { alreadySubmitted = PlatformAdapter.isAssessmentSubmitted(storageKey); } catch (e) {}
+  }
+
+  function renderItems() {
+    const wrap = document.getElementById('assessItems');
+    document.getElementById('totalCount').textContent = items.length;
+    wrap.innerHTML = items.map((it, idx) => {
+      const levelTag = it.level === 'basic' ? 'L1' : it.level === 'intermediate' ? 'L2' : 'L3';
+      const perspTag = it.perspective === 'teacher_own' ? 'T' : 'S';
+      const radios = LIKERT.map(o => `
+        <label>
+          <input type="radio" name="${it.id}" value="${o.v}" onchange="onAnswerChange()"${alreadySubmitted ? ' disabled' : ''}>
+          <span class="num">${o.v}</span>
+          <span>${o.l}</span>
+        </label>`).join('');
+      return `
+        <div class="assess-item" data-id="${it.id}">
+          <div class="assess-item-head">
+            <span class="assess-item-num">${idx + 1}</span>
+            <div class="assess-item-stem">
+              ${it.stem}
+              <div class="assess-item-id">${it.id}</div>
+              <div class="assess-tags">
+                <span class="tag ${perspTag}">${perspTag === 'T' ? "Teacher's own" : 'Empowering students'}</span>
+                <span class="tag ${levelTag}">${levelTag === 'L1' ? 'Basic' : levelTag === 'L2' ? 'Intermediate' : 'Advanced'}</span>
+              </div>
+            </div>
+          </div>
+          <div class="likert" role="radiogroup">${radios}</div>
+        </div>`;
+    }).join('');
+
+    const prior = PlatformAdapter?.readAssessment?.(storageKey);
+    if (prior?.responses) {
+      Object.entries(prior.responses).forEach(([id, val]) => {
+        const r = wrap.querySelector(`input[name="${id}"][value="${val}"]`);
+        if (r) { r.checked = true; wrap.querySelector(`.assess-item[data-id="${id}"]`)?.classList.add('answered'); }
+      });
+    }
+    onAnswerChange();
+  }
+
+  function collectResponses() {
+    const out = {};
+    items.forEach(it => {
+      const c = document.querySelector(`input[name="${it.id}"]:checked`);
+      if (c) out[it.id] = parseInt(c.value, 10);
+    });
+    return out;
+  }
+
+  window.onAnswerChange = function () {
+    const responses = collectResponses();
+    document.querySelectorAll('.assess-item').forEach(el => {
+      el.classList.toggle('answered', el.dataset.id in responses);
+    });
+    document.getElementById('answeredCount').textContent = Object.keys(responses).length;
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = Object.keys(responses).length < items.length || alreadySubmitted;
+  };
+
+  window.submitAssessment = async function (ev) {
+    ev.preventDefault();
+    if (alreadySubmitted) return false;
+    const responses = collectResponses();
+    if (Object.keys(responses).length < items.length) return false;
+
+    const payload = {
+      kind,
+      dimension_id: kind === 'gate' ? dimension : null,
+      after_module: afterModule || null,
+      scale: '5-point-likert',
+      item_count: items.length,
+      item_ids: items.map(i => i.id),
+      responses
+    };
+
+    try {
+      if (PlatformAdapter?.saveAssessment) await PlatformAdapter.saveAssessment(storageKey, payload);
+    } catch (e) { console.warn('[assessment] save failed', e); }
+
+    alreadySubmitted = true;
+    document.getElementById('assessForm').hidden = true;
+    document.getElementById('introBlock').hidden = true;
+    const success = document.getElementById('successBlock');
+    success.hidden = false;
+    document.getElementById('successText').textContent = kind === 'gate'
+      ? 'Module ' + (dimension + 2) + ' is now unlocked on your dashboard.'
+      : (kind === 'pre' ? 'You can continue to Module 1.' : 'Compare this with your pre-test in your profile report.');
+    document.getElementById('successLink').href = 'index.html';
+    return false;
+  };
+
+  if (alreadySubmitted) {
+    document.getElementById('assessForm').hidden = true;
+    document.getElementById('introBlock').hidden = true;
+    document.getElementById('successBlock').hidden = false;
+    document.getElementById('successText').textContent = 'You already submitted this assessment.';
+    document.getElementById('successLink').href = 'index.html';
+  } else {
+    renderItems();
+  }
+})();
+</script>
+</body>
+</html>
