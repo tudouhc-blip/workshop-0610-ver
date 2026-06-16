@@ -7,8 +7,9 @@
 
 ## 1. User journey & assessment schedule
 
-| Trigger | Assessment | Items | Storage key | Unlocks |
-|--------|------------|-------|-------------|---------|
+| Trigger | Assessment / data | Items / fields | Storage key | Unlocks |
+|--------|-------------------|----------------|-------------|---------|
+| Module 0 · 0.3.1 | **Profile** | 6 optional fields (country, institution, …) | `store.profile` | — (not gated; feeds dashboard) |
 | Module 0 complete | **Pre-test** | **20 or 32** (TBD — same set for pre & post) | `pre` | Module 1 |
 | Module 2 complete + gate submitted | **Gate D1** | **10** (Dimension 1 only) | `gate_d1` | Module 3 |
 | Module 3 complete + gate submitted | **Gate D2** | **10** | `gate_d2` | Module 4 |
@@ -93,6 +94,16 @@ Repeat for Modules 3–5 with `gate_d2` … `gate_d4`.
     "gate_d1": { "kind": "gate", "dimension_id": 1, "responses": { ... } },
     "post": { "kind": "post", "submitted_at": "...", "responses": { ... } }
   },
+  "profile": {
+    "country": "United Kingdom",
+    "institution": "University of …",
+    "gender": "Female",
+    "discipline": "Public Health",
+    "years_teaching": "8–15 years",
+    "years_with_genai": "1–2 years",
+    "updated_at": "2026-06-16T12:00:00.000Z",
+    "version": 1
+  },
   "reflections": { "module_2": [ ... ] }
 }
 ```
@@ -100,6 +111,9 @@ Repeat for Modules 3–5 with `gate_d2` … `gate_d4`.
 ### API methods (client)
 
 ```javascript
+PlatformAdapter.saveProfile(profileFields)   // Module 0 — section 0.3.1
+PlatformAdapter.readProfile()
+PlatformAdapter.isProfileSaved()
 PlatformAdapter.saveAssessment(assessKey, payload)   // assessKey: pre | post | gate_d1…gate_d4
 PlatformAdapter.readAssessment(assessKey)
 PlatformAdapter.isAssessmentSubmitted(assessKey)
@@ -113,6 +127,8 @@ PlatformAdapter.configure({ apiBase, authHeader })
 
 ```
 GET  /api/me/dashboard              → modules status + assessment flags + profile
+GET  /api/me/profile                → { country, institution, gender, discipline, … }
+POST /api/me/profile                → body: { profile: { …fields, updated_at, version } }
 GET  /api/me/assessments            → all submitted assessments
 GET  /api/me/assessments/:key       → single (pre | gate_d1 | …)
 POST /api/me/assessments            → body: { assessment_key, assessment: { kind, responses, item_ids, … } }
@@ -121,6 +137,32 @@ POST /api/me/reflections            → body: { module_id, reflection }
 ```
 
 **Auth:** JWT or session cookie; 401 → login with return URL.
+
+### POST profile payload (Module 0 — 0.3.1)
+
+Collected from `#profile-form` in `module_0_pic.html`. All fields optional.
+
+```json
+{
+  "user_id": "user-uuid",
+  "profile": {
+    "country": "United Kingdom",
+    "institution": "University of Edinburgh",
+    "gender": "Female",
+    "discipline": "Public Health",
+    "years_teaching": "8–15 years",
+    "years_with_genai": "1–2 years",
+    "updated_at": "2026-06-16T12:00:00.000Z",
+    "version": 1
+  }
+}
+```
+
+**Engineer notes:**
+- Client writes via `PlatformAdapter.saveProfile()` — same offline-first + queue pattern as assessments.
+- Key display fields (`institution`, `discipline`, `country`) are mirrored onto `store.__user` for dashboard binding.
+- Legacy demo key `genai_workshop_profile_v1` is migrated once on Module 0 load if `store.profile` is empty.
+- Profile is **not** required to unlock Module 1; pre-test submission is the gate. Server may enforce profile separately if needed.
 
 ### POST assessment payload (example)
 
@@ -203,7 +245,8 @@ For profile / Module 6 synthesis:
 |------|------|
 | `assessment-items.js` | 96-item bank + subset helpers |
 | `assessment.html` | Single assessment UI (all kinds) |
-| `progress.js` | PlatformAdapter, offline queue, API hooks |
+| `progress.js` | PlatformAdapter — profile, assessments, progress, reflections, offline queue |
+| `module_0_pic.html` | Profile form (0.3.1) → `PlatformAdapter.saveProfile()` |
 | `module_*_pic.html` | Content only; finish → assessment redirect |
 | `index.html` | Dashboard; assessment hub (UI polish pending) |
 
