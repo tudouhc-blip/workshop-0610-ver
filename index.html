@@ -42,6 +42,12 @@
 
      ▸ LOCKING RULES (server must mirror client)
        Module 1 iff pre submitted; M3 iff M2 + gate_d1; … M6 iff M5 + gate_d4.
+
+     ▸ DEMO PERSONA (remove before production)
+       Dashboard demo uses a fixed persona — Chen H., EdTech Coordinator,
+       EdUHK — seeded by ensureDemoIdentity() in dashboard-app.js.
+       Production: replace with authenticated user from GET /api/me/profile
+       or JWT claims; see ARCHITECTURE_NOTES.md §11.1.
      ==================================================================== -->
 
 <style>
@@ -628,8 +634,29 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,
         <span class="tip-pill">💡 Click a module to expand wrap-up details</span>
       </div>
 
-      <!-- Path items (modules + checkpoints) rendered by JS -->
-      <div class="modules-list" id="pathList"></div>
+      <!-- Path items: static fallback until dashboard-app.js hydrates -->
+      <div class="modules-list" id="pathList">
+        <div class="module-card not-started" id="path-static-fallback">
+          <div class="module-num">0</div>
+          <div class="module-content">
+            <h4>Module 0 · Welcome &amp; Orientation</h4>
+            <div class="module-meta">
+              <span>⏱ 15 min</span><span>3 sections</span><span>Ready when you are</span>
+            </div>
+            <div class="module-status">○ Not started yet</div>
+          </div>
+          <div class="module-actions"><a href="module_0_pic.html" class="module-btn primary">▶ Start</a></div>
+        </div>
+        <div class="checkpoint-card locked">
+          <div class="checkpoint-icon">📋</div>
+          <div class="checkpoint-body">
+            <h4>Pre-Assessment (baseline)</h4>
+            <div class="module-meta"><span>⏱ ~10 min</span><span>Complete Module 0 first</span></div>
+            <div class="module-status">🔒 Locked</div>
+          </div>
+          <div class="checkpoint-actions"><span class="module-btn disabled">🔒 Locked</span></div>
+        </div>
+      </div>
     </div>
 
     <!-- ============ RIGHT: SIDEBAR (DYNAMIC) ============ -->
@@ -738,6 +765,11 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,
 
 <!-- ============ DASHBOARD APP (reads PlatformAdapter / genai_workshop store) ============ -->
 <script src="progress.js"></script>
+<script>
+  if (!window.PlatformAdapter) {
+    console.error('[Dashboard] progress.js did not load — check script path and use http(s)://, not file://');
+  }
+</script>
 <script src="dashboard-app.js"></script>
 </body>
 </html>

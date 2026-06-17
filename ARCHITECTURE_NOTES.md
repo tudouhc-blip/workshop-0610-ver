@@ -266,6 +266,44 @@ Partner logos: `assets/eduhk-logo.png`, `assets/sjtu-logo.png` (white-backed pil
 
 `#demo-fab` / `#demo-panel` seeds `genai_workshop` store scenarios (`fresh`, `halfway`, `finishing`, `complete`). **Remove before production.**
 
+### 11.1 Demo persona vs production identity
+
+The demo build shows a **fixed workshop persona** so previews are consistent. This is **not** production data.
+
+| Field | Demo value (`dashboard-app.js`) | Production source |
+|-------|--------------------------------|-------------------|
+| `user.firstName` | `Chen` | Auth session / `profile.display_name` first token |
+| `user.fullName` | `Chen H.` | `GET /api/me/profile` → `display_name` |
+| `user.title` | `EdTech Coordinator` | `profile.discipline` |
+| `user.org` | `The Education University of Hong Kong` | `profile.institution` |
+| `user.role` | `Project Officer` | `profile.years_teaching` or dedicated role field |
+| `user.badgesEarned` | Derived client-side | Server count or derived from `modulesCompleted` |
+
+**Demo seeding:** `ensureDemoIdentity()` writes `store.profile` + `store.__user` on first load if no profile exists. Scenario buttons reset **progress/assessments** but keep Chen's profile.
+
+**Engineer delete list before launch:**
+
+- `DEMO_USER`, `DEMO_PROFILE`, `applyDemoProfileToStore()`, `ensureDemoIdentity()`, `demoUserWithBadges()`
+- `#demo-fab`, `#demo-panel`, and `seedScenario()` wiring
+- Demo fallbacks in `deriveUser()` (`|| DEMO_USER.*`)
+
+**Production `deriveUser()` shape** (same bind keys in `index.html`):
+
+```json
+{
+  "user": {
+    "firstName": "Chen",
+    "fullName": "Chen H.",
+    "title": "Associate Professor",
+    "org": "Example University",
+    "role": "12+ years",
+    "badgesEarned": 3
+  }
+}
+```
+
+Prefer a single `GET /api/me/dashboard` payload that includes `user` + `profile` to avoid split round-trips.
+
 ---
 
 ## 7. Pre/post comparison report
