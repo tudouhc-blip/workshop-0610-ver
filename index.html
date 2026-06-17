@@ -8,46 +8,40 @@
 <!-- ====================================================================
      ✉️  ENGINEER HANDOFF NOTE — DYNAMIC DATA WIRING
      ────────────────────────────────────────────────────────────────────
-     This dashboard is now FULLY DATA-DRIVEN. For the live product,
-     replace the localStorage demo layer (see <script id="demo-state">)
-     with authenticated API calls. The render layer (renderDashboard())
-     is reusable as-is — just feed it the same shape of object.
+     Dashboard state is built by `dashboard-app.js` from PlatformAdapter
+     (`progress.js` / `genai_workshop` localStorage). For production,
+     replace `buildDashboardState()` with GET /api/me/dashboard and keep
+     the same response shape. See ARCHITECTURE_NOTES.md §6 and §11.
 
      ▸ AUTH REQUIREMENT
-       All endpoints below require an authenticated session
-       (JWT in Authorization header or session cookie). On 401, redirect
-       to /login and preserve the intended return URL.
+       All endpoints require an authenticated session (JWT or cookie).
+       On 401, redirect to /login with return URL preserved.
 
-     ▸ SUGGESTED ENDPOINTS  (single aggregate is preferred for one round-trip)
-       GET  /api/me/dashboard       → returns the full state object below
-         { user, modules, reflections, actionItems,
-           selfChecksDone, selfChecksTotal, assessment }
+     ▸ SUGGESTED ENDPOINT
+       GET  /api/me/dashboard
+         { user, path[], modulesCompleted, modulesTotal,
+           selfChecksDone, selfChecksTotal, timeInvestedMin,
+           estTimeRemainingMin, postComplete }
 
-       Or split:
-       GET  /api/me/profile
-       GET  /api/me/modules         → array with per-module status
-       GET  /api/me/progress
-       GET  /api/me/assessment/latest
-       POST /api/me/modules/:id/complete    → on module completion
-       POST /api/me/streak/ping             → on each session
+     ▸ SELF-CHECKS vs POST
+       selfChecksTotal = 5 (pre + gate_d1…gate_d4). Post-test is separate;
+       completion unlocks digital certificate messaging.
 
-     ▸ DERIVED VALUES (computed client-side, do NOT store)
-       - modulesCompleted    = modules.filter(m=>m.status==='complete').length
-       - overallPct          = round( modulesCompleted / modules.length * 100 )
-       - nextModuleId        = first module where status==='next' || 'in-progress'
-       - estTimeRemainingMin = sum of durationMin for non-complete modules
-       - "Continue Module N" button href + label use nextModuleId
+     ▸ TIME INVESTED
+       Client demo: `store.dashboard.time_invested_min` via
+       PlatformAdapter.addTimeInvestedMin(). Production: server aggregates
+       session duration or module completion events.
 
-     ▸ LOCKING RULES
-       - A module is 'locked' until the previous module is 'complete'.
-       - Module 6 is additionally gated on Self-Assessment #3 being submitted.
-       The render layer enforces these — server should also validate.
+     ▸ REPORT BUTTON
+       "See my report" stays disabled until external report service URL is
+       wired (placeholder in checkpoint cards).
 
-     ▸ REPLACE THIS BLOCK
-       const state = loadState();          // ← localStorage demo
-       // becomes:
-       const state = await fetch('/api/me/dashboard',{credentials:'include'})
-                         .then(r => r.ok ? r.json() : Promise.reject(r));
+     ▸ BANNER i18n
+       Ribbon "Language · In progress" is a disabled placeholder; replace
+       with locale switcher when translations ship.
+
+     ▸ LOCKING RULES (server must mirror client)
+       Module 1 iff pre submitted; M3 iff M2 + gate_d1; … M6 iff M5 + gate_d4.
      ==================================================================== -->
 
 <style>
@@ -103,8 +97,13 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,
 .ribbon-title{font-weight:700;font-size:var(--text-base);}
 .ribbon-version{font-size:var(--text-xs);opacity:.8;letter-spacing:.04em;}
 .ribbon-right{display:flex;gap:var(--space-md);align-items:center;font-size:var(--text-xs);}
-.ribbon-link{color:#fff;text-decoration:none;opacity:.85;font-weight:600;}
-.ribbon-link:hover{opacity:1;}
+.ribbon-schools{display:flex;align-items:center;gap:10px;margin-right:4px;}
+.ribbon-school-logo{height:34px;width:auto;display:block;object-fit:contain;
+  background:#fff;border-radius:8px;padding:4px 8px;box-shadow:0 1px 4px rgba(0,0,0,.12);}
+.ribbon-lang{display:inline-flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.14);padding:6px 12px;border-radius:999px;
+  color:rgba(255,255,255,.75);font-weight:600;cursor:not-allowed;user-select:none;}
+.ribbon-lang::before{content:"🌐";}
 .sync-pill{background:rgba(255,255,255,.18);padding:5px 12px;border-radius:999px;display:flex;align-items:center;gap:6px;}
 .sync-dot{width:8px;height:8px;border-radius:50%;background:#86efac;box-shadow:0 0 0 4px rgba(134,239,172,.25);}
 
@@ -144,8 +143,8 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,
 .hero-illustration{width:100%;max-width:520px;margin-left:auto;display:block;
   filter:drop-shadow(0 16px 28px rgba(91,33,182,.18));}
 
-.stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-md);margin-top:var(--space-xl);}
-@media (max-width:720px){.stats-strip{grid-template-columns:repeat(2,1fr);}}
+.stats-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-md);margin-top:var(--space-xl);max-width:900px;}
+@media (max-width:720px){.stats-strip{grid-template-columns:1fr;max-width:none;}}
 .stat-card{background:#fff;border:1px solid var(--slate-200);
   border-radius:var(--radius-lg);padding:var(--space-lg);
   box-shadow:var(--shadow-sm);text-decoration:none;color:inherit;display:block;
@@ -176,8 +175,67 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,
 .section-intro{font-size:var(--text-base);color:var(--slate-600);
   max-width:75ch;margin:0 0 var(--space-xl);line-height:1.7;}
 
-.found-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-lg);}
+.found-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:var(--space-xl);align-items:stretch;}
 @media (max-width:880px){.found-grid{grid-template-columns:1fr;}}
+.paper-card{background:#fff;border:1.5px solid var(--slate-200);
+  border-radius:var(--radius-xl);padding:var(--space-xl);
+  box-shadow:var(--shadow-sm);}
+.paper-card h3{margin:0 0 var(--space-md);font-size:var(--text-lg);color:var(--slate-900);font-weight:800;}
+.paper-card .citation{font-size:var(--text-sm);color:var(--slate-600);font-style:italic;
+  line-height:1.55;border-left:3px solid var(--purple-200);padding-left:12px;margin-bottom:var(--space-md);}
+.paper-card-meta{font-size:var(--text-xs);font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--purple-700);margin-bottom:var(--space-md);}
+.paper-btn{display:inline-flex;align-items:center;gap:8px;
+  background:linear-gradient(135deg,var(--purple-600),var(--blue-600));
+  color:#fff;padding:12px 22px;border-radius:999px;font-weight:700;font-size:var(--text-sm);
+  text-decoration:none;box-shadow:var(--shadow-sm);}
+.paper-highlights{background:linear-gradient(160deg,var(--purple-50) 0%,#fff 55%);
+  border:1.5px solid var(--purple-200);border-radius:var(--radius-xl);
+  padding:var(--space-lg) var(--space-xl);box-shadow:var(--shadow-sm);
+  display:flex;flex-direction:column;justify-content:center;}
+.paper-highlights h3{margin:0 0 var(--space-md);font-size:var(--text-lg);color:var(--slate-900);font-weight:800;}
+.framework-pillars{display:flex;flex-direction:column;gap:var(--space-sm);}
+.framework-pillar{padding:var(--space-md) var(--space-md);
+  background:rgba(255,255,255,.85);border-radius:var(--radius-md);
+  border:1px solid var(--purple-100);}
+.framework-pillar strong{display:block;font-size:var(--text-sm);color:var(--purple-800);margin-bottom:4px;}
+.framework-pillar p{margin:0;font-size:var(--text-sm);color:var(--slate-600);line-height:1.55;}
+
+.checkpoint-card{background:#fff;border:1.5px solid var(--slate-200);
+  border-radius:var(--radius-md);padding:10px 14px;
+  display:grid;grid-template-columns:auto 1fr auto;
+  gap:var(--space-sm);align-items:center;
+  box-shadow:var(--shadow-sm);border-left:3px solid var(--gold-400);
+  margin-left:28px;}
+.checkpoint-card.complete{border-left-color:var(--green-500);}
+.checkpoint-card.available{border-left-color:var(--orange-500);background:linear-gradient(90deg,#fffbeb 0%,#fff 50%);}
+.checkpoint-card.locked{opacity:.72;border-left-color:var(--slate-300);}
+.checkpoint-card--post{margin-left:0;padding:12px 16px;border-left-width:4px;
+  border-left-color:var(--purple-600);
+  background:linear-gradient(90deg,var(--purple-50) 0%,#fff 55%);}
+.checkpoint-card--post.available{border-left-color:var(--purple-600);
+  background:linear-gradient(90deg,var(--purple-100) 0%,#fff 60%);}
+.checkpoint-card--post.locked{border-left-color:var(--slate-300);background:#fff;}
+.checkpoint-icon{width:34px;height:34px;border-radius:10px;
+  background:linear-gradient(135deg,var(--gold-100),var(--gold-200));
+  display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.checkpoint-card.complete .checkpoint-icon{background:linear-gradient(135deg,var(--green-100),#bbf7d0);}
+.checkpoint-card.locked .checkpoint-icon{background:var(--slate-100);}
+.checkpoint-card--post .checkpoint-icon{background:linear-gradient(135deg,var(--purple-100),var(--blue-100));}
+.checkpoint-body{min-width:0;}
+.checkpoint-body h4{margin:0;font-size:var(--text-sm);color:var(--slate-900);font-weight:800;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.checkpoint-body .module-meta{margin-top:2px;font-size:11px;gap:var(--space-sm);}
+.checkpoint-body .module-status{margin-top:2px;font-size:10px;}
+.checkpoint-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.checkpoint-cert{font-size:10px;color:var(--purple-700);font-weight:600;margin-top:2px;}
+.btn-report{font-family:inherit;font-size:10px;font-weight:700;
+  padding:6px 12px;border-radius:999px;cursor:not-allowed;
+  border:1.5px solid var(--slate-200);background:var(--slate-100);color:var(--slate-500);
+  display:inline-flex;align-items:center;gap:4px;opacity:.85;white-space:nowrap;}
+.btn-report[title]{cursor:not-allowed;}
+.checkpoint-card .module-btn{padding:6px 14px;font-size:var(--text-xs);}
+
 .found-card{background:#fff;border:1.5px solid var(--slate-200);
   border-radius:var(--radius-xl);padding:var(--space-xl);
   box-shadow:var(--shadow-sm);
@@ -204,7 +262,7 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,
   border:1px solid var(--gold-200);color:var(--slate-700);
   font-size:var(--text-sm);padding:8px 14px;border-radius:999px;}
 
-.modules-list{display:grid;gap:var(--space-md);}
+.modules-list{display:grid;gap:var(--space-sm);}
 .module-card{background:#fff;border:1.5px solid var(--slate-200);
   border-radius:var(--radius-lg);padding:var(--space-lg);
   display:grid;grid-template-columns:auto 1fr auto;
@@ -219,7 +277,7 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,
   display:flex;align-items:center;justify-content:center;
   font-size:var(--text-2xl);font-weight:800;color:var(--purple-700);}
 .module-card.complete .module-num{background:linear-gradient(135deg,var(--green-100),#bbf7d0);color:var(--green-700);}
-.module-card.next .module-num{background:linear-gradient(135deg,var(--gold-100),var(--gold-200));color:var(--gold-700);}
+.module-card.not-started .module-num{background:linear-gradient(135deg,var(--slate-100),var(--slate-200));color:var(--slate-600);}
 .module-card.in-progress .module-num{background:linear-gradient(135deg,var(--blue-100),var(--blue-200));color:var(--blue-700);}
 .module-card.locked .module-num{background:var(--slate-100);color:var(--slate-400);}
 .module-content h4{margin:0 0 var(--space-xs);font-size:var(--text-lg);color:var(--slate-900);font-weight:800;}
@@ -229,7 +287,7 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,
 .module-status{font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;
   text-transform:uppercase;margin-top:var(--space-xs);}
 .module-card.complete .module-status{color:var(--green-700);}
-.module-card.next .module-status{color:var(--gold-700);}
+.module-card.not-started .module-status{color:var(--slate-500);}
 .module-card.in-progress .module-status{color:var(--blue-700);}
 .module-card.locked .module-status{color:var(--slate-400);}
 
@@ -426,9 +484,12 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,
       </div>
     </div>
     <div class="ribbon-right">
+      <div class="ribbon-schools" aria-label="Partner institutions">
+        <img class="ribbon-school-logo" src="assets/eduhk-logo.png" alt="The Education University of Hong Kong" height="34">
+        <img class="ribbon-school-logo" src="assets/sjtu-logo.png" alt="Shanghai Jiao Tong University" height="34">
+      </div>
       <div class="sync-pill"><span class="sync-dot"></span> Synced just now</div>
-      <a class="ribbon-link" href="help.html">Help</a>
-      <a class="ribbon-link" href="profile-settings.html">Settings</a>
+      <span class="ribbon-lang" title="Multilingual support coming soon">Language · In progress</span>
     </div>
   </div>
 </div>
@@ -441,11 +502,10 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,
         <span class="hero-eyebrow">👋 Welcome back</span>
         <h1 class="hero-title">Hi <span class="accent" data-bind="user.firstName">there</span>! 👋</h1>
         <p class="hero-sub">
-          You're making real progress. Pick up where you left off, or revisit any
-          completed module — your reflections and notes are saved.
+          Pick up where you left off along your learning path. Complete the post-test at the end
+          to receive your <strong>digital certificate</strong>.
         </p>
         <div class="hero-cta-row">
-          <!-- DYNAMIC: href + label set from nextModule -->
           <a id="continueBtn" href="#" class="btn-primary">▶ Continue</a>
           <div class="hero-progress">
             <span>Overall progress</span>
@@ -453,62 +513,47 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,
             <span data-bind="overallPctLabel">0%</span>
           </div>
         </div>
-        <div class="streak-banner">🔥 <span><strong><span data-bind="user.streakDays">0</span>-day learning streak</strong> — keep it going!</span></div>
       </div>
 
-      <svg class="hero-illustration" viewBox="0 0 480 380" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <svg class="hero-illustration" id="heroPathSvg" viewBox="0 0 480 360" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <defs>
-          <linearGradient id="hg1" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#a855f7"/><stop offset="100%" stop-color="#3b82f6"/>
+          <linearGradient id="pathGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#c4b5fd"/><stop offset="100%" stop-color="#3b82f6"/>
           </linearGradient>
-          <linearGradient id="hg2" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id="activeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#f97316"/>
           </linearGradient>
           <radialGradient id="bgr" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stop-color="#ede9fe"/><stop offset="100%" stop-color="#dbeafe"/>
           </radialGradient>
         </defs>
-        <circle cx="240" cy="190" r="180" fill="url(#bgr)"/>
-        <circle cx="60" cy="80" r="4" fill="#a78bfa" opacity=".5"/>
-        <circle cx="420" cy="60" r="6" fill="#fbbf24" opacity=".5"/>
-        <circle cx="100" cy="320" r="5" fill="#60a5fa" opacity=".5"/>
-        <circle cx="400" cy="310" r="4" fill="#c084fc" opacity=".5"/>
-        <g transform="translate(80,290)">
-          <rect x="0" y="-30" width="60" height="30" rx="6" fill="#c4b5fd"/>
-          <rect x="60" y="-60" width="60" height="60" rx="6" fill="#a78bfa"/>
-          <rect x="120" y="-90" width="60" height="90" rx="6" fill="#8b5cf6"/>
-          <rect x="180" y="-120" width="60" height="120" rx="6" fill="#7c3aed"/>
-          <rect x="240" y="-150" width="60" height="150" rx="6" fill="#6d28d9" opacity=".7"/>
-          <rect x="300" y="-180" width="60" height="180" rx="6" fill="#5b21b6" opacity=".4"/>
-        </g>
-        <g transform="translate(290,125)">
-          <circle cx="0" cy="0" r="18" fill="url(#hg1)"/>
-          <circle cx="0" cy="0" r="8" fill="#fff"/>
-          <circle cx="0" cy="0" r="3" fill="url(#hg1)"/>
-          <rect x="-44" y="-44" width="88" height="22" rx="11" fill="#fff" stroke="#a855f7" stroke-width="1.5"/>
-          <text x="0" y="-29" text-anchor="middle" font-size="10" font-weight="700" fill="#7c3aed">YOU ARE HERE</text>
+        <circle cx="240" cy="180" r="165" fill="url(#bgr)"/>
+        <path d="M 70 290 Q 120 260 160 240 T 260 180 T 360 110 T 410 70" fill="none" stroke="#e2e8f0" stroke-width="6" stroke-linecap="round"/>
+        <path id="heroPathProgress" d="M 70 290 Q 120 260 160 240 T 260 180 T 360 110 T 410 70" fill="none" stroke="url(#pathGrad)" stroke-width="6" stroke-linecap="round" stroke-dasharray="500" stroke-dashoffset="500"/>
+        <g id="heroPathSteps"></g>
+        <g id="heroYouAreHere" transform="translate(200,200)" style="display:none">
+          <rect x="-48" y="-38" width="96" height="22" rx="11" fill="#fff" stroke="#9333ea" stroke-width="1.5"/>
+          <text x="0" y="-23" text-anchor="middle" font-size="9" font-weight="700" fill="#7c3aed">YOU ARE HERE</text>
+          <circle cx="0" cy="0" r="14" fill="url(#activeGrad)"/>
+          <circle cx="0" cy="0" r="5" fill="#fff"/>
         </g>
       </svg>
     </div>
 
     <!-- Stats strip — DYNAMIC -->
     <div class="stats-strip">
-      <a href="modules-overview.html" class="stat-card">
-        <div class="stat-num"><span data-bind="modulesCompleted">–</span> / <span data-bind="modulesTotal">–</span></div>
+      <div class="stat-card">
+        <div class="stat-num"><span data-bind="modulesCompleted">–</span> / <span data-bind="modulesTotal">7</span></div>
         <div class="stat-label">Modules Done</div>
-      </a>
-      <a href="progress-detail.html" class="stat-card">
+      </div>
+      <div class="stat-card">
         <div class="stat-num" data-bind="timeInvestedLabel">–</div>
         <div class="stat-label">Time Invested</div>
-      </a>
-      <a href="reflections.html" class="stat-card">
-        <div class="stat-num" data-bind="reflections">–</div>
-        <div class="stat-label">Reflections</div>
-      </a>
-      <a href="self-assessments.html" class="stat-card">
-        <div class="stat-num"><span data-bind="selfChecksDone">–</span> / <span data-bind="selfChecksTotal">–</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num"><span data-bind="selfChecksDone">–</span> / <span data-bind="selfChecksTotal">5</span></div>
         <div class="stat-label">Self-Checks</div>
-      </a>
+      </div>
     </div>
   </div>
 </header>
@@ -520,36 +565,44 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,
       <div class="section-head-left">
         <div class="section-icon">📄</div>
         <div>
-          <div class="section-eyebrow">Foundational Reading & Orientation</div>
-          <h2 class="section-title">Read the Paper & Get Oriented</h2>
+          <div class="section-eyebrow">Foundational Reading</div>
+          <h2 class="section-title">Read the Paper</h2>
         </div>
       </div>
-      <a class="section-action" href="resources.html">View all resources →</a>
     </div>
     <p class="section-intro">
-      The peer-reviewed manuscript that grounds this workshop — and a 15-minute
-      orientation that sets you up for everything that follows.
+      The peer-reviewed manuscript that grounds this workshop — optional but recommended
+      before you dive into the modules.
     </p>
 
     <div class="found-grid">
-      <a href="GenAI-Responsive Competency Framework for University Teachers.pdf" target="_blank" rel="noopener" class="found-card">
-        <div class="found-card-icon">📑</div>
-        <h3>Full Manuscript (PDF)</h3>
+      <div class="paper-card">
+        <h3>📑 Full Manuscript (PDF)</h3>
         <div class="citation">
           Sun, Ba, Cha, Yu, Chiang, Dai &amp; Lim (2026). <em>Empowering university teachers
           in higher education: A generative AI-responsive competency framework.</em>
           Computers and Education: Artificial Intelligence, 10, 100542.
         </div>
-        <div class="found-card-meta">📖 ~38 min read · Open Access · CC BY 4.0</div>
-      </a>
-      <a href="module_0_pic.html" class="found-card">
-        <div class="found-card-icon">🧭</div>
-        <h3>Module 0 · Welcome &amp; Orientation</h3>
-        <p>Before the four dimensions, take 15 minutes to set up your profile, take the
-          pre-test, and learn how to read your assessment report — the engine that drives
-          the rest of your journey.</p>
-        <div class="found-card-meta">⏱ ~15 min · 3 sections · Includes pre-test</div>
-      </a>
+        <div class="paper-card-meta">📖 ~38 min read · Open Access · CC BY 4.0</div>
+        <a href="GenAI-Responsive Competency Framework for University Teachers.pdf" target="_blank" rel="noopener" class="paper-btn">Open PDF ↗</a>
+      </div>
+      <div class="paper-highlights">
+        <h3>What the paper establishes</h3>
+        <div class="framework-pillars">
+          <div class="framework-pillar">
+            <strong>Four dimensions</strong>
+            <p>Proposes GenAI Literacy, Curriculum/Learning Design, Teaching and Learning, and Assessment as core dimensions.</p>
+          </div>
+          <div class="framework-pillar">
+            <strong>Dual perspective</strong>
+            <p>Integrates teachers' own competencies with their capacity to empower students' critical GenAI engagement.</p>
+          </div>
+          <div class="framework-pillar">
+            <strong>Three-tier progression</strong>
+            <p>Articulates Basic, Intermediate, and Advanced developmental levels from awareness to creative co-creation.</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -572,11 +625,11 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,
       </div>
 
       <div class="filter-row">
-        <span class="tip-pill">💡 Click</strong> to expand wrap-up</span>
+        <span class="tip-pill">💡 Click a module to expand wrap-up details</span>
       </div>
 
-      <!-- Modules rendered by JS into this container -->
-      <div class="modules-list" id="modulesList"></div>
+      <!-- Path items (modules + checkpoints) rendered by JS -->
+      <div class="modules-list" id="pathList"></div>
     </div>
 
     <!-- ============ RIGHT: SIDEBAR (DYNAMIC) ============ -->
@@ -629,24 +682,16 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,
         </div>
 
         <div class="progress-row">
-          <span class="label"><a href="modules-overview.html" style="color:inherit;text-decoration:none;">Modules completed</a></span>
-          <span class="value green"><span data-bind="modulesCompleted">–</span> / <span data-bind="modulesTotal">–</span></span>
+          <span class="label">Modules completed</span>
+          <span class="value green"><span data-bind="modulesCompleted">–</span> / <span data-bind="modulesTotal">7</span></span>
         </div>
         <div class="progress-row">
-          <span class="label"><a href="self-assessments.html" style="color:inherit;text-decoration:none;">Self-assessments</a></span>
-          <span class="value green"><span data-bind="selfChecksDone">–</span> / <span data-bind="selfChecksTotal">–</span></span>
+          <span class="label">Self-checks completed</span>
+          <span class="value green"><span data-bind="selfChecksDone">–</span> / <span data-bind="selfChecksTotal">5</span></span>
         </div>
         <div class="progress-row">
-          <span class="label"><a href="reflections.html" style="color:inherit;text-decoration:none;">Reflections written</a></span>
-          <span class="value" data-bind="reflections">–</span>
-        </div>
-        <div class="progress-row">
-          <span class="label"><a href="action-items.html" style="color:inherit;text-decoration:none;">Action items saved</a></span>
-          <span class="value" data-bind="actionItems">–</span>
-        </div>
-        <div class="progress-row">
-          <span class="label">Current streak</span>
-          <span class="value fire">🔥 <span data-bind="user.streakDays">–</span> days</span>
+          <span class="label">Time invested</span>
+          <span class="value" data-bind="timeInvestedLabel">–</span>
         </div>
         <div class="progress-row">
           <span class="label">Est. time remaining</span>
@@ -656,82 +701,6 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,
 
     </aside>
   </div>
-
-  <!-- ASSESSMENT SECTION (DYNAMIC) -->
-  <section class="assess-section">
-    <div class="assess-eyebrow">📊 Self-Assessment Checkpoint</div>
-    <h2 class="assess-title">Your Most Recent Self-Check</h2>
-    <p class="assess-intro">
-      Required between Module 4 → Module 5. Take it again any time to see how your thinking has shifted.
-    </p>
-    <div class="assess-status-pill">✓ Completed · Next required after Mod 5</div>
-
-    <div class="assess-grid">
-      <div class="assess-card">
-        <h4 data-bind="assessment.label">–</h4>
-        <div class="meta">
-          📅 Taken <span data-bind="assessment.takenAt">–</span>
-          · <span data-bind="assessment.durationMin">–</span> min
-        </div>
-
-        <div class="assess-summary">
-          <div class="mini-donut">
-            <svg width="100" height="100" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="40" fill="none" stroke="#e2e8f0" stroke-width="9"/>
-              <circle id="miniDonutFill" cx="50" cy="50" r="40" fill="none" stroke="url(#donutGrad)" stroke-width="9"
-                stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2"/>
-            </svg>
-            <div class="mini-donut-label">
-              <div class="num"><span data-bind="assessment.overallPct">0</span>%</div>
-              <div class="sub">Overall</div>
-            </div>
-          </div>
-          <p class="summary-text">
-            <strong>Strong growth</strong> since your baseline (<span data-bind="assessment.baselinePct">–</span>% → <span data-bind="assessment.overallPct">–</span>%).
-            Biggest jumps in <strong>Curriculum Design</strong> and <strong>Teaching Practice</strong>.
-          </p>
-        </div>
-
-        <div class="dim-bars">
-          <div class="dim-bar">
-            <span class="label">🧠 Literacy</span>
-            <div class="dim-bar-track"><div class="dim-bar-fill literacy" id="bar-literacy" style="width:0%"></div></div>
-            <span class="pct"><span data-bind="assessment.dimensions.literacy">0</span>%</span>
-          </div>
-          <div class="dim-bar">
-            <span class="label">🎯 Curriculum</span>
-            <div class="dim-bar-track"><div class="dim-bar-fill curriculum" id="bar-curriculum" style="width:0%"></div></div>
-            <span class="pct"><span data-bind="assessment.dimensions.curriculum">0</span>%</span>
-          </div>
-          <div class="dim-bar">
-            <span class="label">💡 Teaching</span>
-            <div class="dim-bar-track"><div class="dim-bar-fill teaching" id="bar-teaching" style="width:0%"></div></div>
-            <span class="pct"><span data-bind="assessment.dimensions.teaching">0</span>%</span>
-          </div>
-          <div class="dim-bar">
-            <span class="label">📊 Assessment</span>
-            <div class="dim-bar-track"><div class="dim-bar-fill assessment" id="bar-assessment" style="width:0%"></div></div>
-            <span class="pct"><span data-bind="assessment.dimensions.assessment">0</span>%</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="assess-card assess-next">
-        <div>
-          <h4>📌 Next checkpoint required</h4>
-          <p>
-            You'll need to complete <strong>Self-Assessment #3</strong> after finishing
-            Module 5 to unlock Module 6 (Synthesis). It takes ~10 minutes and is structured
-            exactly like the first two — just with deeper questions on assessment design.
-          </p>
-        </div>
-        <div>
-          <a href="self-assessment-3.html" class="btn-cta-orange">▶ Take Self-Assessment #3</a>
-          <a href="assessment-report.html" class="btn-cta-teal">📈 View detailed report</a>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <footer class="dash-footer">
     <div>GenAI Competency Workshop · Built for educators, by educators</div>
@@ -767,362 +736,8 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,
   </div>
 </div>
 
-<!-- ============ DEMO STATE LAYER (REPLACE WITH API CALLS) ============ -->
-<script id="demo-state">
-/* ────────────────────────────────────────────────────────────────────
-   ⚠️  ENGINEER:  This entire <script id="demo-state"> block is a DEMO
-   layer using localStorage. In production:
-     1. Delete the LS_KEY / loadState / saveState / scenarios block.
-     2. Replace `const state = loadState();` with an authenticated
-        fetch to /api/me/dashboard (see header comment).
-     3. Replace markComplete() with a POST to /api/me/modules/:id/complete
-        followed by a re-fetch + renderDashboard(state).
-   The renderDashboard() function below is production-ready as-is.
-   ──────────────────────────────────────────────────────────────────── */
-
-const LS_KEY = 'genai_workshop_demo_state_v1';
-
-const SCENARIOS = {
-  // Fresh user — just logged in, nothing done yet
-  fresh: {
-    user: { firstName:"Chen", fullName:"Chen H.", avatarInitials:"CH",
-      title:"EdTech Coordinator", org:"The Education University of Hong Kong",
-      role:"Project Officer", badgesEarned:0, streakDays:1 },
-    modules: buildModules(0),
-    reflections: 0, actionItems: 0, timeInvestedMin: 0,
-    selfChecksDone: 0, selfChecksTotal: 3,
-    assessment: null
-  },
-  // Halfway through (this is the default demo state)
-  halfway: {
-    user: { firstName:"Chen", fullName:"Chen H.", avatarInitials:"CH",
-      title:"EdTech Coordinator", org:"The Education University of Hong Kong",
-      role:"Project Officer", badgesEarned:3, streakDays:4 },
-    modules: buildModules(4),
-    reflections: 12, actionItems: 0, timeInvestedMin: 222,
-    selfChecksDone: 2, selfChecksTotal: 3,
-    assessment: {
-      label:"Self-Assessment #2 — Mid-workshop",
-      takenAt:"Mar 12, 2026", durationMin:11,
-      overallPct:72, baselinePct:51,
-      dimensions:{ literacy:78, curriculum:75, teaching:80, assessment:54 }
-    }
-  },
-  // Almost finished — module 5 done, only synthesis left
-  finishing: {
-    user: { firstName:"Chen", fullName:"Chen H.", avatarInitials:"CH",
-      title:"EdTech Coordinator", org:"The Education University of Hong Kong",
-      role:"Project Officer", badgesEarned:5, streakDays:9 },
-    modules: buildModules(5),
-    reflections: 18, actionItems: 4, timeInvestedMin: 320,
-    selfChecksDone: 3, selfChecksTotal: 3,
-    assessment: {
-      label:"Self-Assessment #3 — Late-workshop",
-      takenAt:"Mar 18, 2026", durationMin:9,
-      overallPct:84, baselinePct:51,
-      dimensions:{ literacy:88, curriculum:85, teaching:88, assessment:76 }
-    }
-  },
-  // Workshop complete
-  complete: {
-    user: { firstName:"Chen", fullName:"Chen H.", avatarInitials:"MC",
-      title:"EdTech Coordinator", org:"The Education University of Hong Kong",
-      role:"Project Officer", badgesEarned:7, streakDays:14 },
-    modules: buildModules(6),
-    reflections: 22, actionItems: 7, timeInvestedMin: 380,
-    selfChecksDone: 3, selfChecksTotal: 3,
-    assessment: {
-      label:"Self-Assessment #3 — Late-workshop",
-      takenAt:"Mar 21, 2026", durationMin:9,
-      overallPct:91, baselinePct:51,
-      dimensions:{ literacy:92, curriculum:90, teaching:93, assessment:88 }
-    }
-  }
-};
-
-// Module catalogue (the static content). `completedThrough` sets the status of each.
-function buildModules(completedThrough) {
-  const catalog = [
-    { id:1, title:"Introduction & Framework Overview", durationMin:25, sections:3,
-      sectionsList:[
-        "1.1 The Big Picture — the 4×3×2 framework structure",
-        "1.2 How the framework connects to your practice",
-        "1.3 Recap of user instructions from Module 0"],
-      takeaway:"a personal learning plan, a clear sense of why the framework is structured this way, and three context layers (discipline, learner profile, culture) for reading every module ahead.",
-      completedAt:"Mar 3" },
-    { id:2, title:"Dimension 1 · GenAI Literacy", durationMin:35, sections:4,
-      sectionsList:[
-        "2.1 What is GenAI Literacy in this framework?",
-        "2.2 Teacher's own literacy across levels (with your companion)",
-        "2.3 Empowering students' literacy across levels",
-        "2.4 Module wrap-up & knowledge recap"],
-      takeaway:"a sharper internal \"BS detector\" for AI outputs, six concrete takeaways, and five moves you can apply tomorrow.",
-      completedAt:"Mar 5" },
-    { id:3, title:"Dimension 2 · Curriculum & Learning Design", durationMin:30, sections:3,
-      sectionsList:[
-        "3.1 Learning objectives in the GenAI era",
-        "3.2 Redesigning syllabi & units",
-        "3.3 Stress-testing your curriculum"],
-      takeaway:"a redesign checklist + a worked example of a unit before/after GenAI integration.",
-      completedAt:"Mar 9" },
-    { id:4, title:"Dimension 3 · Teaching & Learning Practice", durationMin:28, sections:3,
-      sectionsList:[
-        "4.1 GenAI as scaffold, simulation & partner",
-        "4.2 Activity design patterns",
-        "4.3 Common pitfalls in classroom use"],
-      takeaway:"3 concrete classroom activities you can run in your next teaching week.",
-      completedAt:"Mar 12" },
-    { id:5, title:"Dimension 4 · Assessment", durationMin:32, sections:3,
-      sectionsList:[
-        "5.1 Validity & AI-aware assessment",
-        "5.2 Designing assessment tasks",
-        "5.3 Rubrics that grade reasoning, not artefacts"],
-      takeaway:"a redesigned rubric for one of your own assessments — done by the end of the module.",
-      completedAt:"Mar 16" },
-    { id:6, title:"Synthesis & Next Steps", durationMin:20, sections:2,
-      sectionsList:[
-        "6.1 Tying the four dimensions together",
-        "6.2 Your personal action map"],
-      takeaway:"your personal action map and a downloadable plan to take into your next semester.",
-      completedAt:"Mar 21" }
-  ];
-  return catalog.map(m => {
-    let status;
-    if (m.id <= completedThrough) status = "complete";
-    else if (m.id === completedThrough + 1) status = "next";
-    else status = "locked";
-    // Module 6 also requires self-check #3 — handled in render layer
-    return { ...m, status };
-  });
-}
-
-function loadState() {
-  try {
-    const raw = localStorage.getItem(LS_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch(e) { console.warn('LS read failed', e); }
-  // Default to halfway scenario
-  const fresh = JSON.parse(JSON.stringify(SCENARIOS.halfway));
-  saveState(fresh);
-  return fresh;
-}
-function saveState(s) {
-  try { localStorage.setItem(LS_KEY, JSON.stringify(s)); }
-  catch(e) { console.warn('LS write failed (sandboxed iframe?)', e); }
-}
-</script>
-
-<!-- ============ RENDER LAYER (PRODUCTION-READY) ============ -->
-<script>
-/* ────────────────────────────────────────────────────────────────────
-   ENGINEER: this entire script block is reusable as-is in production.
-   Just feed renderDashboard() an object with the same shape produced
-   by GET /api/me/dashboard.
-   ──────────────────────────────────────────────────────────────────── */
-
-let state = loadState();   // ← in production: await fetch('/api/me/dashboard')
-
-function fmtTime(min) {
-  if (!min) return '0m';
-  const h = Math.floor(min/60), m = min%60;
-  return h ? `${h}h ${m}m` : `${m}m`;
-}
-
-function getDeep(obj, path) {
-  return path.split('.').reduce((o,k)=>o==null?undefined:o[k], obj);
-}
-
-function bindAll(scope) {
-  document.querySelectorAll('[data-bind]').forEach(el => {
-    const path = el.getAttribute('data-bind');
-    let val = getDeep(scope, path);
-    if (val === undefined || val === null) val = '–';
-    el.textContent = val;
-  });
-}
-
-function renderModules(modules, nextModuleId) {
-  const list = document.getElementById('modulesList');
-  list.innerHTML = '';
-  modules.forEach(m => {
-    const card = document.createElement('div');
-    card.className = `module-card ${m.status}`;
-    card.dataset.mod = m.id;
-
-    let statusText = '🔒 Locked';
-    let metaCompletion = `🔒 Complete previous module to unlock`;
-    if (m.status === 'complete') {
-      statusText = '✓ Complete';
-      metaCompletion = `✓ Completed ${m.completedAt || ''}`;
-    } else if (m.status === 'next') {
-      statusText = '📍 Up next';
-      metaCompletion = '📍 Up next';
-    } else if (m.status === 'in-progress') {
-      statusText = '⏳ In progress';
-      metaCompletion = '⏳ In progress';
-    }
-
-    let actionsHTML = '';
-    if (m.status === 'complete') {
-      actionsHTML = `
-        <a href="module_${m.id}_pic.html" class="module-btn primary">↻ Revisit</a>`;
-    } else if (m.status === 'next' || m.status === 'in-progress') {
-      actionsHTML = `<a href="module_${m.id}_pic.html" class="module-btn primary">▶ ${m.status==='in-progress'?'Resume':'Start'}</a>`;
-    } else {
-      actionsHTML = `<span class="module-btn disabled">🔒 Locked</span>`;
-    }
-
-    const sectionsListHTML = m.sectionsList.map(s => `<li>${s}</li>`).join('');
-    const expandHTML = m.status === 'locked'
-      ? `<p>This module unlocks once the previous one is complete${m.id===6?' and Self-Assessment #3 has been submitted':''}.</p>`
-      : `<h5>📋 What you'll get</h5>
-         <ul>${sectionsListHTML}</ul>
-         <p><strong>You'll leave with:</strong> ${m.takeaway}</p>`;
-
-    card.innerHTML = `
-      <div class="module-num">${m.id}</div>
-      <div class="module-content">
-        <h4>${m.title}</h4>
-        <div class="module-meta">
-          <span>⏱ ${m.durationMin} min</span>
-          <span>${m.sections} sections</span>
-          <span>${metaCompletion}</span>
-        </div>
-        <div class="module-status">${statusText}</div>
-      </div>
-      <div class="module-actions">${actionsHTML}</div>
-      <div class="module-expand"><div class="module-expand-inner">${expandHTML}</div></div>
-    `;
-
-    // Click to expand (but not on action buttons)
-    card.addEventListener('click', e => {
-      if (e.target.closest('.module-btn') || e.target.closest('a')) return;
-      if (m.status === 'locked') return;
-      card.classList.toggle('open');
-    });
-
-    list.appendChild(card);
-  });
-}
-
-function renderDashboard(s) {
-  // ---- Compute derived values
-  const modulesTotal = s.modules.length;
-  const modulesCompleted = s.modules.filter(m => m.status === 'complete').length;
-  const overallPct = Math.round(modulesCompleted / modulesTotal * 100);
-
-  // Find next module (first 'next' or 'in-progress', else first non-complete)
-  const nextModule = s.modules.find(m => m.status === 'next' || m.status === 'in-progress')
-                 || s.modules.find(m => m.status !== 'complete');
-
-  const estTimeRemainingMin = s.modules
-    .filter(m => m.status !== 'complete')
-    .reduce((sum, m) => sum + m.durationMin, 0);
-
-  // ---- Assemble the bind scope
-  const scope = {
-    user: s.user,
-    modulesCompleted, modulesTotal,
-    overallPct, overallPctLabel: `${overallPct}%`,
-    timeInvestedMin: s.timeInvestedMin,
-    timeInvestedLabel: fmtTime(s.timeInvestedMin),
-    reflections: s.reflections, actionItems: s.actionItems,
-    selfChecksDone: s.selfChecksDone, selfChecksTotal: s.selfChecksTotal,
-    estTimeRemainingMin,
-    assessment: s.assessment || {
-      label:'No self-assessment yet', takenAt:'—', durationMin:0,
-      overallPct:0, baselinePct:0,
-      dimensions:{ literacy:0, curriculum:0, teaching:0, assessment:0 }
-    }
-  };
-  bindAll(scope);
-
-  // ---- "Continue" button
-  const btn = document.getElementById('continueBtn');
-  if (nextModule) {
-    btn.href = `module_${nextModule.id}_pic.html`;
-    const verb = nextModule.status === 'in-progress' ? 'Resume' : 'Continue';
-    btn.innerHTML = `▶ ${verb} Module ${nextModule.id}`;
-    btn.classList.remove('disabled');
-  } else {
-    btn.href = '#';
-    btn.innerHTML = '🎓 Workshop Complete!';
-    btn.classList.add('disabled');
-  }
-
-  // ---- Overall progress bar
-  document.getElementById('overallProgressFill').style.width = `${overallPct}%`;
-
-  // ---- Donut (sidebar)
-  const donut = document.getElementById('donutFill');
-  const C = 2 * Math.PI * 74; // 464.96
-  donut.setAttribute('stroke-dashoffset', String(C));
-  requestAnimationFrame(() => setTimeout(() => {
-    donut.setAttribute('stroke-dashoffset', String(C * (1 - overallPct/100)));
-  }, 50));
-
-  // ---- Mini-donut + dimension bars (assessment)
-  const a = scope.assessment;
-  const Cm = 2 * Math.PI * 40; // 251.2
-  const mini = document.getElementById('miniDonutFill');
-  mini.setAttribute('stroke-dashoffset', String(Cm));
-  requestAnimationFrame(() => setTimeout(() => {
-    mini.setAttribute('stroke-dashoffset', String(Cm * (1 - a.overallPct/100)));
-  }, 50));
-
-  ['literacy','curriculum','teaching','assessment'].forEach(k => {
-    const el = document.getElementById(`bar-${k}`);
-    if (el) requestAnimationFrame(() => setTimeout(() => {
-      el.style.width = `${a.dimensions[k] || 0}%`;
-    }, 100));
-  });
-
-  // ---- Modules list
-  renderModules(s.modules, nextModule ? nextModule.id : null);
-}
-
-// Initial render
-renderDashboard(state);
-
-/* ===== Demo control wiring (remove in production) ===== */
-const fab = document.getElementById('demo-fab');
-const panel = document.getElementById('demo-panel');
-fab.addEventListener('click', () => panel.classList.toggle('open'));
-document.addEventListener('click', e => {
-  if (!panel.contains(e.target) && !fab.contains(e.target)) panel.classList.remove('open');
-});
-
-document.querySelectorAll('[data-scenario]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const key = btn.getAttribute('data-scenario');
-    state = JSON.parse(JSON.stringify(SCENARIOS[key]));
-    saveState(state);
-    renderDashboard(state);
-  });
-});
-
-document.getElementById('advance-btn').addEventListener('click', () => {
-  // Mark the next module complete (simulates a POST /api/me/modules/:id/complete)
-  const next = state.modules.find(m => m.status === 'next' || m.status === 'in-progress');
-  if (!next) return;
-  next.status = 'complete';
-  next.completedAt = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
-  // Promote the following locked module to 'next'
-  const idx = state.modules.findIndex(m => m.id === next.id);
-  if (idx + 1 < state.modules.length && state.modules[idx+1].status === 'locked') {
-    state.modules[idx+1].status = 'next';
-  }
-  state.timeInvestedMin += next.durationMin;
-  state.user.badgesEarned = (state.user.badgesEarned || 0) + 1;
-  saveState(state);
-  renderDashboard(state);
-});
-
-document.getElementById('reset-btn').addEventListener('click', () => {
-  state = JSON.parse(JSON.stringify(SCENARIOS.halfway));
-  saveState(state);
-  renderDashboard(state);
-});
-</script>
+<!-- ============ DASHBOARD APP (reads PlatformAdapter / genai_workshop store) ============ -->
+<script src="progress.js"></script>
+<script src="dashboard-app.js"></script>
 </body>
 </html>

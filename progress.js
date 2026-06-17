@@ -229,6 +229,40 @@
     return enriched;
   }
 
+  // ----- Dashboard time tracking (demo: localStorage; prod: API) ----------
+  // Engineer: replace readTimeInvestedMin() with GET /api/me/dashboard → time_invested_min
+  function readTimeInvestedMin() {
+    const s = readStore();
+    if (s.dashboard && typeof s.dashboard.time_invested_min === 'number') {
+      return s.dashboard.time_invested_min;
+    }
+    return 0;
+  }
+  function addTimeInvestedMin(minutes) {
+    if (!minutes || minutes < 1) return readTimeInvestedMin();
+    const s = readStore();
+    s.dashboard = s.dashboard || {};
+    s.dashboard.time_invested_min = (s.dashboard.time_invested_min || 0) + minutes;
+    s.dashboard.time_updated_at = new Date().toISOString();
+    writeStore(s);
+    const payload = { user_id: getUser().id, time_invested_min: s.dashboard.time_invested_min };
+    if (config.apiBase) {
+      try { postToAPI('/dashboard/time', payload); }
+      catch { enqueue('/dashboard/time', payload); }
+    }
+    return s.dashboard.time_invested_min;
+  }
+  function pingSessionTime() {
+    const s = readStore();
+    const now = Date.now();
+    const last = s.dashboard && s.dashboard.last_session_ping;
+    if (last && now - last < 60000) return readTimeInvestedMin();
+    s.dashboard = s.dashboard || {};
+    s.dashboard.last_session_ping = now;
+    writeStore(s);
+    return addTimeInvestedMin(1);
+  }
+
   // ----- Public API ------------------------------------------------------
   const PlatformAdapter = {
     configure(opts) { config = Object.assign({}, config, opts || {}); },
@@ -239,6 +273,8 @@
     saveReflection, readReflections,
     saveProfile, readProfile, isProfileSaved,
     saveAssessment, readAssessment, readAllAssessments, isAssessmentSubmitted,
+    readTimeInvestedMin, addTimeInvestedMin, pingSessionTime,
+    readStore,
     sync: flushQueue
   };
 
