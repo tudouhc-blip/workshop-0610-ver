@@ -187,23 +187,26 @@ Collected from `#profile-form` in `module_0_pic.html`. All fields optional.
 
 ## 6. Dashboard locking rules (server + client)
 
-Enforce on **server**; mirror in `index.html` render layer:
+Module completion (client): a module counts as **complete** only when every section checkbox is ticked (`mN.complete.section-*` in localStorage). Partial progress = **in progress**; unlocked with zero ticks = **not started yet**.
 
 ```
-Module 1 unlocked  iff  pre submitted
-Module 3 unlocked  iff  module_2 complete AND gate_d1 submitted
-Module 4 unlocked  iff  module_3 complete AND gate_d2 submitted
-Module 5 unlocked  iff  module_4 complete AND gate_d3 submitted
-Module 6 unlocked  iff  module_5 complete AND gate_d4 submitted
-Workshop complete  iff  module_6 complete AND post submitted
+Module 1 unlocked  iff  Module 0 all sections complete AND pre submitted
+Module 3 unlocked  iff  module_2 all sections complete AND gate_d1 submitted
+...
+Post-assessment    iff  module_6 all sections complete AND pre + gate_d1…gate_d4 all submitted
 ```
 
 Suggested dashboard fields:
 
 ```json
 {
+  "modulesCompleted": 3,
+  "modulesTotal": 7,
   "selfChecksDone": 2,
-  "selfChecksTotal": 6,
+  "selfChecksTotal": 5,
+  "timeInvestedMin": 102,
+  "estTimeRemainingMin": 218,
+  "postComplete": false,
   "assessments": {
     "pre": { "submitted": true, "takenAt": "..." },
     "gate_d1": { "submitted": true },
@@ -213,7 +216,55 @@ Suggested dashboard fields:
 }
 ```
 
-`selfChecksTotal = 6` → pre + 4 gates + post.
+`selfChecksTotal = 5` → pre + 4 dimension gates. **Post-test is separate** (certificate on completion).
+
+---
+
+## 11. Dashboard UI (`index.html` + `dashboard-app.js`)
+
+### Learning path order (interleaved)
+
+```
+M0 → Pre → M1 → M2 → Gate D1 → M3 → Gate D2 → M4 → Gate D3 → M5 → Gate D4 → M6 → Post
+```
+
+Rendered in `#pathList` by `renderPathList()`. Hero SVG shows module milestones only (M0–M6).
+
+### Client state builder
+
+`dashboard-app.js` exports `window.DashboardApp` with:
+
+- `buildDashboardState()` — reads `PlatformAdapter` (`progress.js`)
+- `renderDashboard(state)` — binds `[data-bind]` fields, path list, hero, continue CTA
+- `refresh()` — rebuild + re-render (also on `storage` / `focus`)
+
+Module completion: `progress.module_N.completed_at` is optional metadata only; **all** `mN.complete.section-*` keys must be set for `status: complete` in the dashboard path.
+
+### Time invested (demo)
+
+```javascript
+PlatformAdapter.addTimeInvestedMin(minutes);  // on module/checkpoint complete
+PlatformAdapter.readTimeInvestedMin();        // persisted in store.dashboard.time_invested_min
+PlatformAdapter.pingSessionTime();            // optional session heartbeat (dashboard load)
+```
+
+Production: replace with server-side aggregation from session/module events.
+
+### Report & certificate placeholders
+
+| UI element | Current behaviour | Production hook |
+|------------|-------------------|-----------------|
+| "See my report 🔒" on completed checkpoints | `disabled` button | `GET /api/me/reports/:assessment_key` or external analytics URL |
+| Post-test card | Certificate copy when `post` submitted | Cert PDF service after `POST` post submit |
+| Ribbon "Language · In progress" | Disabled pill | Locale switcher + translated module HTML or i18n keys |
+
+### Banner assets
+
+Partner logos: `assets/eduhk-logo.png`, `assets/sjtu-logo.png` (white-backed pills in ribbon).
+
+### Demo panel
+
+`#demo-fab` / `#demo-panel` seeds `genai_workshop` store scenarios (`fresh`, `halfway`, `finishing`, `complete`). **Remove before production.**
 
 ---
 
@@ -245,10 +296,12 @@ For profile / Module 6 synthesis:
 |------|------|
 | `assessment-items.js` | 96-item bank + subset helpers |
 | `assessment.html` | Single assessment UI (all kinds) |
-| `progress.js` | PlatformAdapter — profile, assessments, progress, reflections, offline queue |
+| `progress.js` | PlatformAdapter — profile, assessments, progress, time tracking, offline queue |
+| `dashboard-app.js` | Dashboard state builder + render (reads PlatformAdapter) |
 | `module_0_pic.html` | Profile form (0.3.1) → `PlatformAdapter.saveProfile()` |
 | `module_*_pic.html` | Content only; finish → assessment redirect |
-| `index.html` | Dashboard; assessment hub (UI polish pending) |
+| `index.html` | Dashboard shell (ribbon, hero, path list, paper card) |
+| `assets/eduhk-logo.png`, `assets/sjtu-logo.png` | Ribbon partner logos |
 
 ---
 
